@@ -3,7 +3,6 @@
 import re
 import sys
 import os
-import random
 
 
 class Base(object):
@@ -39,15 +38,17 @@ class Chatbot(object):
 				self.plugins.append(m)
 		sys.path.pop(0)
 
-	def run(self):
+	def run(self, txt):
 		try:
 			for p in self.plugins:
-				if p.test(statement):
+				if p.test(txt):
 					ans = p.process()
 					return ans
 			return ''
 		except:
 			print('Oops ... chatbot')
+			exit()
+
 
 def main():
 	cb = Chatbot()
