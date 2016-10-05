@@ -1,0 +1,7 @@
+pyzmq
+pyyaml
+simplejson
+numpy
+pyaudio
+pyrk
+pyyaml
