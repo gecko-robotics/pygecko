@@ -34,7 +34,7 @@ class TTS(object):
 		"""
 		self.tts.append(options)
 
-	def speak(self, txt):
+	def say(self, txt):
 		"""
 		Speak the text passed to this function. If no tts was found, then this
 		will print the text instead.
@@ -43,7 +43,13 @@ class TTS(object):
 		c.append(txt)
 		call(' '.join(c), shell=True)
 
-s = TTS()
-s.setOptions('-v Karen')
-s.speak('You make me so horny!')
-print('using:', s.tts)
+
+def main():
+	s = TTS()
+	s.setOptions('-v Karen')
+	s.say('hello how are you!')
+	print('using:', s.tts)
+
+
+if __name__ == '__main__':
+	main()

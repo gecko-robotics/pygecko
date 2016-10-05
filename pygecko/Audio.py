@@ -9,7 +9,8 @@ import logging						# logging
 import multiprocessing as mp		# multiprocess
 import lib.zmqclass as zmq
 import lib.FileStorage as fs
-import lib.WitInput as wi
+# import lib.WitInput as wi
+from lib.tts import TTS
 
 
 class SoundServer(mp.Process):
@@ -21,40 +22,42 @@ class SoundServer(mp.Process):
 		self.host = host
 		self.port = port
 		logging.basicConfig(level=logging.DEBUG)
-		self.logger = logging.getLogger('SoundServer')
-		self.os = platform.system()  # why?
+		self.logger = logging.getLogger(__name__)
+		# self.os = platform.system()  # why?
 
 		self.logger.info('soundserver stdin: ' + str(sys.stdin.fileno()))
 
 		self.pub = zmq.Pub((host, port))
-		self.sub = zmq.Sub('wit-text', (host, str(port + 1)))
+		self.sub = zmq.Sub('text', (host, str(port + 1)))
+
+		self.tts = TTS()
 
 		# maybe change this to an env variable ... do travis.ci?
 		# db = fs.FileStorage()
 		# db.readYaml(YAML_FILE)
 		# wit_token = db.getKey('WIT_TOKEN')
 
-		if wit_token is None:
-			self.logger.info('Need Wit.ai token, exiting now ...')
-			exit()
-		else:
-			self.logger.info('Wit.ai API token %s', wit_token)
-
-		self.input = wi.WitInput(wit_token)
+		# if wit_token is None:
+		# 	self.logger.info('Need Wit.ai token, exiting now ...')
+		# 	exit()
+		# else:
+		# 	self.logger.info('Wit.ai API token %s', wit_token)
+		#
+		# self.input = wi.WitInput(wit_token)
 
 		# Grab plugins
-		self.readPlugins()
+		# self.readPlugins()
 
 		results = """--------------------------
 		Sound Server up
-		Pub[wit results]: %s:%d
+		Pub[results]: %s:%d
 		Sub[text]: %s:%d
 		Modules: %d
 		--------------------------
 		"""
 		self.logger.info(results, host, port, host, port + 1, len(self.modules))
 
-	def readPlugins(self, path="./plugins/"):
+	def readPlugins(self, path):
 		"""
 		Clears the current modules and reads in all plugins located in path
 		in: path to plugins
@@ -77,34 +80,29 @@ class SoundServer(mp.Process):
 	out: None
 	"""
 	def speak(self, txt):
-		if True:
-			# fname = self.tts.tts(txt)
-			# os.system('afplay %s'%(fname))
-			print('speak:', txt)
-		else:
-			if self.os == 'Darwin': os.system('say -v vicki ' + txt)
-			elif self.os == 'Linux': os.system('say ' + txt)
-			else: self.logger.info('speak() error')
+		# if True:
+		# 	# fname = self.tts.tts(txt)
+		# 	# os.system('afplay %s'%(fname))
+		# 	print('speak:', txt)
+		# else:
+		# 	if self.os == 'Darwin': os.system('say -v vicki ' + txt)
+		# 	elif self.os == 'Linux': os.system('say ' + txt)
+		# 	else: self.logger.info('speak() error')
+		self.tts.say(txt)
 
-	def search(self, result):
+	def search(self, txt):
 		"""
 		Searches through all plugins to find one that can process this intent
 		in: struct{'intent': '', 'entities': ''}
 		out: text (answer from plugin or '' if nothing could handle it)
 		"""
 		for m in self.modules:
-			# print 'plugin:',m
-			# print 'handleIntent:',m.handleIntent( result['intent'] )
-			if m.handleIntent(result['intent']):
+			if m.test(txt):
 				# print result
-				txt = m.process(result['entities'])
-				self.logger.debug('found plugin response: ' + txt)
-				return txt
+				ans = m.process()
+				self.logger.debug('found plugin response: ' + ans)
+				return ans
 		return ''
-
-	@staticmethod
-	def sound(snd):
-		os.system('afplay {0!s}'.format((snd)))
 
 	def run(self):
 		"""
@@ -142,8 +140,9 @@ class SoundServer(mp.Process):
 
 if __name__ == '__main__':
 	# s = SoundServer('/Users/kevin/Dropbox/accounts.yaml')
-	token = os.getenv('WIT')
-	s = SoundServer(token)
+	# token = os.getenv('WIT')
+	s = SoundServer()
+	s.readPlugins()  # what should I do for this??
 	s.start()
 	print('bye ...')
 

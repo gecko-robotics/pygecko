@@ -5,3 +5,4 @@ numpy
 pyaudio
 pyrk
 pyyaml
+numdifftools
