@@ -53,10 +53,26 @@ setup(
 		'Topic :: Scientific/Engineering :: Image Recognition',
 		'Topic :: Software Development :: Libraries :: Python Modules',
 	],
-	install_requires=['pyrk', 'numdifftools', 'pyyaml', 'pyzmq', 'simplejson', 'pyserial', 'numpy', 'nose', 'pyaudio'],
+	install_requires=[
+		'pyrk',
+		'numdifftools',
+		'pyyaml',
+		'pyzmq',
+		'simplejson',
+		'pyserial',
+		'numpy',
+		'nose',
+		'pyaudio'
+	],
 	url="https://github.com/walchko/pygecko",
 	long_description=readme,
-	packages=["pygecko"],
+	packages=['pygecko'],
+	cmdclass={
+		'test': NoseTestCommand,
+		'publish': PublishCommand,
+		'tag': GitTagCommand,
+		'clean': CleanCommand
+	},
 	# scripts=[
 	# 	'chi/tools/mjpeg-server.py'
 	# ]

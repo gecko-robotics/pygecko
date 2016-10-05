@@ -47,7 +47,7 @@ class Chatbot(object):
 			return ''
 		except:
 			print('Oops ... chatbot')
-			exit()
+			raise
 
 
 def main():
