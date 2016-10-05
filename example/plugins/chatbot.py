@@ -1,16 +1,8 @@
 #!/usr/bin/env python
 
-import re
 import random
-
-
-class Base(object):
-	def analyze(self, txt):
-		for pattern in self.patterns:
-			match = re.search(pattern, txt.rstrip(".!?"), re.I)  # re.I is case insensative
-			if match:
-				return match
-		return False
+from pygecko.lib.chatbot import Base
+import time
 
 
 class Command(Base):
@@ -58,7 +50,57 @@ class StarWars(Base):
 			return False
 
 	def process(self):
-		return 'star wars - good'
+		return 'I like star wars too!'
+
+
+class TimeDate(Base):
+	def __init__(self):
+		self.patterns = [
+			r'what (time|date) is it',
+			r'what is the (time|date)',
+			r'what is (today|tomorrow) date'
+		]
+
+	def date(self, offset=0):
+		t = time.localtime()
+		day = t[2]+offset  # this won't work perfectly
+		months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+		mon = months[t[1] - 1]
+		yr = t[0]
+		resp = 'The date is {0:d} {1!s} {2:d}'.format(day, mon, yr)
+		return resp
+
+	def time(self):
+		t = time.localtime()
+		hrs = t[3]
+		if hrs > 12:
+			hrs = hrs - 12
+			ampm = 'pm'
+		else:
+			ampm = 'am'
+		mins = t[4]
+		resp = 'The current time is {0:d} {1:d} {2!s}'.format(hrs, mins, ampm)
+		return resp
+
+	def test(self, txt):
+		ret = self.analyze(txt)
+		if ret:
+			self.key = ret.group(1)
+			return True
+		else:
+			return False
+
+	def process(self):
+		if self.key == 'time':
+			return self.time()
+		elif self.key == 'date':
+			return self.date()
+		elif self.key == 'today':
+			return self.date()
+		elif self.key == 'tomorrow':
+			return self.date()
+		else:
+			return ''
 
 
 class Greeting(Base):
@@ -113,14 +155,11 @@ def main():
 		name = 'bob'
 
 		# print analyze2(statement)
-		plugins = [StarWars(), Command(name), Exit(), Greeting(name)]
+		plugins = [StarWars(), Command(name), Exit(), Greeting(name), TimeDate()]
 		for p in plugins:
 			if p.test(statement):
 				print p.process()
 				break
-
-		# if statement == 'quit':
-		# 	return
 
 if __name__ == "__main__":
 	main()
