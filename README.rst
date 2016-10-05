@@ -1,7 +1,7 @@
 pyGecko
 ============================
 
-.. image:: noun_11784_cc.png
+.. image:: https://github.com/walchko/pygecko/blob/master/pics/noun_11784_cc.png
 	:align: center
 
 My robot software.
