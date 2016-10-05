@@ -146,3 +146,42 @@ if __name__ == '__main__':
 	s = SoundServer(token)
 	s.start()
 	print('bye ...')
+
+
+
+import speech_recognition as sr
+
+def loop(r):
+	audio = None
+	ret = ''
+
+	with sr.Microphone() as source:
+		# r.adjust_for_ambient_noise(source)
+		print("Say something!")
+		# audio = None
+		audio = r.listen(source, 1.0)
+
+	ret = r.recognize_sphinx(audio)
+
+	print(">>" + ret)
+
+	if ret == 'quit':
+		exit()
+
+def main2():
+	# obtain audio from the microphone
+	r = sr.Recognizer()
+
+	while True:
+		with sr.Microphone() as source:
+			r.adjust_for_ambient_noise(source)
+
+		try:
+			loop(r)
+
+		except sr.WaitTimeoutError as e:
+			pass
+
+		except KeyboardInterrupt as e:
+			print('Ctrl-c ... bye')
+			break
