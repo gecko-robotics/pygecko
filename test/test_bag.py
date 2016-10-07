@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 import pygecko.lib.bag as Bag
 import pygecko.lib.Messages as Msg
 import random

@@ -2,8 +2,8 @@
 
 
 import os
-# import sys
-# sys.path.insert(0, os.path.abspath('..'))
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 import pygecko.lib.FileStorage as Fs
 
 
