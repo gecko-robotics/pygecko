@@ -6,3 +6,4 @@ pyaudio
 pyrk
 pyyaml
 numdifftools
+pyserial
