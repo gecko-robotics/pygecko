@@ -8,10 +8,10 @@ python:
 
 # command to install dependencies that require sudo
 # https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
-addons:
-    apt:
-        packages:
-            - libzmq3-dev
+# addons:
+#     apt:
+#         packages:
+#             - libzmq3-dev
 
 # install other libraries using pip
 install: pip install pyserial nose simplejson pyaudio numpy pyzmq
