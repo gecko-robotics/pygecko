@@ -3,6 +3,5 @@ pyyaml
 simplejson
 numpy
 pyaudio
-pyrk
-numdifftools
 pyserial
+six

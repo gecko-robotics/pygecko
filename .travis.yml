@@ -16,7 +16,6 @@ addons:
             # - python-numpy
             # - python-six
             # - python-yaml
-            # - python-pyaudio
             - libzmq3-dev
             - sox
 
