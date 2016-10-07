@@ -2,6 +2,8 @@
 
 import random
 from pygecko.lib.chatbot import Base
+from pygecko.lib.chatbot import Chatbot
+from pygecko.lib.tts import TTS
 import time
 
 
@@ -107,6 +109,7 @@ class Greeting(Base):
 	def __init__(self, robot_name='robot'):
 		self.patterns = [
 			r'(.*) (hello|hi|greetings|ola|good day)'
+			# r'(hello|hi|greetings|ola|good day)'
 		]
 		self.name = robot_name
 
@@ -150,16 +153,18 @@ class Exit(Base):
 
 
 def main():
+	tts = TTS()
+	tts.setOptions('-v Karen')  # this works on macOS and say
+	cb = Chatbot()
+	name = 'bob'
+	plugins = [StarWars(), Command(name), Exit(), Greeting(name), TimeDate()]
+	cb.setPlugins(plugins)
 	while True:
-		statement = raw_input(">> ")
-		name = 'bob'
-
-		# print analyze2(statement)
-		plugins = [StarWars(), Command(name), Exit(), Greeting(name), TimeDate()]
-		for p in plugins:
-			if p.test(statement):
-				print p.process()
-				break
+		txt = raw_input('>> ')
+		ans = cb.run(txt)
+		if ans:
+			print ans
+			tts.say(ans)
 
 if __name__ == "__main__":
 	main()
