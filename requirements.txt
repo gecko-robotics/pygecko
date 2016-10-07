@@ -4,6 +4,5 @@ simplejson
 numpy
 pyaudio
 pyrk
-pyyaml
 numdifftools
 pyserial

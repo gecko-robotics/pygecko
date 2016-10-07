@@ -11,14 +11,17 @@ python:
 addons:
     apt:
         packages:
-            - python-zmq
-            - python-nose
-            - python-numpy
+            # - python-zmq
+            # - python-nose
+            # - python-numpy
+            # - python-six
+            # - python-yaml
             # - python-pyaudio
-            # - libzmq3-dev
+            - libzmq3-dev
+            - sox
 
 # install other libraries using pip
-install: pip install pyserial nose simplejson
+install: pip install -r requirements.txt
 
 # command to run tests
-script: nosetests -v test
+script: nosetests -v -w test/
