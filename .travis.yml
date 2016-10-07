@@ -11,7 +11,7 @@ python:
 addons:
     apt:
         packages:
-            - libzmq-dev
+            - libzmq3-dev
 
 # install other libraries using pip
 install: pip install pyserial nose simplejson pyaudio numpy pyzmq
