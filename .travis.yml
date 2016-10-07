@@ -12,10 +12,13 @@ addons:
     apt:
         packages:
             - python-zmq
+            - python-nose
+            - python-numpy
+            # - python-pyaudio
             # - libzmq3-dev
 
 # install other libraries using pip
-install: pip install pyserial nose simplejson pyaudio numpy
+install: pip install pyserial nose simplejson
 
 # command to run tests
 script: nosetests -v test
