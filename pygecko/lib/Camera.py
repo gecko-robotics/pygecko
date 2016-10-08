@@ -102,11 +102,11 @@ class Camera(object):
 			# need to do vertical flip?
 		elif cam == 'video':
 			self.cameraType = 'video'  # opencv
-			self.camera = cv2.VideoCapture()
+			# self.camera = cv2.VideoCapture()
 		else:
 			raise VideoError('Error, {0!s} not supported'.format((cam)))
 
-		time.sleep(1)  # let camera warm-up
+		print('[+] Camera type {}'.format(self.cameraType))
 
 	def __del__(self):
 		"""
@@ -126,20 +126,21 @@ class Camera(object):
 		out: None
 		"""
 		if self.cameraType == 'pi':
-			self.camera.vflip = True  # camera is mounted upside down
+			# self.camera.vflip = True  # camera is mounted upside down
 			self.camera.resolution = win
 			self.bgr = picamera.array.PiRGBArray(self.camera, size=win)
 		elif self.cameraType == 'cv':
 			self.camera.open(cameraNumber)
+			time.sleep(1)  # let camera warm-up
 			self.camera.set(3, win[0])
 			self.camera.set(4, win[1])
 		# self.capture.set(cv2.cv.CV_CAP_PROP_SATURATION,0.2);
 		elif self.cameraType == 'video':
 			if fileName is None:
-				VideoError('Error: video filename is not set')
+				raise VideoError('Error: video filename is not set')
 			self.camera.open(fileName)
 
-		if calibration is not None:
+		if calibration:
 			self.cal = calibration
 
 	# def setCalibration(self, n):

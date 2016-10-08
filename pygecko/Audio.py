@@ -19,7 +19,7 @@ class SoundServer(mp.Process):
 	"""
 	"""
 	# def __init__(self, YAML_FILE, REAL, stdin=os.fdopen(os.dup(sys.stdin.fileno())), host="localhost", port=9200):
-	def __init__(self, wit_token, host="localhost", port=9200):
+	def __init__(self, host="localhost", port=9200):
 		mp.Process.__init__(self)
 		self.host = host
 		self.port = port
@@ -33,15 +33,16 @@ class SoundServer(mp.Process):
 
 		self.tts = TTS()
 		self.chatbot = Chatbot()
+		self.chatbot.setPlugins([])
 
-		results = """--------------------------
-		Sound Server up
-		Pub[text out]: %s:%d
-		Sub[text in]: %s:%d
-		Modules: %d
-		--------------------------
-		"""
-		self.logger.info(results, host, port, host, port + 1, len(self.modules))
+		# results = """--------------------------
+		# Sound Server up
+		# Pub[text out]: %s:%d
+		# Sub[text in]: %s:%d
+		# Modules: %d
+		# --------------------------
+		# """
+		# self.logger.info(results, host, port, host, port + 1, len(self.modules))
 
 	def run(self):
 		"""
@@ -57,20 +58,20 @@ class SoundServer(mp.Process):
 			while loop:
 				# get wit.ai json
 				# result = self.input.listenPrompt()
-				result = self.input.listen()
+				# result = self.input.listen()
 
-				txt = self.chatbot.test(result)
+				txt = self.chatbot.run(' ')
 
 				if txt == 'exit_loop':
 					loop = False
 				elif txt == 'empty' or not txt:
-					self.logger.info('no plugin response')
+					# self.logger.info('no plugin response')
 					continue
 				else:
 					self.logger.debug('response' + txt)
 					self.tts.say(txt)
 
-			self.speak('Good bye ...')
+			self.tts.say('Good bye ...')
 
 		except KeyboardInterrupt:
 			print('{} exiting'.format(__name__))
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 # 		print("Say something!")
 # 		# audio = None
 # 		audio = r.listen(source, 1.0)
-# 
+#
 # 	ret = r.recognize_sphinx(audio)
 #
 # 	print(">>" + ret)

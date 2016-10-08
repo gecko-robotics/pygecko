@@ -9,9 +9,10 @@ from __future__ import division
 import zmq
 import simplejson as json
 import numpy
-import datetime as dt
+# import datetime as dt
 import base64
 import socket as Socket
+import time
 
 
 class ZMQError(Exception):
@@ -160,7 +161,8 @@ class PubBase64(Pub):
 
 		# create a message
 		msg = {
-			'header': dt.datetime.now(),
+			# 'header': dt.datetime.now(),
+			'header': time.time(),
 			'image': b64
 		}
 

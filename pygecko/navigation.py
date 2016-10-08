@@ -230,7 +230,7 @@ class Navigation(mp.Process):
 		# self.sub = Sub('/cmd','tcp://%s:%s'%(host,port))
 		# logging.basicConfig(level=logging.INFO)
 		mp.log_to_stderr()
-		self.logger = mp.getLogger()
+		self.logger = logging.getLogger(__name__)
 		# self.kf = KF()
 		self.eom = EOM()
 

@@ -6,47 +6,61 @@
 from __future__ import print_function
 from __future__ import division
 import lib.zmqclass as zmq
-import multiprocessing as mp
-import logging
+# import multiprocessing as mp
+# import logging
 import datetime as dt
 import cv2
 import argparse
-import lib.Camera as Cam
+from lib.Camera import Camera
+import time
 
 
-class RobotCameraServer(mp.Process):
+class RobotCameraServer(object):
+# class RobotCameraServer(mp.Process):
 	"""
 	Streams camera images as fast as possible
 	"""
 	def __init__(self, host="localhost", port='9100', camera_num=0):
-		mp.Process.__init__(self)
+		# mp.Process.__init__(self)
 		self.epoch = dt.datetime.now()
 		self.host = host
 		self.port = port
 		self.camera_num = camera_num
-		logging.basicConfig(level=logging.INFO)
-		self.logger = logging.getLogger('robot')
+		# logging.basicConfig(level=logging.INFO)
+		# self.logger = logging.getLogger('robot')
 
-		self.epoch = dt.datetime.now()
+		# self.epoch = dt.datetime.now()
+
+	def start(self):
+		self.run()
+
+	def join(self):
+		pass
 
 	def run(self):
-		self.logger.info(str(self.name) + '[' + str(self.pid) + '] started on' + str(self.host) + ':' + str(self.port) + ', Daemon: ' + str(self.daemon))
+		# self.logger.info(str(self.name) + '[' + str(self.pid) + '] started on ' + str(self.host) + ':' + str(self.port) + ', Daemon: ' + str(self.daemon))
 
 		# pub = zmq.PubBase64('tcp://' + self.host + ':' + self.port)
 		pub = zmq.PubBase64((self.host, self.port))
-		# camera = cv2.VideoCapture(self.camera_num)
-		camera = Cam.Camera()
+		# camera = cv2.VideoCapture(0)
+		camera = Camera()
 		camera.init(cameraNumber=self.camera_num)
 
-		self.logger.info('Openned camera: ' + str(self.camera_num))
+		# self.logger.info('Openned camera: ' + str(self.camera_num))
+
+		# import cv2
+
+		# c = cv2.VideoCapture()
+		# c.open(0)
 
 		try:
 			while True:
+				# ret, frame = c.read()
 				ret, frame = camera.read()
 				jpeg = cv2.imencode('.jpg', frame)[1]  # jpeg compression
 				pub.pub('image', jpeg)
 				# print '[*] frame: %d k   jpeg: %d k'%(frame.size/1000,len(jpeg)/1000)
-				# time.sleep(0.1)
+				time.sleep(0.1)
 
 		except KeyboardInterrupt:
 			print('Ctl-C ... exiting')
@@ -224,31 +238,6 @@ def handleArgs():
 
 def main():
 	print('Hello cowboy!')
-	# """
-	# need to figure out how to cleanly handle window size, save to file for everything
-	#
-	# maybe pass a dict to every class and let it figure it out instead of function args
-	# """
-	# args = handleArgs()
-	#
-	# print args
-	# # exit()
-	#
-	# if args['sub']:
-	# 	sub = 0
-	# 	if args['file']: sub = CameraSaveClient(args['file'])
-	# 	else: sub = CameraDisplayClient(args['sub'][0],args['sub'][1])
-	# 	sub.run()
-	#
-	# elif args['pub']:
-	# 	pub = RobotCameraServer(args['pub'][0],args['pub'][1],args['camera'])
-	# 	pub.run()
-	#
-	# elif args['local']:
-	# 	local = LocalCamera(args)
-	# 	local.run()
-	# else:
-	# 	print 'Error'
 
 
 if __name__ == "__main__":
