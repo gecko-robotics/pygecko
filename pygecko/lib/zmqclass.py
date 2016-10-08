@@ -36,17 +36,21 @@ class Base(object):  # FIXME: 20160525 move printing statements to logging inste
 		"""
 		print('Using ZeroMQ version: {0!s}'.format((zmq.version_info())))
 
-	def _stop(self, msg='some pub/sub/srvc'):
+	def _stop(self):
 		"""
 		Internal function, don't call
 		"""
 		self.ctx.term()
-		print('[<] shutting down', msg)
+		addr = '(,)'
+		if self.addr:
+			addr = self.addr
+		print('[<] shutting down {} for {}'.format(type(self).__name__, addr))
 
 	def getAddress(self, hp):
 		if hp[0] == 'localhost':  # do I need to do this?
 			hp = (Socket.gethostbyname(Socket.gethostname()), hp[1])
 		addr = 'tcp://{}:{}'.format(*hp)
+		self.addr = addr
 		return addr
 
 
@@ -56,9 +60,6 @@ class Pub(Base):
 	"""
 	def __init__(self, bind_to=('localhost', 9000)):
 		Base.__init__(self)
-		# if bind_to[0] == 'localhost':  # do I need to do this?
-		# 	bind_to = (Socket.gethostbyname(Socket.gethostname()), bind_to[1])
-		# self.bind_to = 'tcp://' + bind_to[0] + ':' + str(bind_to[1])
 		self.bind_to = self.getAddress(bind_to)
 
 		try:
@@ -75,7 +76,7 @@ class Pub(Base):
 	def __del__(self):
 		# self.poller.register(self.socket)
 		self.socket.close()
-		# self._stop('PUB:' + self.bind_to)
+		self._stop()
 
 	def pub(self, topic, msg):
 		"""
@@ -118,7 +119,7 @@ class Sub(Base):
 
 	def __del__(self):
 		self.socket.close()
-		# self._stop('SUB:' + self.connect_to)
+		self._stop()
 
 	def recv(self):
 		# check to see if there is read, write, or erros
@@ -148,7 +149,7 @@ class PubBase64(Pub):
 
 	def __del__(self):
 		self.socket.close()
-		self._stop('PUB_Base64:' + self.bind_to)
+		self._stop()
 
 	def pub(self, topic, jpeg):
 		# JPEG compress frame
@@ -182,7 +183,7 @@ class SubBase64(Sub):
 
 	def __del__(self):
 		self.socket.close()
-		self._stop('SUB_Base64:' + self.connect_to)
+		self._stop()
 
 	def recv(self):
 		# check to see if there is read, write, or errors
@@ -222,7 +223,7 @@ class ServiceProvider(Base):
 
 	def __del__(self):
 		self.socket.close()
-		# self._stop('Srvc:'+ self.bind_to)
+		self._stop()
 
 	def listen(self, callback):
 		# print 'listen'
@@ -249,7 +250,7 @@ class ServiceClient(Base):
 
 	def __del__(self):
 		self.socket.close()
-		# self._stop('Srvc:'+ self.bind_to)
+		self._stop()
 
 	def get(self, msg):
 		jmsg = json.dumps(msg)

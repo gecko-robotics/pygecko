@@ -188,7 +188,7 @@ class Camera(object):
 
 
 def main():
-	print('Hello!')
+	print('Luke, I am your father!')
 
 if __name__ == "__main__":
 	main()

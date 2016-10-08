@@ -1,15 +1,15 @@
 #!/usr/bin/env python
+
 from __future__ import division
 from __future__ import print_function
 # import os							# run commands and get/use path
 # import platform						# determine os
-import sys							# ?
+# import sys							# ?
 # import time							# sleep
 import logging						# logging
 import multiprocessing as mp		# multiprocess
 import lib.zmqclass as zmq
-import lib.FileStorage as fs
-# import lib.WitInput as wi
+# import lib.FileStorage as fs
 from lib.tts import TTS
 from lib.chatbot import Chatbot
 import speech_recognition as sr
@@ -26,23 +26,13 @@ class SoundServer(mp.Process):
 		logging.basicConfig(level=logging.DEBUG)
 		self.logger = logging.getLogger(__name__)
 
-		self.logger.info('soundserver stdin: ' + str(sys.stdin.fileno()))
+		# self.logger.info('soundserver stdin: ' + str(sys.stdin.fileno()))
 
 		self.pub = zmq.Pub((host, port))
 		self.sub = zmq.Sub('text', (host, str(port + 1)))
 
 		self.tts = TTS()
 		self.chatbot = Chatbot()
-		self.chatbot.setPlugins([])
-
-		# results = """--------------------------
-		# Sound Server up
-		# Pub[text out]: %s:%d
-		# Sub[text in]: %s:%d
-		# Modules: %d
-		# --------------------------
-		# """
-		# self.logger.info(results, host, port, host, port + 1, len(self.modules))
 
 	def run(self):
 		"""
@@ -52,8 +42,8 @@ class SoundServer(mp.Process):
 		"""
 		# main loop
 		try:
-			# self.logger.info(str(self.name)+'['+str(self.pid)+'] started on '+
-			# 	str(self.host) + ':' + str(self.port) +', Daemon: '+str(self.daemon))
+			self.logger.info(str(self.name)+'['+str(self.pid)+'] started on ' +
+				str(self.host) + ':' + str(self.port) + ', Daemon: '+str(self.daemon))
 			loop = True
 			while loop:
 				# get wit.ai json
