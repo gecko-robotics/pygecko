@@ -9,11 +9,23 @@ import numpy as np
 # import logging         # logging
 import platform        # determine linux or darwin (OSX)
 # import argparse        # command line args
+import os
 
 
-if platform.system().lower() == 'linux':
-	import picamera        # on linux, PiCamera
+# travis-ci has a fit ... trying to get around it
+if platform.system().lower() == 'linux' and not os.environ['TRAVIS-CI']:
+	import picamera.PiCamera        # on linux, PiCamera
 	import picamera.array  # on linux, turn PiCamera images into numpy arrays
+else:
+	class picamera(object):
+		class PiCamera(object):
+			resolution = (0, 0)
+			def read(self): pass
+			def close(self): pass
+			def capture(self, image, format, use_video_port): pass
+
+		class array(object):
+			def PiRGBArray(self, size): pass
 
 
 class VideoError(Exception):
