@@ -3,3 +3,4 @@ pyyaml
 simplejson
 numpy
 pyserial
+pyrk
