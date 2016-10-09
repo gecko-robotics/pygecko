@@ -8,7 +8,6 @@ python:
     # - "2.7"
 
 env:
-  global:
     - TRAVIS-CI=1
 
 # command to install dependencies that require sudo
