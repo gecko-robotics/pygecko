@@ -8,7 +8,7 @@ python:
     # - "2.7"
 
 env:
-    - TRAVIS-CI=1
+    - TRAVISCI=1
 
 # command to install dependencies that require sudo
 # https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
