@@ -13,7 +13,7 @@ import os
 
 
 # travis-ci has a fit ... trying to get around it
-if platform.system().lower() == 'linux' and not os.environ['TRAVIS-CI']:
+if platform.system().lower() == 'linux' and 'TRAVIS-CI' not in os.environ:
 	import picamera.PiCamera        # on linux, PiCamera
 	import picamera.array  # on linux, turn PiCamera images into numpy arrays
 else:

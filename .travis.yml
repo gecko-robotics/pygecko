@@ -9,7 +9,7 @@ python:
 
 env:
   global:
-    - TRAVIS-CI 1
+    - TRAVIS-CI=1
 
 # command to install dependencies that require sudo
 # https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
