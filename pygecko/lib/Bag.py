@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-#
-
-__doc__ = """Basically a rosbag library"""
 
 from __future__ import print_function
 # import os
@@ -21,6 +17,7 @@ import Messages as Msg  # deserialize topics
 # useful to turn off for debugging
 use_compression = True
 
+__doc__ = """Basically a rosbag library"""
 
 class Bag(object):
 	"""
