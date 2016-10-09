@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 #
 #
-# copyright Kevin Walchko
-#
-# Basically a rosbag library
+
+__doc__ = """Basically a rosbag library"""
 
 from __future__ import print_function
 # import os
