@@ -1,6 +1,6 @@
 import Bag
 import ZmqClass
-import Microphone
+# import Microphone  # travis fails of this, no pyaudio
 import Sound
 import TTS
 import Camera
