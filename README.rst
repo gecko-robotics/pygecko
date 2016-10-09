@@ -1,7 +1,7 @@
 pyGecko
 ============================
 
-.. image:: https://github.com/walchko/pygecko/blob/master/pics/noun_11784_cc.png
+.. image:: https://github.com/walchko/pygecko/raw/master/pics/noun_11784_cc.png
 	:align: center
 	:width: 400px
 
@@ -97,7 +97,7 @@ Change Log
 -------------
 
 ========== ======= =============================
-2016-10-05 0.3.0   published to PyPi
+2016-10-09 0.4.1   published to PyPi
 2010-03-10 0.0.1   init
 ========== ======= =============================
 
