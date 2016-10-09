@@ -202,10 +202,14 @@ class SoxMicrophone(object):
 		return temp
 
 
+import pyaudio
+import wave
+
+
 class PyAudioMicrophone(object):
 	def __init__(self):
 		self.format = pyaudio.paInt16
-		self.channgels = 2
+		self.channels = 2
 		self.rate = 44100
 		self.chunk = 1024
 		self.record_time = 5  # seconds
@@ -214,8 +218,6 @@ class PyAudioMicrophone(object):
 		self.frames = []
 
 	def grab(self):
-		import pyaudio
-		import wave
 
 		audio = pyaudio.PyAudio()
 
@@ -241,13 +243,14 @@ class PyAudioMicrophone(object):
 		stream.stop_stream()
 		stream.close()
 		audio.terminate()
+		self.sample_size = audio.get_sample_size(self.format)
 
 	def saveToWave(self, filename):
 		if not self.frames:
 			raise Exception('No audio captured yet')
 		waveFile = wave.open(filename, 'wb')
 		waveFile.setnchannels(self.channels)
-		waveFile.setsampwidth(audio.get_sample_size(self.format))
+		waveFile.setsampwidth(self.sample_size)
 		waveFile.setframerate(self.rate)
 		waveFile.writeframes(b''.join(self.frames))
 		waveFile.close()
@@ -271,7 +274,8 @@ def main():
 
 	t = PyAudioMicrophone()
 	t.grab()
-	t.playAudio()
+	t.saveToWave('file.wav')
+	t.playAudio('file.wav')
 
 	# mic.playAudio(filename)
 	# snd = mic.readAudio(filename)

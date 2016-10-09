@@ -7,9 +7,9 @@ import cv2
 import datetime as dtm
 import logging
 import multiprocessing as mp
-import lib.Messages as Msg
-import lib.zmqclass as Zmq
-import lib.Camera as Cam
+import pygecko.lib.Messages as Msg
+import pygecko.lib.ZmqClass as Zmq
+import pygecko.lib.Camera as Cam
 
 
 save_pts = []

@@ -8,7 +8,7 @@ from __future__ import print_function
 from __future__ import division
 import curses
 import argparse
-import lib.zmqclass as Zmq
+import lib.ZmqClass as Zmq
 import lib.Messages as Msg
 import time
 

@@ -3,13 +3,13 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-import pygecko.lib.bag as Bag
+from pygecko.lib.Bag import Bag
 import pygecko.lib.Messages as Msg
 import random
 
 
 def test_bag():
-	bag = Bag.Bag()
+	bag = Bag()
 	bag.open('imu')
 
 	num_msg = 105

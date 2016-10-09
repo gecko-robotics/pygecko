@@ -14,7 +14,7 @@ import argparse
 import multiprocessing as mp
 
 # sys.path.insert(0, os.path.abspath('..'))
-import pygecko.lib.zmqclass as Zmq
+import pygecko.lib.ZmqClass as Zmq
 import pygecko.lib.Messages as Msg
 
 """

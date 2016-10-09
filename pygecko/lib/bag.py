@@ -6,17 +6,17 @@
 # Basically a rosbag library
 
 from __future__ import print_function
-import os
-import sys
+# import os
+# import sys
 import logging
 # import argparse
 import gzip  # compression
 import multiprocessing as mp
 import time  # filename date/time
-import six  # Py2/3 is a string
+# import six  # Py2/3 is a string ... why?
 
 # sys.path.insert(0, os.path.abspath('..'))
-import zmqclass as Zmq
+import ZmqClass as Zmq
 import Messages as Msg  # deserialize topics
 
 # useful to turn off for debugging
@@ -122,10 +122,12 @@ class Record(object):
 		sub = Zmq.Sub(topic, tcp)
 
 		# make sure path is a good file name ending in .bag
-		if not path or not isinstance(path, six.string_types):
+		# if not path or not isinstance(path, six.string_types):
+		if not path or not isinstance(path, str):
 			t = time.ctime().replace(' ', '_')
 			filename = './' + topic + t + '.bag'
-		elif path.rfind('.bag') == -1 and isinstance(path, six.string_types):
+		# elif path.rfind('.bag') == -1 and isinstance(path, six.string_types):
+		elif path.rfind('.bag') == -1 and isinstance(path, str):
 			filename = path + '.bag'
 		else:
 			filename = path

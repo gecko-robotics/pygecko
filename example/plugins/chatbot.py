@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import random
-from pygecko.lib.chatbot import Base
-from pygecko.lib.chatbot import Chatbot
-from pygecko.lib.tts import TTS
+from pygecko.lib.Chatbot import Base
+from pygecko.lib.Chatbot import Chatbot
+from pygecko.lib.TTS import TTS
 import time
 
 

@@ -11,7 +11,7 @@ from __future__ import print_function
 import sdl2
 import time  # sleep ... why?
 import argparse
-import lib.zmqclass as zmq
+import lib.ZmqClass as zmq
 import lib.Messages as Msg
 
 

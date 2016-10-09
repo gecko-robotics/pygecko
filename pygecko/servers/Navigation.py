@@ -13,8 +13,8 @@ import datetime as dt
 import numpy as np
 from math import sin, cos, sqrt
 from pyrk import RK4
-import lib.zmqclass as zmq
-import lib.Messages as msg
+import pygecko.lib.ZmqClass as zmq
+import pygecko.lib.Messages as msg
 from numpy import dot, cross
 from numpy.linalg import inv
 # from pyrk import RK4
@@ -218,7 +218,7 @@ def kf_eqns(t, x, u):
 	return np.hstack((dev, dep, dea))
 
 
-class Navigation(mp.Process):
+class NavigationServer(mp.Process):
 	"""
 	Still needs lots of work!
 	"""
@@ -338,7 +338,7 @@ class Navigation(mp.Process):
 
 
 def main():
-	nav = Navigation()
+	nav = NavigationServer()
 	nav.run()
 
 

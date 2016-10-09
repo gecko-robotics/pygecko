@@ -7,7 +7,7 @@ import time
 import logging
 import multiprocessing as mp
 import lib.Messages as Msg
-import lib.zmqclass as Zmq
+import lib.ZmqClass as Zmq
 from otherLibs.BNO055 import BNO055
 from math import cos, sin, atan2, asin, sqrt
 from math import radians as d2r

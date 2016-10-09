@@ -8,8 +8,8 @@ from __future__ import print_function
 from __future__ import division
 import argparse
 import sys, tty, termios
-import lib.zmqclass as Zmq
-import lib.Messages as Msg
+import pygecko.lib.ZmqClass as Zmq
+import pygecko.lib.Messages as Msg
 
 
 class Keyboard(object):

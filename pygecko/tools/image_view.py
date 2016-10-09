@@ -17,9 +17,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import lib.zmqclass as zmq
-import lib.Message as Msg
-import lib.Camera as Camera
+import pygecko.lib.ZmqClass as zmq
+import pygecko.lib.Messages as Msg
+import pygecko.lib.Camera as Camera
 
 # FIXME: 20160522 too many things that really do the same thing!
 

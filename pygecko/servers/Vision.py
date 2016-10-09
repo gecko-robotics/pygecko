@@ -5,13 +5,13 @@
 
 from __future__ import print_function
 from __future__ import division
-import lib.zmqclass as zmq
+import pygecko.lib.ZmqClass as zmq
 # import multiprocessing as mp
 # import logging
 import datetime as dt
 import cv2
 import argparse
-from lib.Camera import Camera
+from pygecko.lib.Camera import Camera
 import time
 
 

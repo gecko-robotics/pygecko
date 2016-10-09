@@ -5,9 +5,16 @@
 # see LICENSE for full details
 ##############################################
 
-# import Process
-import pygecko.lib
-import pygecko.tools
-# from pygecko import *
+from pygecko import lib
+# from pygecko.lib import *
+# from pygecko.tools import *
+# from pygecko.servers import *
+from pygecko import servers
+from pygecko import tools
+# import Speech
+# import Navigation
+# import Vision
 
 __version__ = '0.3.0'
+__license__ = 'MIT'
+__author__ = 'Kevin J. Walchko'

@@ -6,7 +6,7 @@ import multiprocessing as mp
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-import pygecko.lib.zmqclass as zmq
+import pygecko.lib.ZmqClass as zmq
 
 
 def test_pub_sub():

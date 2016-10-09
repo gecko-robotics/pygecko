@@ -2,16 +2,20 @@
 
 from __future__ import print_function
 from pygecko.Vision import RobotCameraServer as CameraServer
-from pygecko.navigation import Navigation
-from pygecko.Audio import SoundServer
+from pygecko.Navigation import NavigationServer
+from pygecko.Speech import SoundServer
 
+"""
+This is an example of a ROS like launch file
 
-
+sometimes OpenCV doesn't like multiprocessing and crashes, the move to macOS
+Sierra has broken cv and mp.
+"""
 
 
 def main():
 	cs = CameraServer('localhost', 9000)
-	nav = Navigation('localhost', 9001)
+	nav = NavigationServer('localhost', 9001)
 	aud = SoundServer('localhost', 9002)
 
 	print('start processes')

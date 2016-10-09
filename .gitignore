@@ -1,11 +1,13 @@
 # Python
 *.pyc
+build/
+dist/
+*.egg-info/
 
 # Misc
 docs/
 old/
 *.bag
-*.egg-info
 
 # OS generated files #
 ######################

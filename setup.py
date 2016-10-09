@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from pygecko import __version__ as VERSION
 from setuptools.command.test import test as TestCommand
 
@@ -13,8 +13,9 @@ class NoseTestCommand(TestCommand):
 class PublishCommand(TestCommand):
 	def run_tests(self):
 		print('Publishing to PyPi ...')
-		os.system("python setup.py sdist")
-		os.system("twine upload dist/pygecko-{}.tar.gz".format(VERSION))
+		os.system("python setup.py bdist_wheel")
+		# os.system("twine upload dist/pygecko-{}.tar.gz".format(VERSION))
+		os.system("twine upload dist/pygecko-{}*.whl".format(VERSION))
 
 
 class GitTagCommand(TestCommand):
@@ -27,7 +28,7 @@ class GitTagCommand(TestCommand):
 class CleanCommand(TestCommand):
 	def run_tests(self):
 		print('Cleanning up ...')
-		os.system('rm -fr pygecko.egg-info dist')
+		os.system('rm -fr pygecko.egg-info dist build')
 
 readme = open('README.rst').read()
 
@@ -66,7 +67,8 @@ setup(
 	],
 	url="https://github.com/walchko/pygecko",
 	long_description=readme,
-	packages=['pygecko'],
+	# packages=['pygecko'],
+	packages=find_packages(exclude=['drivers', 'example', 'docs', 'test']),
 	cmdclass={
 		'test': NoseTestCommand,
 		'publish': PublishCommand,

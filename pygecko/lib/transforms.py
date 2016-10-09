@@ -7,7 +7,7 @@ from math import degrees as r2d
 import numpy as np
 
 
-class ChiMathError(Exception):
+class GMathError(Exception):
 	pass
 
 
@@ -75,7 +75,7 @@ def aa2Quaternion(axis, angle):
 			for i in range(0, 3):
 				axis[i] /= m
 		else:
-			raise ChiMathError('aa2Quaternion: div by 0')
+			raise GMathError('aa2Quaternion: div by 0')
 
 	x = axis[0]*s
 	y = axis[1]*s
