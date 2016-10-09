@@ -11,7 +11,7 @@ from __future__ import print_function
 import logging
 # import argparse
 import gzip  # compression
-import multiprocessing as mp
+# import multiprocessing as mp
 import time  # filename date/time
 # import six  # Py2/3 is a string ... why?
 

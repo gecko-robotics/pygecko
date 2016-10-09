@@ -7,6 +7,10 @@ import tempfile
 import StringIO
 import pyaudio
 
+"""
+this isn't being used yet
+"""
+
 
 class SoxError(Exception):
 	pass

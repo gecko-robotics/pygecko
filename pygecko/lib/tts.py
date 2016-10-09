@@ -45,10 +45,6 @@ class TTS(object):
 
 
 def main():
-	# s = TTS()
-	# s.setOptions('-v Karen')
-	# s.say('hello how are you!')
-	# print('using:', s.tts)
 	print('I am a mad man with a little blue box')
 
 
