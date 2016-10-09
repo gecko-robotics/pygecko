@@ -18,6 +18,8 @@ addons:
             # - python-yaml
             - libzmq3-dev
             - sox
+            - python-opencv
+            - libopencv-dev
 
 # install other libraries using pip
 install: pip install -r requirements.txt
