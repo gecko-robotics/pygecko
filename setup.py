@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # from pygecko import __version__ as VERSION
 from setuptools.command.test import test as TestCommand
 
-VERSION = '0.4.0'
+VERSION = '0.4.2'
 
 class NoseTestCommand(TestCommand):
 	def run_tests(self):
