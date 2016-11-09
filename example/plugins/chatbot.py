@@ -152,12 +152,38 @@ class Exit(Base):
 		exit()
 
 
+class Gators(Base):
+	def __init__(self):
+		Base.__init__(self)
+		self.patterns = [
+			r'(.*)  war eagle',
+			r'go gators',
+			r'(.*) gators',
+			r'war eagle',
+			r"let's go gators"
+		]
+
+	def test(self, txt):
+		ret = self.analyze(txt)
+		if ret:
+			return True
+		else:
+			return False
+
+	def process(self):
+		response = [
+			'go gators',
+			'i bleed orange and blue',
+			'2 bits 4 bits 6 bits a dollar, all for the gators stand up an holler'
+		]
+		return random.choice(response)
+
 def main():
 	tts = TTS()
 	tts.setOptions('-v Karen')  # this works on macOS and say
 	cb = Chatbot()
 	name = 'bob'
-	plugins = [StarWars(), Command(name), Exit(), Greeting(name), TimeDate()]
+	plugins = [Gators(), StarWars(), Command(name), Exit(), Greeting(name), TimeDate()]
 	cb.setPlugins(plugins)
 	while True:
 		txt = raw_input('>> ')

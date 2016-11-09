@@ -163,6 +163,7 @@ class SpeechServer(mp.Process):
 		# Create a speech recognizer
 		# r = speech_recognition.Recognizer()
 		r = self.r
+		audio = None
 
 		# Open the microphone (and release is when done using "with")
 		with speech_recognition.Microphone() as source:
@@ -179,6 +180,9 @@ class SpeechServer(mp.Process):
 					audio = r.listen(source, timeout=timeout)
 				except speech_recognition.WaitTimeoutError:
 					return None
+
+			if not audio:
+				print('heard nothing')
 
 			return audio
 
@@ -206,15 +210,18 @@ class SpeechServer(mp.Process):
 			while loop:
 				print('speak')
 
-				audio = self.get_audio()
-				txt = self.stt(audio)
-				txt = self.chatbot.run(txt)
+				audio = self.get_audio(5)
+				if audio:
+					txt = self.stt(audio)
+					print('heard: {}'.format(txt))
+					txt = self.chatbot.run(txt)
 
-				if txt == 'exit_loop':
-					loop = False
-				elif txt:
-					self.logger.debug('response' + txt)
-					self.tts.say(txt)
+					if txt == 'exit_loop':
+						# self.tts.say('bye')
+						loop = False
+					elif txt:
+						self.logger.debug('response' + txt)
+						self.tts.say(txt)
 
 			self.tts.say('Good bye ...')
 

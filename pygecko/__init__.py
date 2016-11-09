@@ -11,6 +11,7 @@
 # from pkg_resources import get_distribution
 
 # __version__ = get_distribution('pygecko').version
+__version__ = '0.4.4'
 __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2010 Kevin Walchko'
 __author__ = 'Kevin J. Walchko'
