@@ -1,9 +1,22 @@
 pyGecko
 ============================
 
-.. image:: https://github.com/walchko/pygecko/raw/master/pics/noun_11784_cc.png
+.. image:: https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg
 	:align: center
 	:width: 200 px
+
+
+.. image:: https://img.shields.io/pypi/v/pygecko.svg
+	:target: https://github.com/walchko/pygecko
+.. image:: https://img.shields.io/pypi/l/pygecko.svg
+	:target: https://github.com/walchko/pygecko
+.. image:: https://travis-ci.org/walchko/pygecko.svg?branch=master
+	:target: https://travis-ci.org/walchko/pygecko
+.. image:: https://api.codacy.com/project/badge/Grade/7e526b9907754837a15beff59d393e10
+	:target: https://www.codacy.com/app/kevin-walchko/pygecko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=walchko/pygecko&amp;utm_campaign=Badge_Grade
+.. image:: https://requires.io/github/walchko/pygecko/requirements.svg?branch=master
+	:target: https://requires.io/github/walchko/pygecko/requirements/?branch=master
+	:alt: Requirements Status
 
 My robot software.
 
@@ -22,7 +35,6 @@ Use ``brew`` or ``apt-get`` to install:
 
 * zeromq
 * opencv 3.x
-* cmu pocket sphinx (the most recent version, you will probably have to build it)
 * [optional] SDL 2.0 for PS4 joystick control
 
 pip
@@ -53,7 +65,7 @@ pyGecko **still in development**
 	* Navigation server
 	* Vision processing server
 	* VideoOdometry server
-	
+
 * tools: command line programs
 
 	* Topic reader/creator
@@ -61,7 +73,7 @@ pyGecko **still in development**
 	* image viewer
 	* mjpeg streamer
 	* keyboard
-	
+
 * lib: mostly classes
 
 	* bag
@@ -80,12 +92,12 @@ This directory contains several tools for the robot:
 ==================== ======= ================
 Executable           Stable  Description
 ==================== ======= ================
-camera_calibrate.py  Y       performs camera calibration using either a chessboard or asymmetric circle target. Target patterns are in the `patterns` folder. 
-topic.py             N       send various commands to the robot [work in progress] 
-image_view           Y       subscribe to image messages and display them for debugging 
-mjpeg-server         Y       create a web server which serves up an mjpeg stream from a camera. Any web browser on any device can see this stream (easier than image_view) 
-video.py             Y       capture images or a video clip from a camera 
-webserver.py         N       serve up a web page containing debugging and status info for the robot 
+camera_calibrate.py  Y       performs camera calibration using either a chessboard or asymmetric circle target. Target patterns are in the `patterns` folder.
+topic.py             N       send various commands to the robot [work in progress]
+image_view           Y       subscribe to image messages and display them for debugging
+mjpeg-server         Y       create a web server which serves up an mjpeg stream from a camera. Any web browser on any device can see this stream (easier than image_view)
+video.py             Y       capture images or a video clip from a camera
+webserver.py         N       serve up a web page containing debugging and status info for the robot
 bag_play/record      Y       saves messages to a file so they can be replayed off-line later
 twist_keyboard       Y       simple keyboard interface to send twist messages to a robot
 ==================== ======= ================
@@ -94,6 +106,22 @@ twist_keyboard       Y       simple keyboard interface to send twist messages to
 
 **Note:** There is some duplication between these, and it will eventually be sorted out.
 
+
+ToDo
+-----
+
+* fix speech ... not sure best way to do this
+* better modularity for various robots ... not sure how to do this
+	* multiple robots use same/similar software ... not sure how to best divide things up
+* ``mjpeg_server``
+	* only handles one connection at a time ... make threaded?
+	* sometimes the video stream is slow to load, but then it works fine
+	* handle client disconnect (broken pipe - 32) better
+* ``opencvutils`` - replacing ``lib/Camera.py`` and move calibration stuff to it
+	* these are good capabilities that can be used beyond just this library, make a stand alone library/tool
+* ``simplehtml`` - use for dynamic webpages
+* ``quaternions`` - use/update
+* implement a simple dynamic html server that takes json data in and produces webpages of diagnostic/status info
 
 History
 -----------
@@ -105,7 +133,7 @@ Change Log
 -------------
 
 ========== ======= =============================
+2016-12-26 0.5.0   refactor
 2016-10-09 0.4.1   published to PyPi
 2010-03-10 0.0.1   init
 ========== ======= =============================
-

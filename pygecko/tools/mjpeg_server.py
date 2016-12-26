@@ -3,87 +3,21 @@
 
 import cv2
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from socket import gethostname, gethostbyname
+# from socket import gethostname
+# from socket import gethostbyname
 # import BaseHTTPServer
 # import StringIO
+# import socket
+# import errno
 import time
-# import logging
-import platform
 import argparse
+from opencvutils.video import Camera
 
-if platform.system().lower() == 'linux':
-	import picamera
-	import picamera.array
+# threaded version
+# http://stackoverflow.com/questions/12650238/processing-simultaneous-asynchronous-requests-with-python-basehttpserver
 
-
-class Camera(object):
-	"""
-	Generic camera object that can switch between OpenCv in PiCamera.
-	"""
-	def __init__(self, cam=None, num=0):
-		self.cal = None
-
-		if not cam:
-			os = platform.system().lower()  # grab OS name and make lower case
-			if os == 'linux': cam = 'pi'
-			else: cam = 'cv'
-
-		if cam == 'pi':
-			self.cameraType = 'pi'  # picamera
-			self.camera = picamera.PiCamera()
-		else:
-			self.cameraType = 'cv'  # opencv
-			self.cameraNumber = num
-			self.camera = cv2.VideoCapture()
-			# need to do vertical flip?
-
-		time.sleep(1)  # let camera warm-up
-
-	def __del__(self):
-		# the red light should shut off
-		if self.cameraType == 'pi': self.camera.close()
-		else: self.camera.release()
-
-		print 'exiting camera ... bye!'
-
-	def init(self, win=(640, 480)):
-		if self.cameraType == 'pi':
-			self.camera.vflip = True  # camera is mounted upside down
-			self.camera.resolution = win
-			self.bgr = picamera.array.PiRGBArray(self.camera, size=win)
-		else:
-			self.camera.open(self.cameraNumber)
-			self.camera.set(3, win[0])
-			self.camera.set(4, win[1])
-		# self.capture.set(cv2.cv.CV_CAP_PROP_SATURATION,0.2);
-
-	def setCalibration(self, n):
-		self.cal = n
-
-	def read(self):
-		gray = 0
-
-		if self.cameraType == 'pi':
-			self.camera.capture(self.bgr, format='bgr', use_video_port=True)
-			gray = cv2.cvtColor(self.bgr.array, cv2.COLOR_BGR2GRAY)
-			self.bgr.truncate(0)  # clear stream
-			# print 'got image'
-			# return True, gray
-		else:
-			ret, img = self.camera.read()
-			if not ret:
-				return False
-			# imgRGB=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-			gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-			# return True, gray
-
-		if self.cal:  # FIXME 2016-05-15
-			print 'do calibration correction ... not done yet'
-
-		return True, gray
-
-	def isOpen(self):
-		return True  # FIXME 2016-05-15
+# not sure flask is any better:
+# https://blog.miguelgrinberg.com/post/video-streaming-with-flask
 
 
 def compress(orig, comp):
@@ -91,6 +25,9 @@ def compress(orig, comp):
 
 
 class mjpgServer(BaseHTTPRequestHandler):
+	"""
+
+	"""
 	cam = None
 
 	def do_GET(self):
@@ -109,12 +46,11 @@ class mjpgServer(BaseHTTPRequestHandler):
 
 			capture = self.cam
 
-			if not capture.isOpen():
-				capture.init((320, 240))
+			# if not capture.isOpen():
+			# 	capture.init((320, 240))
 			# tmpFile = StringIO.StringIO()
 			while True:
 				# try:
-
 				ret, img = capture.read()
 				if not ret:
 					continue
@@ -133,20 +69,35 @@ class mjpgServer(BaseHTTPRequestHandler):
 				self.wfile.write(jpg.tostring())
 				time.sleep(0.05)
 				# tmpFile.close()
-			return
+				# except socket.error, e:
+				# 	if isinstance(e.args, tuple):
+				# 		print "errno is %d" % e[0]
+				# 		if e[0] == errno.EPIPE:
+				# 			# remote peer disconnected
+				# 			print "Detected remote disconnect"
+				# 		else:
+				# 			# determine and handle different error
+				# 			print "socket error ", e
+				# 			pass
+				# 	else:
+				# 		print "socket error ", e
+				# 	# remote.close()
+				# 	break
+			# return
 
-		if self.path == '/':
+		elif self.path == '/':
 			# hn = self.server.server_address[0]
 			# pt = self.server.server_address[1]
 			self.send_response(200)
 			self.send_header('Content-type', 'text/html')
 			self.end_headers()
 			self.wfile.write('<html><head></head><body>')
-			self.wfile.write('<h1>http://{0!s}:{1!s}/cam.html</h1>'.format(*self.server.server_address))
+			self.wfile.write('<h1>http://{0!s}:{1!s}</h1>'.format(*self.server.server_address))
 			self.wfile.write('<img src="http://{0!s}:{1!s}/camera.mjpg"/>'.format(*self.server.server_address))
 			self.wfile.write('<p>{0!s}</p>'.format((self.version_string())))
+			self.wfile.write('<p>This only handles one connection at a time</p>')
 			self.wfile.write('</body></html>')
-			return
+			# return
 
 		else:
 			print 'error', self.path
@@ -177,10 +128,11 @@ def main():
 
 	try:
 		camera = Camera()  # need to figure a clean way to pass this ... move switching logic here?
-		camera.init(args['size'])
+		camera.init(cameraNumber=0, win=args['size'])
 		mjpgServer.cam = camera
 
-		server = HTTPServer((gethostname(), args['port']), mjpgServer)
+		# server = HTTPServer((gethostname(), args['port']), mjpgServer)
+		server = HTTPServer(('0.0.0.0', args['port']), mjpgServer)
 		print "server started"
 		server.serve_forever()
 
@@ -188,6 +140,21 @@ def main():
 		print 'main interrupt'
 		server.socket.close()
 
+	# except socket.error, e:
+	# 	if isinstance(e.args, tuple):
+	# 		print "errno is %d" % e[0]
+	# 		if e[0] == errno.EPIPE:
+	# 			# remote peer disconnected
+	# 			print "Detected remote disconnect"
+	# 		else:
+	# 			# determine and handle different error
+	# 			print "socket error ", e
+	# 			pass
+	# 	else:
+	# 		print "socket error ", e
+		# remote.close()
+		# server.socket.close()
+
+
 if __name__ == '__main__':
 	main()
-	

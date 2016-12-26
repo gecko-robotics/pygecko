@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 from pygecko import __version__ as VERSION
 from setuptools.command.test import test as TestCommand
 
-# VERSION = '0.4.2'
 
 class NoseTestCommand(TestCommand):
 	def run_tests(self):
@@ -30,6 +29,7 @@ class CleanCommand(TestCommand):
 	def run_tests(self):
 		print('Cleanning up ...')
 		os.system('rm -fr pygecko.egg-info dist build')
+
 
 readme = open('README.rst').read()
 
@@ -63,8 +63,9 @@ setup(
 		'simplejson',
 		'pyserial',
 		'numpy',
-		'nose',
-		'pyaudio'
+		'opencvutils',
+		'pyaudio',
+		'quaternions'
 	],
 	url="https://github.com/walchko/pygecko",
 	long_description=readme,
