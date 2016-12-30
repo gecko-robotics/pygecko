@@ -64,6 +64,7 @@ setup(
 		'pyserial',
 		'numpy',
 		'opencvutils',
+		'wit',
 		# 'pyaudio',  # this is crap!
 		'quaternions'
 	],
