@@ -64,7 +64,7 @@ setup(
 		'pyserial',
 		'numpy',
 		'opencvutils',
-		'pyaudio',
+		# 'pyaudio',  # this is crap!
 		'quaternions'
 	],
 	url="https://github.com/walchko/pygecko",
