@@ -1,6 +1,1 @@
-pyzmq
-pyyaml
-simplejson
-numpy
-pyserial
-pyrk
+
