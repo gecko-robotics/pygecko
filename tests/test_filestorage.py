@@ -2,9 +2,7 @@
 
 
 import os
-import sys
-# sys.path.insert(0, os.path.abspath('..'))
-import pygecko.lib.FileStorage as Fs
+from pygecko.lib import FileStorage
 
 
 def test_yaml():
@@ -16,7 +14,7 @@ def test_yaml():
 
 	fname = 'test.yaml'
 
-	fs = Fs.FileStorage()
+	fs = FileStorage()
 	fs.writeYaml(fname, data)
 	fs.clear()
 	fs.readYaml(fname)
@@ -36,7 +34,7 @@ def test_json():
 
 	fname = 'test.json'
 
-	fs = Fs.FileStorage()
+	fs = FileStorage()
 	fs.writeJson(fname, data)
 	fs.clear()
 	fs.readJson(fname)
