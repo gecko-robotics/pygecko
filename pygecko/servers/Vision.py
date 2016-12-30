@@ -22,8 +22,8 @@ import time
 #   image_rect_color - color, rectified
 
 
-class RobotCameraServer(object):
 # class RobotCameraServer(mp.Process):
+class RobotCameraServer(object):
 	"""
 	Streams camera images as fast as possible
 	"""
@@ -46,7 +46,8 @@ class RobotCameraServer(object):
 
 	def run(self):
 		# self.logger.info(str(self.name) + '[' + str(self.pid) + '] started on ' + str(self.host) + ':' + str(self.port) + ', Daemon: ' + str(self.daemon))
-		pub = zmq.PubBase64((self.host, self.port))
+		# pub = zmq.PubBase64((self.host, self.port))
+		pub = zmq.Pub((self.host, self.port))
 		camera = Camera()
 		camera.init(cameraNumber=self.camera_num)
 
@@ -56,9 +57,9 @@ class RobotCameraServer(object):
 			while True:
 				ret, frame = camera.read()
 				jpeg = cv2.imencode('.jpg', frame)[1]  # jpeg compression
-				pub.pub('image_color', jpeg)
+				pub.pubB64('image_color', jpeg)
 				# print '[*] frame: %d k   jpeg: %d k'%(frame.size/1000,len(jpeg)/1000)
-				time.sleep(0.1)
+				time.sleep(0.01)
 
 		except KeyboardInterrupt:
 			print('Ctl-C ... exiting')

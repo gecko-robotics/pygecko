@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import os
-# import wave
-# import os
 from wit import Wit
 import ZmqClass as zmq
 from time import sleep
@@ -90,7 +88,7 @@ class pyWit(object):
 			if msg:
 				if 'message' in msg:
 					intent, confidence, ent = self.message(msg['message'])
-					
+
 				elif 'wav' in msg:
 					intent, confidence, ent = self.speech(msg['wav'])
 

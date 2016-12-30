@@ -19,6 +19,7 @@ use_compression = True
 
 __doc__ = """Basically a rosbag library"""
 
+
 class Bag(object):
 	"""
 	Save messages to a file based on their topic name. It also uses gzip to

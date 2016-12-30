@@ -7,7 +7,7 @@ from setuptools.command.test import test as TestCommand
 class NoseTestCommand(TestCommand):
 	def run_tests(self):
 		print('Running nose tests ...')
-		os.system('nosetests -v test/test.py')
+		os.system('nosetests -vs tests/*.py')
 
 
 class PublishCommand(TestCommand):

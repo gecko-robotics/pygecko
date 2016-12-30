@@ -11,40 +11,11 @@
 # - add camera calibration matrix
 #
 
-# import numpy as np
 import cv2
 import yaml
 import argparse
-
-import os
-import sys
-# sys.path.insert(0, os.path.abspath('..'))
-
-# import lib.zmqclass as zmq
-# import lib.Messages as msg
-import pygecko.lib.Camera as Camera
-
-
-def create_capture(source, size=(0, 0)):  # FIXME: 20160525 Need to handle picamera
-	# cap = cv2.VideoCapture(source)
-	#
-	# if cap is None or not cap.isOpened():
-	# 	print 'Warning: unable to open video source: ', source
-	# 	exit(-1)
-	# else:
-	# 	print '[/] openned video source',source
-	#
-	# # set size if necessary
-	# if size != (0,0):
-	# 	w, h = size
-	# 	cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, w)
-	# 	cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, h)
-	# 	print '[>] set camera image size:',w,'x',h
-
-	camera = Camera.Camera()
-	if size != (0, 0): camera.init(size)
-	else: camera.init()
-	return camera
+from opencvutils.video.Camera import Camera
+from opencvutils.video.Camera import SaveVideo
 
 
 def read(matrix_name):
@@ -54,6 +25,7 @@ def read(matrix_name):
 	fd = open(matrix_name, "r")
 	data = yaml.load(fd)
 	return data
+
 
 if __name__ == '__main__':
 
@@ -89,8 +61,11 @@ if __name__ == '__main__':
 	# print size
 	# print cam_cal
 
+	save = SaveVideo()
+
 	# open camera
-	cap = create_capture(source, size)
+	cap = Camera()
+	cap.init(win=size, cameraNumber=source)
 
 	print '---------------------------------'
 	print ' ESC/q to quit'
@@ -101,13 +76,11 @@ if __name__ == '__main__':
 	shot_idx = 0
 	video_idx = 0
 	video = False
-	vfn = ' '
+	vfn = None
 
 	# Main loop ---------------------------------------------
 	while True:
 		ret, img = cap.read()
-
-		# print img.shape
 
 		if args['numpy'] is not None:
 			img = cv2.undistort(img, m, k)
@@ -116,7 +89,6 @@ if __name__ == '__main__':
 		ch = cv2.waitKey(20)
 
 		# Quit program using ESC or q
-		# if ch == 27 or ch == ord('q'):
 		if ch in [27, ord('q')]:
 			exit(0)
 
@@ -124,14 +96,12 @@ if __name__ == '__main__':
 		elif ch == ord('v'):
 			if video is False:  # FIXME: 20160525 Change to Camera.VideoSave (or whatever)
 				# setup video output
-				mpg4 = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')
-				out = cv2.VideoWriter()
 				vfn = '{0!s}_{1:d}.mp4v'.format(filename, video_idx)
 				h, w = img.shape[:2]
-				out.open(vfn, mpg4, 20.0, (w, h))
+				save.start(vfn, (w, h), 20.0)
 				print '[+] start capture', vfn
 			else:
-				out.release()
+				save.release()
 				video_idx += 1
 				print '[-] stop capture', vfn
 			video = not video
@@ -144,6 +114,6 @@ if __name__ == '__main__':
 			shot_idx += 1
 
 		if video:
-			out.write(img)
+			save.write(img)
 
 	cv2.destroyAllWindows()

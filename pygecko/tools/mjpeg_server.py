@@ -3,12 +3,6 @@
 
 import cv2
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-# from socket import gethostname
-# from socket import gethostbyname
-# import BaseHTTPServer
-# import StringIO
-# import socket
-# import errno
 import time
 import argparse
 from opencvutils.video import Camera
@@ -46,18 +40,11 @@ class mjpgServer(BaseHTTPRequestHandler):
 
 			capture = self.cam
 
-			# if not capture.isOpen():
-			# 	capture.init((320, 240))
-			# tmpFile = StringIO.StringIO()
 			while True:
-				# try:
 				ret, img = capture.read()
 				if not ret:
 					continue
-				# jpg = Image.fromarray(img)
-				# tmpFile = StringIO.StringIO()
-				# jpg.save(tmpFile,'JPEG')
-				# print 'image',img.shape
+
 				ret, jpg = cv2.imencode('.jpg', img)
 				# print 'Compression ratio: %d4.0:1'%(compress(img.size,jpg.size))
 				self.wfile.write("--jpgboundary")
@@ -65,25 +52,8 @@ class mjpgServer(BaseHTTPRequestHandler):
 				# self.send_header('Content-length',str(tmpFile.len))
 				self.send_header('Content-length', str(jpg.size))
 				self.end_headers()
-				# self.wfile.write(tmpFile.getvalue())
 				self.wfile.write(jpg.tostring())
 				time.sleep(0.05)
-				# tmpFile.close()
-				# except socket.error, e:
-				# 	if isinstance(e.args, tuple):
-				# 		print "errno is %d" % e[0]
-				# 		if e[0] == errno.EPIPE:
-				# 			# remote peer disconnected
-				# 			print "Detected remote disconnect"
-				# 		else:
-				# 			# determine and handle different error
-				# 			print "socket error ", e
-				# 			pass
-				# 	else:
-				# 		print "socket error ", e
-				# 	# remote.close()
-				# 	break
-			# return
 
 		elif self.path == '/':
 			# hn = self.server.server_address[0]
@@ -97,7 +67,6 @@ class mjpgServer(BaseHTTPRequestHandler):
 			self.wfile.write('<p>{0!s}</p>'.format((self.version_string())))
 			self.wfile.write('<p>This only handles one connection at a time</p>')
 			self.wfile.write('</body></html>')
-			# return
 
 		else:
 			print 'error', self.path
@@ -124,7 +93,6 @@ def handleArgs():
 def main():
 	args = handleArgs()
 	print args['size']
-	# exit()
 
 	try:
 		camera = Camera()  # need to figure a clean way to pass this ... move switching logic here?
@@ -139,21 +107,6 @@ def main():
 	except KeyboardInterrupt:
 		print 'main interrupt'
 		server.socket.close()
-
-	# except socket.error, e:
-	# 	if isinstance(e.args, tuple):
-	# 		print "errno is %d" % e[0]
-	# 		if e[0] == errno.EPIPE:
-	# 			# remote peer disconnected
-	# 			print "Detected remote disconnect"
-	# 		else:
-	# 			# determine and handle different error
-	# 			print "socket error ", e
-	# 			pass
-	# 	else:
-	# 		print "socket error ", e
-		# remote.close()
-		# server.socket.close()
 
 
 if __name__ == '__main__':

@@ -23,7 +23,7 @@ import numpy as np
 import cv2
 import glob
 import yaml
-import json
+# import json
 import argparse
 # import os
 # import sys
@@ -78,7 +78,7 @@ class CameraCalibration(object):
 		# objp = np.zeros((self.marker_size[0]*self.marker_size[1],3), np.float32)
 		# objp[:,:2] = np.mgrid[0:self.marker_size[0],0:self.marker_size[1]].T.reshape(-1,2)
 		objp = np.zeros((np.prod(self.marker_size), 3), np.float32)
-		objp[:, :2] = np.indices(self.marker_size).T.reshape(-1, 2) # make a grid of points
+		objp[:, :2] = np.indices(self.marker_size).T.reshape(-1, 2)  # make a grid of points
 
 		# Find the chess board corners or circle centers
 		if self.marker_checkerboard is True:
@@ -206,6 +206,7 @@ def main():
 	cv2.waitKey(0)
 
 	cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
 	# print('Here we go!')
