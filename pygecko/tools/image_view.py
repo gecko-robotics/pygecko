@@ -4,55 +4,48 @@
 # copyright Kevin Walchko
 # 29 July 2014
 #
-# Just a dummy test script
 
 # import time
 # import json
 import cv2
-import base64
-import numpy
+# import base64
+# import numpy
 # from multiprocessing.connection import Client as Subscriber
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath('..'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('..'))
 
 import pygecko.lib.ZmqClass as zmq
-import pygecko.lib.Messages as Msg
-import pygecko.lib.Camera as Camera
+# import pygecko.lib.Messages as Msg
+from opencvutils.video import Camera
 
 # FIXME: 20160522 too many things that really do the same thing!
 
 
 class CameraDisplayClient(object):
-	"""
-	Are these the same?
-	"""
-	def __init__(self, host, port):
-		self.host = host
-		self.port = port
-		self.save = False
-
-	def run(self):
-
-		sub_topics = ['image']
-
-		p = zmq.SubBase64(sub_topics, 'tcp://' + self.host + ':' + self.port)
-
-		try:
-			while True:
-				topic, msg = p.recv()
-
+	def run(self, topic, hostinfo):
+		s = zmq.SubBase64(topics=topic, connect_to=hostinfo)
+		while True:
+			# msg_miss = 1
+			try:
+				tp, msg = s.recv()
 				if not msg:
 					pass
 				elif 'image' in msg:
 					im = msg['image']
-					buf = cv2.imdecode(im, 1)
-					cv2.imshow('image', buf)
-					cv2.waitKey(10)
+					cv2.imshow('Camera', im)
+					key = cv2.waitKey(10)
+					if key == ord('q'):
+						break
 
-		except KeyboardInterrupt:
-			pass
+				# elif 'sensors' in msg:
+				# 	print '[+] Time (', msg['sensors'], '):', msg['imu']
+			except (IOError, EOFError):
+				print '[-] Connection gone .... bye'
+				break
+
+		s.close()
 
 
 class LocalCamera(object):
@@ -73,10 +66,11 @@ class LocalCamera(object):
 	def run(self):
 
 		# Source: 0 - built in camera  1 - USB attached camera
-		cap = cv2.VideoCapture(self.camera)
+		cap = Camera()
+		cap.init(self.camera, (self.width, self.height))
 
-		ret = cap.set(3, self.width)
-		ret = cap.set(4, self.height)
+		# ret = cap.set(3, self.width)
+		# ret = cap.set(4, self.height)
 
 		# ret, frame = cap.read()
 		# h,w,d = frame.shape
@@ -117,28 +111,28 @@ class LocalCamera(object):
 
 
 if __name__ == '__main__':
-	s = zmq.Subscriber(("192.168.1.22", 9100))
-	while True:
-		try:
-			msg = s.recv()
-			if not msg:
-				pass
-			elif 'image' in msg:
-				im = msg['image']
-				im = base64.b64decode(im)
-				im = numpy.fromstring(im, dtype=numpy.uint8)
-				buf = cv2.imdecode(im, 1)
-				# buf = im
-				cv2.imshow('Camera', buf)
-				cv2.waitKey(10)
-
-			elif 'sensors' in msg:
-				print '[+] Time (', msg['sensors'], '):', msg['imu']
-		except (IOError, EOFError):
-			print '[-] Connection gone .... bye'
-			break
-# 		except:
-# 			print '[?] pass'
-# 			pass
-
-	s.close()
+	client = CameraDisplayClient()
+	client.run('image_color', ('localhost', 9000))
+	# s = zmq.SubBase64(topics='image_color', connect_to=('localhost', 9000))
+	# while True:
+	# 	msg_miss = 1
+	# 	try:
+	# 		tp, msg = s.recv()
+	# 		if not msg:
+	# 			# print tp, 'no message:', msg_miss
+	# 			# msg_miss += 1
+	# 			pass
+	# 		elif 'image' in msg:
+	# 			im = msg['image']
+	# 			cv2.imshow('Camera', im)
+	# 			key = cv2.waitKey(10)
+	# 			if key == ord('q'):
+	# 				break
+	#
+	# 		# elif 'sensors' in msg:
+	# 		# 	print '[+] Time (', msg['sensors'], '):', msg['imu']
+	# 	except (IOError, EOFError):
+	# 		print '[-] Connection gone .... bye'
+	# 		break
+	#
+	# s.close()

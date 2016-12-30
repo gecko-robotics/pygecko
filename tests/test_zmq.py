@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 
-
+import numpy as np
 import multiprocessing as mp
-import os
-import sys
-sys.path.insert(0, os.path.abspath('..'))
 import pygecko.lib.ZmqClass as zmq
+from pygecko.lib.Messages import Image
 
 
 def test_pub_sub():
@@ -20,6 +18,25 @@ def test_pub_sub():
 
 		if msg:
 			assert msg == tmsg
+			assert topic == 'test'
+			break
+
+
+def test_pub_sub_b64():
+	tcp = ('127.0.0.1', 9000)
+	pub = zmq.Pub(tcp)
+	sub = zmq.Sub('test', tcp)
+	im = np.random.rand(100, 100)
+	tmsg = Image(im)
+	# print(tmsg['size'], tmsg['depth'])
+	while True:
+		pub.pubB64('test', tmsg)
+		topic, msg = sub.recvB64()
+
+		if msg:
+			# print(msg['size'], msg['depth'])
+			assert msg['size'] == tmsg['size']
+			assert msg['depth'] == tmsg['depth']
 			assert topic == 'test'
 			break
 

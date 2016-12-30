@@ -116,7 +116,7 @@ from pygecko.lib.Chatbot import Chatbot
 # import pyaudio
 # import wave
 # import subprocess
-import speech_recognition
+# keep? import speech_recognition
 # import time
 
 

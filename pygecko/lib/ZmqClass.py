@@ -13,6 +13,7 @@ import numpy
 import base64
 import socket as Socket
 import time
+import cv2
 
 
 class ZMQError(Exception):
@@ -88,6 +89,23 @@ class Pub(Base):
 		self.socket.send_multipart([topic, jmsg])
 		# self.socket.send_json(msg)
 
+	def pubB64(self, topic, msg):
+		# encode binary into base64 ascii
+		if 'image' in msg:
+			jpeg = msg['image']
+			b64 = base64.b64encode(jpeg)
+			msg['image'] = b64
+			
+		elif 'wav' in msg:
+			wav = msg['wav']
+			wav = base64.b64decode(wav)
+			msg['wav'] = wav
+
+		else:
+			raise ZMQError('pubB64 does not support message type')
+
+		self.pub(topic, msg)
+
 
 class Sub(Base):
 	"""
@@ -135,6 +153,27 @@ class Sub(Base):
 
 		# topic, jmsg = self.socket.recv_multipart()
 		# msg = json.loads(jmsg)
+		return topic, msg
+
+	def recvB64(self):
+		topic, msg = self.recv()
+		# decode base64 messages
+		if msg:
+			if 'image' in msg:
+				im = msg['image']
+				im = base64.b64decode(im)
+				im = numpy.fromstring(im, dtype=numpy.uint8)
+				im = cv2.imdecode(im, 1)
+				msg['image'] = im
+
+			elif 'wav' in msg:
+				wav = msg['wav']
+				wav = base64.b64decode(wav)
+				msg['wav'] = wav
+
+			else:
+				raise ZMQError('subB64 does not support message type')
+
 		return topic, msg
 
 
@@ -205,6 +244,7 @@ class SubBase64(Sub):
 				im = msg['image']
 				im = base64.b64decode(im)
 				im = numpy.fromstring(im, dtype=numpy.uint8)
+				im = cv2.imdecode(im, 1)
 				msg['image'] = im
 
 		return topic, msg

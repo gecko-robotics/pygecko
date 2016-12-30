@@ -3,6 +3,7 @@
 import time
 import simplejson as json  # supposed to be better than json
 import math
+import numpy as np
 
 
 def serialize(c):
@@ -23,7 +24,7 @@ class Message(dict):
 	"""
 	Base class for all messages. Main jobs:
 	- prevent new keys being added, don't want a 3d vector with keys
-	  of [x,y,z,tom,hi,sam]
+		of [x,y,z,tom,hi,sam]
 	"""
 	def __init__(self):
 		dict.__init__(self)
@@ -119,7 +120,8 @@ class Pose(Message):
 
 class PoseStamped(Message):
 	"""
-	This is primarily used in path planning. The planner returns a position/orientation at a given time.
+	This is primarily used in path planning. The planner returns a position/orientation
+	at a given time.
 	"""
 	def __init__(self):
 		Message.__init__(self)
@@ -130,7 +132,9 @@ class PoseStamped(Message):
 
 class Range(Message):
 	"""
-	Holds the ranges of the Sharp IR sensors. Note, currently, these are just digital and only return True (1) or False (0) and have a real distance of around 7 inches. This is because the analog signal is tied to a digital pin.
+	Holds the ranges of the Sharp IR sensors. Note, currently, these are just digital and
+	only return True (1) or False (0) and have a real distance of around 7 inches. This
+	is because the analog signal is tied to a digital pin.
 	"""
 	def __init__(self):
 		Message.__init__(self)
@@ -141,6 +145,8 @@ class Range(Message):
 
 
 class IMU(Message):
+	"""
+	"""
 	def __init__(self):
 		Message.__init__(self)
 		dict.update(self, stamp=time.time())
@@ -158,6 +164,8 @@ class IMU(Message):
 
 
 class Odom(Message):
+	"""
+	"""
 	def __init__(self):
 		Message.__init__(self)
 		dict.update(self, stamp=time.time())
@@ -189,10 +197,108 @@ class Text(Message):
 	"""
 	Simple text message
 	"""
-	def __init__(self):
+	def __init__(self, **kw):
 		Message.__init__(self)
 		dict.update(self, stamp=time.time())
 		dict.update(self, message='')
+		if kw: dict.update(self, kw)
+
+
+class Compass(Message):
+	"""
+	Simple tilt compensated compass message, the roll, pitch, and heading angles
+	are stored either in radians or degrees.
+	"""
+	COMPASS_RADIANS = 0
+	COMPASS_DEGREES = 1
+
+	def __init__(self, roll=0, pitch=0, heading=0):
+		Message.__init__(self)
+		dict.update(self, stamp=time.time())
+		dict.update(self, roll=roll, pitch=pitch, heading=heading)
+		dict.update(self, units=self.COMPASS_RADIANS)
+
+
+class Image(Message):
+	"""
+	"""
+	IMAGE_FORMAT_UNKNOWN = 0
+	IMAGE_FORMAT_JPG     = 1
+	IMAGE_FORMAT_PNG     = 2
+	IMAGE_FORMAT_NUMPY   = 3
+
+	def __init__(self, img=None, format=None):
+		Message.__init__(self)
+		dict.update(self, stamp=time.time(), format=0)
+		if type(img) == np.ndarray:
+			a = img.shape
+			if len(a) == 3:
+				w, h, d = a
+			else:
+				w, h = a
+				d = 1
+
+			# i would rather do size as a tuple, but json makes it a list
+			dict.update(self, image=img, size=[w, h], depth=d)
+
+
+class BatteryState(Message):
+	"""
+	"""
+	# Power supply status constants
+	POWER_SUPPLY_STATUS_UNKNOWN      = 0
+	POWER_SUPPLY_STATUS_CHARGING     = 1
+	POWER_SUPPLY_STATUS_DISCHARGING  = 2
+	POWER_SUPPLY_STATUS_NOT_CHARGING = 3
+	POWER_SUPPLY_STATUS_FULL         = 4
+
+	# Power supply health constants
+	POWER_SUPPLY_HEALTH_UNKNOWN               = 0
+	POWER_SUPPLY_HEALTH_GOOD                  = 1
+	POWER_SUPPLY_HEALTH_OVERHEAT              = 2
+	POWER_SUPPLY_HEALTH_DEAD                  = 3
+	POWER_SUPPLY_HEALTH_OVERVOLTAGE           = 4
+	POWER_SUPPLY_HEALTH_UNSPEC_FAILURE        = 5
+	POWER_SUPPLY_HEALTH_COLD                  = 6
+	POWER_SUPPLY_HEALTH_WATCHDOG_TIMER_EXPIRE = 7
+	POWER_SUPPLY_HEALTH_SAFETY_TIMER_EXPIRE   = 8
+
+	# Power supply technology (chemistry) constants
+	POWER_SUPPLY_TECHNOLOGY_UNKNOWN = 0
+	POWER_SUPPLY_TECHNOLOGY_NIMH    = 1
+	POWER_SUPPLY_TECHNOLOGY_LION    = 2
+	POWER_SUPPLY_TECHNOLOGY_LIPO    = 3
+	POWER_SUPPLY_TECHNOLOGY_LIFE    = 4
+	POWER_SUPPLY_TECHNOLOGY_NICD    = 5
+	POWER_SUPPLY_TECHNOLOGY_LIMN    = 6
+
+	def __init__(self, img=None):
+		Message.__init__(self)
+		dict.update(self, stamp=time.time())
+		dict.update(self, voltage=0)                  # 7.2 V
+		dict.update(self, current=0)                  # 0.45 A
+		dict.update(self, design_capacity=0)          # 240 Ahr
+		dict.update(self, power_supply_technology=0)  # NiMH
+		dict.update(self, power_supply_status=0)      # discharge
+		dict.update(self, power_supply_health=0)      # good
+		dict.update(self, location='')
+
+
+class AudioFile(Message):
+	"""
+	Simple audio message
+
+	kevin@Logan ~ $ file test.wav
+	test.wav: RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 16000 Hz
+	"""
+	AUDIO_FORMAT_WAV = 0  # .wav
+	AUDIO_FORMAT_MP3 = 1  # .mp3
+	AUDIO_FORMAT_MP4 = 2  # .m4a
+
+	def __init__(self):
+		Message.__init__(self)
+		dict.update(self, stamp=time.time())
+		dict.update(self, file='')
 
 
 class Joystick(Message):
@@ -213,7 +319,7 @@ class Joystick(Message):
 	def str(js):
 		return js.__str__()
 
-	def __str__(self):
+	# def __str__(self):
 		s = '--------------------------------------------------\n'
 		ps4 = js['buttons']
 		s += 'Triangle {} Square {} X {} O {}\n'.format(
