@@ -26,13 +26,13 @@ addons:
             - libopencv-dev
             - libportaudio-dev
             - python-numpy
-            - python-scipy
+            # - python-scipy
             - gnustep
 
 # install other libraries using pip
 install:
     - pip install -U pip setuptools
-    - pip install -U pyzmq pyyaml opencvutils simplejson numpy wit quaternions numdifftools pyrk
+    - pip install -U pyzmq pyyaml opencvutils simplejson wit quaternions numdifftools pyrk
     - pip install .
     # - pip install -U -r requirements.txt
 
