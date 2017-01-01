@@ -61,6 +61,7 @@ setup(
 		'numdifftools',
 		'pyyaml',
 		'pyzmq',
+		'zmq',
 		'simplejson',
 		'pyserial',
 		'numpy',
