@@ -33,7 +33,7 @@ addons:
 install:
     - pip install -U pip setuptools
     - pip install -U pyzmq pyyaml opencvutils simplejson numpy wit quaternions numdifftools pyrk
-    # - pip install .
+    - pip install .
     # - pip install -U -r requirements.txt
 
 # command to run tests
