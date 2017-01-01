@@ -12,7 +12,7 @@ import numpy
 # import datetime as dt
 import base64
 import socket as Socket
-import time
+# import time
 import cv2
 
 
@@ -85,6 +85,9 @@ class Pub(Base):
 		in: topic, message
 		out: none
 		"""
+		# get rid of separate pub/sub ... msg tells us what to do
+		# if 'type' in msg and msg['type'] is 'b64encoded' -> do pubb64
+
 		jmsg = json.dumps(msg)
 		self.socket.send_multipart([topic, jmsg])
 		# self.socket.send_json(msg)

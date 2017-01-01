@@ -1,5 +1,6 @@
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
+# from setuptools import find_packages
 from pygecko import __version__ as VERSION
 from setuptools.command.test import test as TestCommand
 
@@ -28,7 +29,7 @@ class GitTagCommand(TestCommand):
 class CleanCommand(TestCommand):
 	def run_tests(self):
 		print('Cleanning up ...')
-		os.system('rm -fr pygecko.egg-info dist build')
+		os.system('rm -fr pygecko.egg-info dist build .eggs')
 
 
 readme = open('README.rst').read()
@@ -71,7 +72,8 @@ setup(
 	url="https://github.com/walchko/pygecko",
 	long_description=readme,
 	# packages=['pygecko'],
-	packages=find_packages(exclude=['drivers', 'example', 'docs', 'test']),
+	# packages=find_packages(exclude=['drivers', 'example', 'docs', 'test']),
+	packages=['pygecko', 'pygecko.lib', 'pygecko.tools', 'pygecko.servers'],
 	cmdclass={
 		'test': NoseTestCommand,
 		'publish': PublishCommand,

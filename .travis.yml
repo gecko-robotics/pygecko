@@ -31,7 +31,7 @@ addons:
 
 # install other libraries using pip
 install:
-    - pip install -U pip
+    - pip install -U pip setuptools
     - pip install .
     # - pip install -U -r requirements.txt
 

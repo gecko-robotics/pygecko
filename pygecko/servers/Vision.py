@@ -6,7 +6,8 @@
 from __future__ import print_function
 from __future__ import division
 import pygecko.lib.ZmqClass as zmq
-# import multiprocessing as mp
+from pygecko.lib import Messages as Msg
+import multiprocessing as mp
 # import logging
 import datetime as dt
 import cv2
@@ -22,13 +23,13 @@ import time
 #   image_rect_color - color, rectified
 
 
-# class RobotCameraServer(mp.Process):
-class RobotCameraServer(object):
+# class RobotCameraServer(object):
+class RobotCameraServer(mp.Process):
 	"""
 	Streams camera images as fast as possible
 	"""
-	def __init__(self, host="localhost", port='9100', camera_num=0):
-		# mp.Process.__init__(self)
+	def __init__(self, host="0.0.0.0", port='9100', camera_num=0):
+		mp.Process.__init__(self)
 		self.epoch = dt.datetime.now()
 		self.host = host
 		self.port = port
@@ -38,18 +39,18 @@ class RobotCameraServer(object):
 
 		# self.epoch = dt.datetime.now()
 
-	def start(self):
-		self.run()
-
-	def join(self):
-		pass
+	# def start(self):
+	# 	self.run()
+	#
+	# def join(self):
+	# 	pass
 
 	def run(self):
 		# self.logger.info(str(self.name) + '[' + str(self.pid) + '] started on ' + str(self.host) + ':' + str(self.port) + ', Daemon: ' + str(self.daemon))
 		# pub = zmq.PubBase64((self.host, self.port))
 		pub = zmq.Pub((self.host, self.port))
 		camera = Camera()
-		camera.init(cameraNumber=self.camera_num)
+		camera.init(cameraNumber=self.camera_num, win=(640, 480))
 
 		# self.logger.info('Openned camera: ' + str(self.camera_num))
 
@@ -57,7 +58,8 @@ class RobotCameraServer(object):
 			while True:
 				ret, frame = camera.read()
 				jpeg = cv2.imencode('.jpg', frame)[1]  # jpeg compression
-				pub.pubB64('image_color', jpeg)
+				msg = Msg.Image(jpeg)
+				pub.pubB64('image_color', msg)
 				# print '[*] frame: %d k   jpeg: %d k'%(frame.size/1000,len(jpeg)/1000)
 				time.sleep(0.01)
 
@@ -87,9 +89,9 @@ def handleArgs():
 	return args
 
 
-def main():
-	print('Hello cowboy!')
-
-
-if __name__ == "__main__":
-	main()
+# def main():
+# 	print('Hello cowboy!')
+#
+#
+# if __name__ == "__main__":
+# 	main()
