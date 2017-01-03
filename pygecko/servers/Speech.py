@@ -12,7 +12,7 @@ import pygecko.lib.ZmqClass as zmq
 # import lib.FileStorage as fs
 from pygecko.lib.TTS import TTS
 from pygecko.lib.Chatbot import Chatbot
-# import speech_recognition as sr
+import speech_recognition
 
 
 # class SoundServer(mp.Process):
@@ -231,9 +231,7 @@ class SphinxServer(mp.Process):
 			print('{} exiting'.format(__name__))
 			raise
 
+
 if __name__ == '__main__':
 	t = SphinxServer()
-	# audio = t.get_audio()
-	# txt = t.stt(audio)
-	# print('sphinx heard: {}'.format(txt))
 	t.run()
