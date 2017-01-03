@@ -92,7 +92,3 @@ class FileStorage(object):
 
 	def clear(self):
 		self.db = None
-
-
-if __name__ == "__main__":
-	print('good bye cowboy!')

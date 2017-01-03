@@ -6,7 +6,6 @@ dist/
 .eggs/
 
 # Misc
-docs/
 old/
 *.bag
 

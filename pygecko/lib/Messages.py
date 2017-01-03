@@ -348,48 +348,48 @@ class Joystick(Message):
 
 		return s
 
-
-if __name__ == '__main__':
-	# print 'run "nosetests -v ./Messages.py" to test'
-	v = Vector(x=1.23, y=-1.23, z=32.1)
-	# v.set()
-	print v
-	# print dir(v)
-
-	t = Twist()
-	print t
-
-	i = IMU()
-	print i
-
-	j = Joystick()
-	print Joystick.str(j)
-	# j.update(tom='hi')
-	# print j
-	# j['bob'] = 25
-	# print j
-
-	# m = type('Vector', (object,), dict(x=1.23, y=-1.23, z=32.1))
-	# print m
-	# print dir(m)
-	vv = Vector()
-	vv.update(dict(x=1.23, y=-1.23, z=32.1))
-	print vv
-
-	tt = Twist()
-	tt.update(dict(linear=Vector(x=1.23, y=-1.23, z=32.1)))
-	# tt['linear']['tom'] = 7
-	print tt
-
-	tt2 = Twist()
-	tt2.update(dict(linear=dict(x=1.23, y=-1.23, z=32.1)))
-	tt2['linear']['tom'] = 7
-	print 'does not work if uou use dicts'
-	print tt2
-	print tt2['linear']['x']
-
-	ff = Twist()
-	ss = deserialize(serialize(tt))
-	ff.update(ss)
-	print ss
-	print ff
+#
+# if __name__ == '__main__':
+# 	# print 'run "nosetests -v ./Messages.py" to test'
+# 	v = Vector(x=1.23, y=-1.23, z=32.1)
+# 	# v.set()
+# 	print v
+# 	# print dir(v)
+#
+# 	t = Twist()
+# 	print t
+#
+# 	i = IMU()
+# 	print i
+#
+# 	j = Joystick()
+# 	print Joystick.str(j)
+# 	# j.update(tom='hi')
+# 	# print j
+# 	# j['bob'] = 25
+# 	# print j
+#
+# 	# m = type('Vector', (object,), dict(x=1.23, y=-1.23, z=32.1))
+# 	# print m
+# 	# print dir(m)
+# 	vv = Vector()
+# 	vv.update(dict(x=1.23, y=-1.23, z=32.1))
+# 	print vv
+#
+# 	tt = Twist()
+# 	tt.update(dict(linear=Vector(x=1.23, y=-1.23, z=32.1)))
+# 	# tt['linear']['tom'] = 7
+# 	print tt
+#
+# 	tt2 = Twist()
+# 	tt2.update(dict(linear=dict(x=1.23, y=-1.23, z=32.1)))
+# 	tt2['linear']['tom'] = 7
+# 	print 'does not work if uou use dicts'
+# 	print tt2
+# 	print tt2['linear']['x']
+#
+# 	ff = Twist()
+# 	ss = deserialize(serialize(tt))
+# 	ff.update(ss)
+# 	print ss
+# 	print ff

@@ -2,8 +2,9 @@
 
 import os
 from wit import Wit
-import ZmqClass as zmq
-from time import sleep
+# import ZmqClass as zmq
+# from time import sleep
+import socket
 
 
 class Audio(object):
@@ -35,6 +36,12 @@ class pyWit(object):
 			'Content-Type': 'audio/wav'
 			# 'Content-Type': 'audio/raw;encoding=signed-integer;bits=16;rate=16000;endian=little'
 		}
+
+		try:
+			host = 'www.google.com'
+			socket.gethostbyname(host)
+		except socket.gaierror:
+			raise Exception('ERROR: pyWit, you MUST be connected to internet, could not find {}'.format(host))
 
 	@staticmethod
 	def max(a):
@@ -78,23 +85,3 @@ class pyWit(object):
 			confidence = ans['confidence']
 			# print('Result {} at {:.2f}%'.format(intent, confidence*100.0))
 		return (intent, confidence, ans['entities'])
-
-	def run(self, topics, port, actions, confidence_level=0.6):
-		sub = zmq.Sub(topics=topics, connect_to=('localhost', port))
-		print('[>] {} subscribed to {} on {}:{}'.format('pywitServer', topics, 'localhost', port))
-
-		while True:
-			topic, msg = sub.recv()
-			if msg:
-				if 'message' in msg:
-					intent, confidence, ent = self.message(msg['message'])
-
-				elif 'wav' in msg:
-					intent, confidence, ent = self.speech(msg['wav'])
-
-				if intent and (confidence >= confidence_level):
-					if intent in actions:
-						func = actions[intent]
-						func()
-			sleep(2)
-			# print('\n------------------------')

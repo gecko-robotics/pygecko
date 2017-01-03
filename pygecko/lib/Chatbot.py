@@ -239,10 +239,3 @@ class Chatbot(object):
 		except:
 			print('Oops ... chatbot')
 			raise
-
-
-def main():
-	print('I am a mad man with a little blue box')
-
-if __name__ == "__main__":
-	main()

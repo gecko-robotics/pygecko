@@ -1,16 +1,9 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-# import os
-# import sys
 import logging
-# import argparse
 import gzip  # compression
-# import multiprocessing as mp
 import time  # filename date/time
-# import six  # Py2/3 is a string ... why?
-
-# sys.path.insert(0, os.path.abspath('..'))
 import ZmqClass as Zmq
 import Messages as Msg  # deserialize topics
 
@@ -150,11 +143,6 @@ class Record(object):
 class Play(object):
 	def __init__(self):
 		# mp.Process.__init__(self)
-
-		# self.tcp = ('localhost', self.port)
-		# self.topic = topic
-		# self.bag = bag
-		# logging.basicConfig(level=logging.INFO)
 		self.logger = logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 	def run(self, filename, topic, port=9000, loop=True):
@@ -211,7 +199,3 @@ class Play(object):
 			self.logger.error(e)
 			bag.close()
 			raise
-
-
-if __name__ == '__main__':
-	print('hello cowboy')

@@ -120,7 +120,7 @@ from pygecko.lib.Chatbot import Chatbot
 # import time
 
 
-class SpeechServer(mp.Process):
+class SphinxServer(mp.Process):
 	def __init__(self, host='localhost', port=9000):
 		"""
 
@@ -144,6 +144,8 @@ class SpeechServer(mp.Process):
 		self.tts = TTS()
 		self.tts.setOptions('-v Karen')  # this works on macOS and say
 		self.chatbot = Chatbot()
+
+		print('WARNING ... I am going to move away from this')
 
 	def __del__(self):
 		""" Called when the AlexaAudio object is no longer needed. This closes the PyAudio instance.
@@ -230,7 +232,7 @@ class SpeechServer(mp.Process):
 			raise
 
 if __name__ == '__main__':
-	t = SpeechServer()
+	t = SphinxServer()
 	# audio = t.get_audio()
 	# txt = t.stt(audio)
 	# print('sphinx heard: {}'.format(txt))
