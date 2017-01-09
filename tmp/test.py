@@ -151,14 +151,15 @@ class Compass(object):
 	COMPASS_RADIANS = 0
 	COMPASS_DEGREES = 1
 
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Compass'
 		self.roll = 0
 		self.pitch = 0
 		self.heading = 0
 		self.stamp = time.time()
-		for key in data:
-			setattr(self, key, data[key])
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
 
 	def set(self, x, y, z):
 		self.roll = x
@@ -179,19 +180,21 @@ class IMU(object):
 	COMPASS_RADIANS = 0
 	COMPASS_DEGREES = 1
 
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'IMU'
 		self.linear_acceleration = Vector()
 		self.angular_velocity = Vector()
 		self.orientation = Quaternion()
 		self.stamp = time.time()
-		for key in data:
-			if key in ['linear_acceleration', 'angular_velocity']:
-				setattr(self, key, Vector(data[key]))
-			elif key == 'orientation':
-				setattr(self, key, Quaternion(data[key]))
-			else:
-				setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				if key in ['linear_acceleration', 'angular_velocity']:
+					setattr(self, key, Vector(data[key]))
+				elif key == 'orientation':
+					setattr(self, key, Quaternion(data[key]))
+				else:
+					setattr(self, key, data[key])
 
 	def __str__(self):
 		s = 'a: ' + self.linear_acceleration.__str__()
@@ -202,14 +205,16 @@ class IMU(object):
 
 @froze_it
 class Image(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.depth = -1   # 0-grayscale, 1-bgr
 		self._img = None  # image, either numpy or b64
 		self.b64 = False  # is this encoded for transmission?
 		self.stamp = time.time()
 		self.Class = 'Image'
-		for key in data:
-			setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
 
 	def __str__(self):
 		if self._img is None:
@@ -259,16 +264,18 @@ class Image(object):
 
 @froze_it
 class Twist(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Twist'
 		self.linear = Vector()
 		self.angular = Vector()
 		self.stamp = time.time()
-		for key in data:
-			if key in ['linear', 'angular']:
-				setattr(self, key, Vector(data[key]))
-			else:
-				setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				if key in ['linear', 'angular']:
+					setattr(self, key, Vector(data[key]))
+				else:
+					setattr(self, key, data[key])
 
 	def __str__(self):
 		s = 'linear: {} {} {} '.format(self.linear.x, self.linear.y, self.linear.z)
@@ -279,60 +286,68 @@ class Twist(object):
 
 @froze_it
 class Wrench(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Wrench'
 		self.force = Vector()
 		self.torque = Vector()
 		self.stamp = time.time()
-		for key in data:
-			if key in ['torque', 'force']:
-				setattr(self, key, Vector(data[key]))
-			else:
-				setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				if key in ['torque', 'force']:
+					setattr(self, key, Vector(data[key]))
+				else:
+					setattr(self, key, data[key])
 
 
 @froze_it
 class Pose(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Pose'
 		self.position = Vector()
 		self.orientation = Quaternion()
 		self.stamp = time.time()
-		for key in data:
-			if key == 'position':
-				setattr(self, key, Vector(data[key]))
-			elif key == 'orientation':
-				setattr(self, key, Quaternion(data[key]))
-			else:
-				setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				if key == 'position':
+					setattr(self, key, Vector(data[key]))
+				elif key == 'orientation':
+					setattr(self, key, Quaternion(data[key]))
+				else:
+					setattr(self, key, data[key])
 
 
 @froze_it
 class Odom(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Odom'
 		self.position = Pose()
 		self.velocity = Twist()
 		self.stamp = time.time()
-		for key in data:
-			if key == 'position':
-				setattr(self, key, Pose(data[key]))
-			elif key == 'orientation':
-				setattr(self, key, Twist(data[key]))
-			else:
-				setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				if key == 'position':
+					setattr(self, key, Pose(data[key]))
+				elif key == 'orientation':
+					setattr(self, key, Twist(data[key]))
+				else:
+					setattr(self, key, data[key])
 
 
 class Axes(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Axes'
 		self.leftStick = [0.0, 0.0]
 		self.rightStick = [0.0, 0.0]
 		self.dPad = [0.0, 0.0]
 		self.L2 = 0.0
 		self.R2 = 0.0
-		for key in data:
-			setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
 
 	def set(self, ls, rs, dp, l2, r2):
 		self.leftStick = ls
@@ -343,7 +358,7 @@ class Axes(object):
 
 
 class Buttons(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Buttons'
 		self.x = False
 		self.o = False
@@ -355,8 +370,10 @@ class Buttons(object):
 		self.R3 = False
 		self.options = False
 		self.share = False
-		for key in data:
-			setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
 
 	def set(self, x, o, s, t, r1, l1, r3, l3, opt, share):
 		self.x = x
@@ -373,18 +390,20 @@ class Buttons(object):
 
 @froze_it
 class Joystick(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Joystick'
 		self.axes = Axes()
 		self.buttons = Buttons()
 		self.stamp = time.time()
-		for key in data:
-			if key == 'axes':
-				setattr(self, key, Axes(data[key]))
-			elif key == 'buttons':
-				setattr(self, key, Buttons(data[key]))
-			else:
-				setattr(self, key, data[key])
+
+		if data:
+			for key in data:
+				if key == 'axes':
+					setattr(self, key, Axes(data[key]))
+				elif key == 'buttons':
+					setattr(self, key, Buttons(data[key]))
+				else:
+					setattr(self, key, data[key])
 
 
 def serialize(c):
