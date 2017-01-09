@@ -240,6 +240,8 @@ class Image(Message):
 
 			# i would rather do size as a tuple, but json makes it a list
 			dict.update(self, image=img, size=[w, h], depth=d)
+		else:
+			dict.update(self, image=img)
 
 
 class BatteryState(Message):
