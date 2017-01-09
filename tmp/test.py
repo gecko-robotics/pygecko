@@ -319,6 +319,19 @@ class Pose(object):
 
 
 @froze_it
+class Range(object):
+	def __init__(self, data=None):
+		self.Class = 'Range'
+		self.range = []
+		self.fov = 0.0
+		self.stamp = time.time()
+
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
+
+
+@froze_it
 class Odom(object):
 	def __init__(self, data=None):
 		self.Class = 'Odom'
@@ -427,7 +440,8 @@ idc = {
 	'Axes': Axes,
 	'Buttons': Buttons,
 	'Joystick': Joystick,
-	'Compass': Compass
+	'Compass': Compass,
+	'Range': Range
 }
 
 
@@ -456,12 +470,15 @@ def test_twist():
 	m = deserialize(m)
 
 	assert m.linear == t.linear
+	assert m.angular == t.angular
 	assert isinstance(t, Twist)
 	assert isinstance(m, Twist)
 	assert isinstance(t.linear, Vector)
 	assert isinstance(t.angular, Vector)
 	assert isinstance(m.linear, Vector)
 	assert isinstance(m.angular, Vector)
+	assert t.stamp == m.stamp
+	assert t.Class == m.Class
 
 
 def test_image():
@@ -480,6 +497,7 @@ def test_image():
 	assert im.depth == i.depth
 	assert i.img.all() == im.img.all()
 	assert i.Class == im.Class
+	assert i.stamp == im.stamp
 
 
 def test_vector():
@@ -498,6 +516,23 @@ def test_vector():
 	assert v.Class == m.Class
 
 
+def test_range():
+	v = Range()
+	v.range = [1, 2, 3]
+	v.range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+	v.fov = 20.0
+
+	m = serialize(v)
+	m = deserialize(m)
+
+	assert v.range == m.range
+	assert type(v) == type(m)
+	assert v.Class == m.Class
+	assert len(v.range) == len(m.range)
+	assert v.stamp == m.stamp
+	assert v.fov == m.fov
+
+
 def test_quaternion():
 	q = Quaternion()
 	q.x = 100
@@ -508,6 +543,7 @@ def test_quaternion():
 	m = deserialize(m)
 
 	assert type(q) == type(m) == type(Quaternion())
+	assert q.Class == m.Class
 	assert q == m
 
 
@@ -526,6 +562,8 @@ def test_imu():
 	assert p.linear_acceleration == m.linear_acceleration
 	assert p.angular_velocity == m.angular_velocity
 	assert p.orientation == m.orientation
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
 
 
 def test_pose():
@@ -540,6 +578,8 @@ def test_pose():
 	assert isinstance(m.orientation, Quaternion)
 	assert p.position == m.position
 	assert p.orientation == m.orientation
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
 
 
 def test_compass():
@@ -552,6 +592,8 @@ def test_compass():
 	assert p.roll == m.roll
 	assert p.pitch == m.pitch
 	assert p.heading == m.heading
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
 
 
 def test_joytstick():
@@ -568,3 +610,5 @@ def test_joytstick():
 	assert p.axes.rightStick == m.axes.rightStick
 	assert p.axes.dPad == m.axes.dPad
 	assert p.axes.L2 == m.axes.L2
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
