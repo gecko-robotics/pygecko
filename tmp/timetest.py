@@ -19,7 +19,7 @@ def time_image():
 	im.img = save
 
 	msg = serialize(im)
-	i = deserialize(msg)
+	deserialize(msg)
 
 
 def pygecko_image():
@@ -32,7 +32,7 @@ def pygecko_image():
 	# print m
 	ii = base64.b64decode(m['image'])
 	ii = np.fromstring(ii, dtype=np.uint8)
-	ii = cv2.imdecode(ii, 0)
+	cv2.imdecode(ii, 0)
 
 
 print 'old dict', timeit.timeit("pygecko_image()", "from __main__ import pygecko_image", number=loop_num)

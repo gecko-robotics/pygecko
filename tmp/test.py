@@ -78,13 +78,14 @@ def froze_it(cls):
 
 @froze_it
 class Vector(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Vector'
 		self.x = 0
 		self.y = 0
 		self.z = 0
-		for key in data:
-			setattr(self, key, data[key])
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
 
 	def set(self, x, y, z):
 		self.x = x
@@ -96,22 +97,24 @@ class Vector(object):
 		return s
 
 	def __eq__(self, v):
-		if self.x == v.x and self.y == v.y and self.z == v.z:
-			return True
-		else:
-			return False
+		# if self.x == v.x and self.y == v.y and self.z == v.z:
+		# 	return True
+		# else:
+		# 	return False
+		return (self.x == v.x and self.y == v.y and self.z == v.z)
 
 
 @froze_it
 class Quaternion(object):
-	def __init__(self, data={}):
+	def __init__(self, data=None):
 		self.Class = 'Quaternion'
 		self.x = 0.0
 		self.y = 0.0
 		self.z = 0.0
 		self.w = 1.0
-		for key in data:
-			setattr(self, key, data[key])
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
 
 	def normalize(self):
 		d = math.sqrt(self.w**2 + self.x**2 + self.y**2 + self.z**2)
@@ -132,10 +135,11 @@ class Quaternion(object):
 		return s
 
 	def __eq__(self, q):
-		if self.x == q.x and self.y == q.y and self.z == q.z and self.w == q.w:
-			return True
-		else:
-			return False
+		# if self.x == q.x and self.y == q.y and self.z == q.z and self.w == q.w:
+		# 	return True
+		# else:
+		# 	return False
+		return (self.x == q.x and self.y == q.y and self.z == q.z and self.w == q.w)
 
 
 @froze_it
