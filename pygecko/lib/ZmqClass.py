@@ -8,12 +8,8 @@ from __future__ import print_function
 from __future__ import division
 import zmq
 import simplejson as json
-import numpy
-# import datetime as dt
-import base64
 import socket as Socket
-# import time
-import cv2
+from Messages import serialize, deserialize
 
 
 class ZMQError(Exception):
@@ -59,7 +55,7 @@ class Pub(Base):
 	"""
 	Simple publisher
 	"""
-	def __init__(self, bind_to=('localhost', 9000)):
+	def __init__(self, bind_to=('0.0.0.0', 9000)):
 		Base.__init__(self)
 		self.bind_to = self.getAddress(bind_to)
 
@@ -85,38 +81,37 @@ class Pub(Base):
 		in: topic, message
 		out: none
 		"""
-		# get rid of separate pub/sub ... msg tells us what to do
-		# if 'type' in msg and msg['type'] is 'b64encoded' -> do pubb64
 
-		jmsg = json.dumps(msg)
+		# jmsg = json.dumps(msg)
+		jmsg = serialize(msg)
 		self.socket.send_multipart([topic, jmsg])
 		# self.socket.send_json(msg)
 
 	def pubB64(self, topic, msg):
-		# encode binary into base64 ascii
-		if 'image' in msg:
-			jpeg = msg['image']
-			b64 = base64.b64encode(jpeg)
-			msg['image'] = b64
-
-		elif 'wav' in msg:
-			wav = msg['wav']
-			wav = base64.b64decode(wav)
-			msg['wav'] = wav
-
-		else:
-			raise ZMQError('pubB64 does not support message type')
-
 		self.pub(topic, msg)
+	# 	# encode binary into base64 ascii
+	# 	if 'image' in msg:
+	# 		jpeg = msg['image']
+	# 		b64 = base64.b64encode(jpeg)
+	# 		msg['image'] = b64
+	#
+	# 	elif 'wav' in msg:
+	# 		wav = msg['wav']
+	# 		wav = base64.b64decode(wav)
+	# 		msg['wav'] = wav
+	#
+	# 	else:
+	# 		raise ZMQError('pubB64 does not support message type')
+	#
+	# 	self.pub(topic, msg)
 
 
 class Sub(Base):
 	"""
 	Simple subscriber
 	"""
-	def __init__(self, topics=None, connect_to=('localhost', 9000), poll_time=0.01):
+	def __init__(self, topics=None, connect_to=('0.0.0.0', 9000), poll_time=0.01):
 		Base.__init__(self)
-		# self.connect_to = 'tcp://' + connect_to[0] + ':' + str(connect_to[1])
 		self.connect_to = self.getAddress(connect_to)
 		self.poll_time = poll_time
 		try:
@@ -146,38 +141,39 @@ class Sub(Base):
 		# check to see if there is read, write, or erros
 		r, w, e = zmq.select([self.socket], [], [], self.poll_time)
 
-		topic = ''
-		msg = {}
+		topic = None
+		msg = None
 
 		# should this be a for loop? I don't think so???
 		if len(r) > 0:
 			topic, jmsg = r[0].recv_multipart()
-			msg = json.loads(jmsg)
-
+			# msg = json.loads(jmsg)
+			msg = deserialize(jmsg)
 		# topic, jmsg = self.socket.recv_multipart()
 		# msg = json.loads(jmsg)
 		return topic, msg
 
 	def recvB64(self):
-		topic, msg = self.recv()
-		# decode base64 messages
-		if msg:
-			if 'image' in msg:
-				im = msg['image']
-				im = base64.b64decode(im)
-				im = numpy.fromstring(im, dtype=numpy.uint8)
-				im = cv2.imdecode(im, 1)
-				msg['image'] = im
-
-			elif 'wav' in msg:
-				wav = msg['wav']
-				wav = base64.b64decode(wav)
-				msg['wav'] = wav
-
-			else:
-				raise ZMQError('subB64 does not support message type')
-
-		return topic, msg
+		return self.recv()
+	# 	topic, msg = self.recv()
+	# 	# decode base64 messages
+	# 	if msg:
+	# 		if 'image' in msg:
+	# 			im = msg['image']
+	# 			im = base64.b64decode(im)
+	# 			im = numpy.fromstring(im, dtype=numpy.uint8)
+	# 			im = cv2.imdecode(im, 1)
+	# 			msg['image'] = im
+	#
+	# 		elif 'wav' in msg:
+	# 			wav = msg['wav']
+	# 			wav = base64.b64decode(wav)
+	# 			msg['wav'] = wav
+	#
+	# 		else:
+	# 			raise ZMQError('subB64 does not support message type')
+	#
+	# 	return topic, msg
 
 
 class ServiceProvider(Base):
@@ -230,5 +226,5 @@ class ServiceClient(Base):
 		return msg
 
 
-if __name__ == "__main__":
-	print('hello cowboy!')
+# if __name__ == "__main__":
+# 	print('hello cowboy!')

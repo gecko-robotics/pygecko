@@ -1,46 +1,161 @@
 #!/usr/bin/env python
 
-
-import os
-import sys
-# sys.path.insert(0, os.path.abspath('..'))
-import pygecko.lib.Messages as msg
-
-
-def test_vector():
-    v = msg.Vector(x=1.23, y=-1.23, z=32.1)
-    assert v == {'y': -1.23, 'x': 1.23, 'z': 32.1}
-
-
-def test_quaternion():
-    q = msg.Quaternion(x=0.5, y=0.5, z=0.5, w=0.5)
-    assert q == {'w': 0.5, 'y': 0.5, 'x': 0.5, 'z': 0.5}
+from pygecko.lib.Messages import Twist, Image, IMU, Joystick, Vector
+from pygecko.lib.Messages import Pose, Compass, Range, Quaternion
+from pygecko.lib.Messages import Buttons, Axes
+from pygecko.lib.Messages import serialize, deserialize
+# from pygecko.lib.ZmqClass import Pub, Sub
+import numpy as np
 
 
 def test_twist():
-    t = msg.Twist()
-    t['linear']['x'] = 55.0
-    t['angular']['y'] = -56.7
-    assert t == {'linear': {'y': 0.0, 'x': 55.0, 'z': 0.0}, 'angular': {'y': -56.7, 'x': 0.0, 'z': 0.0}}
+	t = Twist()
+	t.linear.set(.1, .2, .3)
+	t.angular.set(-1, -2., -3)
+
+	m = serialize(t)
+	m = deserialize(m)
+
+	assert m.linear == t.linear
+	assert m.angular == t.angular
+	assert isinstance(t, Twist)
+	assert isinstance(m, Twist)
+	assert isinstance(t.linear, Vector)
+	assert isinstance(t.angular, Vector)
+	assert isinstance(m.linear, Vector)
+	assert isinstance(m.angular, Vector)
+	assert t.stamp == m.stamp
+	assert t.Class == m.Class
+
+
+def test_image():
+	im = Image()
+	im.img = np.random.randint(0, 255, size=(5, 5))
+
+	msg = serialize(im)
+	i = deserialize(msg)
+
+	im.decodeB64()  # serialize destroys original image
+
+	assert isinstance(im, Image)
+	assert isinstance(i, Image)
+	assert isinstance(im.img, np.ndarray), type(im.img)
+	assert isinstance(i.img, np.ndarray), type(i.img)
+	assert im.depth == i.depth
+	assert i.img.all() == im.img.all()
+	assert i.Class == im.Class
+	assert i.stamp == im.stamp
+
+
+def test_vector():
+	v = Vector()
+	v.x = -0.00001
+	v.y = 2.123456789
+	v.z = -0.0123456789
+
+	m = serialize(v)
+	m = deserialize(m)
+
+	assert v.x == m.x
+	assert v.y == m.y
+	assert v.z == m.z
+	assert type(v) == type(m)
+	assert v.Class == m.Class
+
+
+def test_range():
+	v = Range()
+	v.range = [1, 2, 3]
+	v.range = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+	v.fov = 20.0
+
+	m = serialize(v)
+	m = deserialize(m)
+
+	assert v.range == m.range
+	assert type(v) == type(m)
+	assert v.Class == m.Class
+	assert len(v.range) == len(m.range)
+	assert v.stamp == m.stamp
+	assert v.fov == m.fov
+
+
+def test_quaternion():
+	q = Quaternion()
+	q.x = 100
+	q.y = -100
+	q.z = 0.12345
+	q.w = -0.12345
+	m = serialize(q)
+	m = deserialize(m)
+
+	assert type(q) == type(m) == type(Quaternion())
+	assert q.Class == m.Class
+	assert q == m
+
+
+def test_imu():
+	p = IMU()
+	p.linear_acceleration.set(1, 2, 3)
+	p.angular_velocity.set(1, 2, 3)
+	p.orientation.set(1, 2, 3, 4)
+	m = serialize(p)
+	m = deserialize(m)
+
+	assert type(p) == type(m) == type(IMU())
+	assert isinstance(m.linear_acceleration, Vector)
+	assert isinstance(m.angular_velocity, Vector)
+	assert isinstance(m.orientation, Quaternion)
+	assert p.linear_acceleration == m.linear_acceleration
+	assert p.angular_velocity == m.angular_velocity
+	assert p.orientation == m.orientation
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
 
 
 def test_pose():
-    p = msg.Pose()
-    assert p == {'position': {'y': 0.0, 'x': 0.0, 'z': 0.0}, 'orientation': {'y': 0.0, 'x': 0.0, 'z': 0.0, 'w': 1.0}}
+	p = Pose()
+	p.position.set(1, 2, 3)
+	p.orientation.set(1, 2, 3, 4)
+	m = serialize(p)
+	m = deserialize(m)
+
+	assert type(p) == type(m) == type(Pose())
+	assert isinstance(m.position, Vector)
+	assert isinstance(m.orientation, Quaternion)
+	assert p.position == m.position
+	assert p.orientation == m.orientation
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
 
 
-def test_posestamped():
-    ps = msg.PoseStamped()
-    ps['stamp'] = 1234567.89
-    assert ps == {'stamp': 1234567.89, 'orientation': {'y': 0.0, 'x': 0.0, 'z': 0.0, 'w': 1.0}, 'position': {'y': 0.0, 'x': 0.0, 'z': 0.0}}
+def test_compass():
+	p = Compass()
+	p.set(1, 2, 3)
+	m = serialize(p)
+	m = deserialize(m)
+
+	assert type(p) == type(m) == type(Compass())
+	assert p.roll == m.roll
+	assert p.pitch == m.pitch
+	assert p.heading == m.heading
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
 
 
-def test_wrench():
-    w = msg.Wrench()
-    assert w == {'torque': {'y': 0.0, 'x': 0.0, 'z': 0.0}, 'force': {'y': 0.0, 'x': 0.0, 'z': 0.0}}
+def test_joytstick():
+	p = Joystick()
+	p.axes.set([1, 1], [2, 2], [3, 3], 4, 5)
+	p.buttons.set(True, False, True, False, True, False, True, False, True, False)
+	m = serialize(p)
+	m = deserialize(m)
 
-
-def test_serialize():
-    ps = msg.PoseStamped()
-    ps['stamp'] = 1234567.89
-    assert msg.deserialize(msg.serialize(ps)) == ps
+	assert type(p) == type(m) == type(Joystick())
+	assert isinstance(m.axes, Axes)
+	assert isinstance(m.buttons, Buttons)
+	assert p.axes.leftStick == m.axes.leftStick
+	assert p.axes.rightStick == m.axes.rightStick
+	assert p.axes.dPad == m.axes.dPad
+	assert p.axes.L2 == m.axes.L2
+	assert p.stamp == m.stamp
+	assert p.Class == m.Class
