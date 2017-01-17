@@ -112,7 +112,6 @@ class Imu(mp.Process):
 			# exit()
 			# self.bno._read_vector(BNO055_UNIT_SEL_ADDR, 1)
 
-
 			# Axis remap values
 			# AXIS_REMAP_X                         = 0x00
 			# AXIS_REMAP_Y                         = 0x01
@@ -138,7 +137,7 @@ class Imu(mp.Process):
 				# this seems to be hard coded, but quaternions and gyro rates are correct
 				heading, pitch, roll = bno.read_euler()
 				# msg['heading'] = heading
-				msg['heading'] = [heading, -pitch, -roll]
+				msg.heading = [heading, -pitch, -roll]
 				# Read the calibration status, 0=uncalibrated and 3=fully calibrated.
 				# sys, gyro, accel, mag = bno.get_calibration_status()
 				# Print everything out.
@@ -147,7 +146,7 @@ class Imu(mp.Process):
 				# Other values you can optionally read:
 				# Orientation as a quaternion:
 				x, y, z, w = bno.read_quaternion()
-				msg['orientation'].update({'x': x, 'y': y, 'z': z, 'w': w})
+				msg.orientation.set(x, y, z, w)
 				# https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 				# roll = atan2(2.0*(w*x+y*z), 1.0-2.0*(x**2+y**2))
 				# pitch = asin(2.0*(w*y-z*x))
@@ -156,15 +155,15 @@ class Imu(mp.Process):
 
 				# print('quat[x,y,z,w]: {0:0.2F}\t{1:0.2F}\t{2:0.2F}\t{3:0.2F}'.format(x, y, z, w))
 				# Sensor temperature in degrees Celsius:
-				temp_c = bno.read_temp()
-				msg['temperature'] = temp_c
+				# temp_c = bno.read_temp()
+				# msg['temperature'] = temp_c
 				# print('temp[C]: {0:0.2F}'.format(temp_c))
 				# Magnetometer data (in micro-Teslas):
 				# x, y, z = bno.read_magnetometer()
 				# print('mag[x,y,z]: {0:0.2F}\t{1:0.2F}\t{2:0.2F}'.format(x, y, z))
 				# Gyroscope data (in degrees per second):
 				x, y, z = bno.read_gyroscope()
-				msg['angular_velocity'].update({'x': x, 'y': y, 'z': z})
+				msg.angular_velocity.set(x, y, z)
 				# print('gyro[x,y,z]: {0:0.2F}\t{1:0.2F}\t{2:0.2F}'.format(x, y, z))
 				# Accelerometer data (in meters per second squared):
 				# x, y, z = bno.read_accelerometer()
@@ -177,7 +176,7 @@ class Imu(mp.Process):
 				# Linear acceleration data (i.e. acceleration from movement, not gravity--
 				# returned in meters per second squared):
 				x, y, z = bno.read_linear_acceleration()
-				msg['linear_acceleration'].update({'x': x, 'y': y, 'z': z})
+				msg.linear_acceleration.set(x, y, z)
 				# acceleration2Euler(x,y,z)
 				# print('linaccel[x,y,z]: {0:0.2F}\t{1:0.2F}\t{2:0.2F}'.format(x, y, z))
 				# Gravity acceleration data (i.e. acceleration just from gravity--returned
@@ -194,14 +193,14 @@ class Imu(mp.Process):
 
 				Examples:
 				- When the device lies flat on a table and is pushed on its left side toward the
-				  right, the x acceleration value is positive.
+					right, the x acceleration value is positive.
 				- When the device lies flat on a table, the acceleration value is +9.81, which
-				  correspond to the acceleration of the device (0 m/s^2) minus the force of
-				  gravity (-9.81 m/s^2).
+					correspond to the acceleration of the device (0 m/s^2) minus the force of
+					gravity (-9.81 m/s^2).
 				- When the device lies flat on a table and is pushed toward the sky with an
-				  acceleration of A m/s^2, the acceleration value is equal to A+9.81 which
-				  correspond to the acceleration of the device (+A m/s^2) minus the force of
-				  gravity (-9.81 m/s^2).
+					acceleration of A m/s^2, the acceleration value is equal to A+9.81 which
+					correspond to the acceleration of the device (+A m/s^2) minus the force of
+					gravity (-9.81 m/s^2).
 				"""
 				# print('gravity[x,y,z]: {0:0.2F}\t{1:0.2F}\t{2:0.2F}'.format(-x, -y, -z))
 				# roll = atan2(z,y)
@@ -238,6 +237,7 @@ def main():
 	imu = Imu()
 	imu.init(serialPort)
 	imu.start()
+
 
 if __name__ == "__main__":
 	main()

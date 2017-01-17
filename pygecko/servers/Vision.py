@@ -10,7 +10,7 @@ from pygecko.lib import Messages as Msg
 import multiprocessing as mp
 # import logging
 import datetime as dt
-import cv2
+# import cv2
 import argparse
 from opencvutils.video import Camera
 import time
@@ -57,9 +57,10 @@ class RobotCameraServer(mp.Process):
 		try:
 			while True:
 				ret, frame = camera.read()
-				jpeg = cv2.imencode('.jpg', frame)[1]  # jpeg compression
-				msg = Msg.Image(jpeg)
-				pub.pubB64('image_color', msg)
+				# jpeg = cv2.imencode('.jpg', frame)[1]  # jpeg compression
+				msg = Msg.Image()
+				msg.img = frame
+				pub.pub('image_color', msg)
 				# print '[*] frame: %d k   jpeg: %d k'%(frame.size/1000,len(jpeg)/1000)
 				time.sleep(0.01)
 

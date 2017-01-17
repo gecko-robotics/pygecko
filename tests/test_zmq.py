@@ -4,8 +4,9 @@
 import numpy as np
 # import multiprocessing as mp
 import pygecko.lib.ZmqClass as zmq
-from pygecko.lib.Messages import Image, Vector, deserialize, dict_to_class
-import simplejson as json
+from pygecko.lib.Messages import Image, Vector, dict_to_class
+# from pygecko.lib.Messages import serialize, deserialize
+# import simplejson as json
 
 
 def test_pub_sub():

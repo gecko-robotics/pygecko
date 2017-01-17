@@ -407,10 +407,12 @@ def deserialize(s):
 	Takes a json string and turns it into a message.
 	"""
 	j = json.loads(s)
-	c = idc[j['Class']](j)
+	c = None
+	if 'Class' in j and j['Class'] in idc:
+		c = idc[j['Class']](j)
 
-	if c.Class == 'Image':
-		c.decodeB64()
+		if c.Class == 'Image':
+			c.decodeB64()
 
 	return c
 

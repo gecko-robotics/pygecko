@@ -8,7 +8,7 @@ import time
 import argparse
 from opencvutils.video import Camera
 import socket as Socket
-import errno
+# import errno
 
 # threaded version
 # http://stackoverflow.com/questions/12650238/processing-simultaneous-asynchronous-requests-with-python-basehttpserver
@@ -56,9 +56,10 @@ class mjpgServer(BaseHTTPRequestHandler):
 
 		elif self.sub:
 			# print 'sub'
-			_, msg = self.sub.recvB64()
+			_, msg = self.sub.recv()
 			if msg:
-				return True, msg['image']
+				# return True, msg['image']
+				return True, msg.img
 			else:
 				return False, None
 		else:

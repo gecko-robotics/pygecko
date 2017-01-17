@@ -25,11 +25,12 @@ class CameraDisplayClient(object):
 		while True:
 			# msg_miss = 1
 			try:
-				tp, msg = s.recvB64()
+				tp, msg = s.recv()
 				if not msg:
 					pass
 				elif 'image' in msg:
-					im = msg['image']
+					# im = msg['image']
+					im = msg.img
 					cv2.imshow('Camera', im)
 					key = cv2.waitKey(10)
 					if key == ord('q'):
