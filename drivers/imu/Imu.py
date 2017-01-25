@@ -10,8 +10,8 @@ import lib.Messages as Msg
 import lib.ZmqClass as Zmq
 from otherLibs.BNO055 import BNO055
 from math import cos, sin, atan2, asin, sqrt
-from math import radians as d2r
-from math import degrees as r2d
+# from math import radians as d2r
+# from math import degrees as r2d
 
 """
 serial port fix
