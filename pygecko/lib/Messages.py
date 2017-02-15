@@ -163,7 +163,7 @@ class IMU(object):
 @froze_it
 class Image(object):
 	def __init__(self, data=None):
-		self.depth = -1   # 0-grayscale, 1-bgr
+		self.depth = -1   # 0-grayscale, 1-bgr ... why?
 		self._img = None  # image, either numpy or b64
 		self.b64 = False  # is this encoded for transmission?
 		self.stamp = time.time()
@@ -178,7 +178,7 @@ class Image(object):
 			s = 'image empty'
 		elif not self.b64:
 			w, h = self.img.shape[:2]
-			s = 'Image w:{} h:{} d:{}'.format(w, h, self.depth)
+			s = 'Image[{}] w:{} h:{} d:{}'.format(self.stamp, w, h, self.depth)
 		else:
 			s = 'image is b46 encoded'
 
@@ -194,7 +194,7 @@ class Image(object):
 		if len(shp) == 2:
 			self.depth = 0  # grayscale
 		elif len(shp) == 3:
-			self.depth = 1  # color
+			self.depth = 1  # color ... why not shp[2]
 		else:
 			print 'crap, wrong shape {}'.format(shp)
 		self._img = image
@@ -404,7 +404,8 @@ idc = {
 
 def deserialize(s):
 	"""
-	Takes a json string and turns it into a message.
+	Takes a json string and turns it into a message. If the message is an
+	Image, then it automatically decodes it from base64/jpeg
 	"""
 	j = json.loads(s)
 	c = None

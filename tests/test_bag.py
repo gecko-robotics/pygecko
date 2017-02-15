@@ -14,7 +14,7 @@ def test_bag():
 
 	for i in range(0, num_msg):
 		msg = Msg.Vector()
-		msg.update({'x': random.uniform(-3, 3), 'y': random.uniform(10, 50), 'z': random.uniform(-20, 5)})
+		msg.set(1, 2, 3)
 		bag.push(msg)
 	bag.close()
 
@@ -24,4 +24,5 @@ def test_bag():
 	# print 'Found {} messages in file {}'.format(len(ans), filename)
 	# print 'type:', type(ans[0])
 	# print ans[0]
-	assert len(ans) == num_msg and isinstance(ans[0], dict)
+	assert len(ans) == num_msg
+	assert isinstance(ans[0], Msg.Vector)

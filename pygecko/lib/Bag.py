@@ -53,8 +53,8 @@ class Bag(object):
 		"""
 		Push another message to the buffer and grab time stamp for play back
 		"""
-		dmsg = {'ts': time.time(), 'msg': msg}
-		self.buffer.append(dmsg)
+		# dmsg = {'ts': time.time(), 'msg': msg}
+		self.buffer.append(msg)
 
 		if len(self.buffer) >= self.buffer_size:
 			self.writeToFile()

@@ -23,24 +23,19 @@ class CameraDisplayClient(object):
 		print('Press "q" to quit')
 		s = zmq.Sub(topics=topic, connect_to=hostinfo)
 		while True:
-			# msg_miss = 1
 			try:
 				tp, msg = s.recv()
-				if not msg:
-					pass
-				elif 'image' in msg:
-					# im = msg['image']
+				if msg:
+					# print('Image:', msg)
 					im = msg.img
 					cv2.imshow('Camera', im)
-					key = cv2.waitKey(10)
-					if key == ord('q'):
-						break
+				key = cv2.waitKey(1)
+				if key == ord('q'):
+					break
 
 			except (IOError, EOFError):
 				print('[-] Connection gone .... bye')
 				break
-
-		s.close()
 
 
 def handleArgs():
