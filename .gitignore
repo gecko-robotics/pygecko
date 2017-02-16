@@ -8,6 +8,7 @@ dist/
 # Misc
 old/
 *.bag
+*.wav
 
 # OS generated files #
 ######################

@@ -8,7 +8,13 @@
 
 from __future__ import division
 from __future__ import print_function
-import sdl2
+
+try:
+	import sdl2
+except:
+	print('You must install SLD2 library')
+	exit()
+
 import time  # sleep ... why?
 import argparse
 import lib.ZmqClass as zmq
@@ -21,30 +27,30 @@ class Joystick(object):
 	publish the outputs via ZeroMQ.
 
 	Buttons
-	    Square  = joystick button 0
-	    X       = joystick button 1
-	    Circle  = joystick button 2
-	    Triangle= joystick button 3
-	    L1      = joystick button 4
-	    R1      = joystick button 5
-	    L2      = joystick button 6
-	    R2      = joystick button 7
-	    Share   = joystick button 8
-	    Options = joystick button 9
-	    L3      = joystick button 10
-	    R3      = joystick button 11
-	    PS      = joystick button 12
-	    PadPress= joystick button 13
+		Square  = joystick button 0
+		X       = joystick button 1
+		Circle  = joystick button 2
+		Triangle= joystick button 3
+		L1      = joystick button 4
+		R1      = joystick button 5
+		L2      = joystick button 6
+		R2      = joystick button 7
+		Share   = joystick button 8
+		Options = joystick button 9
+		L3      = joystick button 10
+		R3      = joystick button 11
+		PS      = joystick button 12
+		PadPress= joystick button 13
 
 	Axes:
-	    LeftStickX      = X-Axis
-	    LeftStickY      = Y-Axis (Inverted?)
-	    RightStickX     = 3rd Axis
-	    RightStickY     = 4th Axis (Inverted?)
-	    L2              = 5th Axis (-1.0f to 1.0f range, unpressed is -1.0f)
-	    R2              = 6th Axis (-1.0f to 1.0f range, unpressed is -1.0f)
-	    DPadX           = 7th Axis
-	    DPadY           = 8th Axis (Inverted?)
+		LeftStickX      = X-Axis
+		LeftStickY      = Y-Axis (Inverted?)
+		RightStickX     = 3rd Axis
+		RightStickY     = 4th Axis (Inverted?)
+		L2              = 5th Axis (-1.0f to 1.0f range, unpressed is -1.0f)
+		R2              = 6th Axis (-1.0f to 1.0f range, unpressed is -1.0f)
+		DPadX           = 7th Axis
+		DPadY           = 8th Axis (Inverted?)
 
 	"""
 	def __init__(self, host, port):
@@ -67,7 +73,7 @@ class Joystick(object):
 
 	def run(self, verbose, rate):
 		js = self.js
-		dt = 1.0/float(rate)
+		dt = 1.0/rate
 		ps4 = Msg.Joystick()
 
 		while True:
@@ -77,48 +83,48 @@ class Joystick(object):
 				# left axis
 				x = sdl2.SDL_JoystickGetAxis(js, 0) / 32768
 				y = sdl2.SDL_JoystickGetAxis(js, 1) / 32768
-				ps4['axes']['leftStick'] = [x, y]
+				ps4.axes.leftStick = [x, y]
 
 				# right axis
 				x = sdl2.SDL_JoystickGetAxis(js, 2) / 32768
 				y = sdl2.SDL_JoystickGetAxis(js, 5) / 32768
-				ps4['axes']['rightStick'] = [x, y]
+				ps4.axes.rightStick = [x, y]
 
 				# other axes
-				ps4['axes']['L2'] = sdl2.SDL_JoystickGetAxis(js, 3) / 32768
-				ps4['axes']['R2'] = sdl2.SDL_JoystickGetAxis(js, 4) / 32768
+				ps4.axes.L2 = sdl2.SDL_JoystickGetAxis(js, 3) / 32768
+				ps4.axes.R2 = sdl2.SDL_JoystickGetAxis(js, 4) / 32768
 
 				# accels
 				x = sdl2.SDL_JoystickGetAxis(js, 6) / 32768
 				y = sdl2.SDL_JoystickGetAxis(js, 7) / 32768
 				z = sdl2.SDL_JoystickGetAxis(js, 8) / 32768
-				ps4['axes']['accels'] = [x, y, z]
+				ps4.axes.accels = [x, y, z]
 
 				# gyros
 				x = sdl2.SDL_JoystickGetAxis(js, 9) / 32768
 				y = sdl2.SDL_JoystickGetAxis(js, 10) / 32768
 				z = sdl2.SDL_JoystickGetAxis(js, 11) / 32768
-				ps4['axes']['gyros'] = [x, y, z]
+				ps4.axes.gyros = [x, y, z]
 
 				# get buttons
-				ps4['buttons']['s'] = sdl2.SDL_JoystickGetButton(js, 0)
-				ps4['buttons']['x'] = sdl2.SDL_JoystickGetButton(js, 1)
-				ps4['buttons']['o'] = sdl2.SDL_JoystickGetButton(js, 2)
-				ps4['buttons']['t'] = sdl2.SDL_JoystickGetButton(js, 3)
-				ps4['buttons']['L1'] = sdl2.SDL_JoystickGetButton(js, 4)
-				ps4['buttons']['R1'] = sdl2.SDL_JoystickGetButton(js, 5)
-				ps4['buttons']['L2'] = sdl2.SDL_JoystickGetButton(js, 6)
-				ps4['buttons']['R2'] = sdl2.SDL_JoystickGetButton(js, 7)
-				ps4['buttons']['share'] = sdl2.SDL_JoystickGetButton(js, 8)
-				ps4['buttons']['options'] = sdl2.SDL_JoystickGetButton(js, 9)
-				ps4['buttons']['L3'] = sdl2.SDL_JoystickGetButton(js, 10)
-				ps4['buttons']['R3'] = sdl2.SDL_JoystickGetButton(js, 11)
-				ps4['buttons']['ps'] = sdl2.SDL_JoystickGetButton(js, 12)
-				ps4['buttons']['pad'] = sdl2.SDL_JoystickGetButton(js, 13)
+				ps4.buttons.s = sdl2.SDL_JoystickGetButton(js, 0)
+				ps4.buttons.x = sdl2.SDL_JoystickGetButton(js, 1)
+				ps4.buttons.o = sdl2.SDL_JoystickGetButton(js, 2)
+				ps4.buttons.t = sdl2.SDL_JoystickGetButton(js, 3)
+				ps4.buttons.L1 = sdl2.SDL_JoystickGetButton(js, 4)
+				ps4.buttons.R1 = sdl2.SDL_JoystickGetButton(js, 5)
+				ps4.buttons.L2 = sdl2.SDL_JoystickGetButton(js, 6)
+				ps4.buttons.R2 = sdl2.SDL_JoystickGetButton(js, 7)
+				ps4.buttons.share = sdl2.SDL_JoystickGetButton(js, 8)
+				ps4.buttons.options = sdl2.SDL_JoystickGetButton(js, 9)
+				ps4.buttons.L3 = sdl2.SDL_JoystickGetButton(js, 10)
+				ps4.buttons.R3 = sdl2.SDL_JoystickGetButton(js, 11)
+				ps4.buttons.ps = sdl2.SDL_JoystickGetButton(js, 12)
+				ps4.buttons.pad = sdl2.SDL_JoystickGetButton(js, 13)
 
 				# get hat
 				# [up right down left] = [1 2 4 8]
-				ps4['buttons']['hat'] = sdl2.SDL_JoystickGetHat(js, 0)
+				ps4.buttons.hat = sdl2.SDL_JoystickGetHat(js, 0)
 
 				# print('b 12', sdl2.SDL_JoystickGetButton(js, 12))
 				# print('b 13', sdl2.SDL_JoystickGetButton(js, 13))
@@ -155,6 +161,7 @@ def main():
 	args = handleArgs()
 	js = Joystick(args['publish'][0], args['publish'][1])
 	js.run(args['verbose'], args['rate'])
+
 
 if __name__ == "__main__":
 	main()

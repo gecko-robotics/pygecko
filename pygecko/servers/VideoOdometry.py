@@ -9,7 +9,7 @@ import logging
 import multiprocessing as mp
 import pygecko.lib.Messages as Msg
 import pygecko.lib.ZmqClass as Zmq
-import pygecko.lib.Camera as Cam
+from opencvutils.video import Camera as Cam
 
 
 save_pts = []

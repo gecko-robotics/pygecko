@@ -10,7 +10,7 @@ from pygecko.lib import Messages as Msg
 import multiprocessing as mp
 # import logging
 import datetime as dt
-import cv2
+# import cv2
 import argparse
 from opencvutils.video import Camera
 import time
@@ -41,7 +41,7 @@ class RobotCameraServer(object):
 
 	def start(self):
 		self.run()
-	
+
 	def join(self):
 		pass
 
@@ -58,6 +58,7 @@ class RobotCameraServer(object):
 		try:
 			while True:
 				ret, frame = camera.read()
+
 # 				jpeg = cv2.imencode('.jpg', frame)[1]  # jpeg compression
 # 				msg = Msg.Image(jpeg)
 				if ret:
