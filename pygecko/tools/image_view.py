@@ -9,6 +9,7 @@ import cv2
 import pygecko.lib.ZmqClass as zmq
 # from opencvutils.video import Camera
 import argparse
+import socket
 
 # --- topics --------------------------------------------------------------
 #   image_raw - raw data from the camera driver, possibly Bayer encoded
@@ -20,8 +21,10 @@ import argparse
 
 class CameraDisplayClient(object):
 	def run(self, topic, hostinfo):
+		print('Connecting to: {}[{}]:{}'.format(hostinfo[0], socket.gethostbyname(hostinfo[0]), hostinfo[1]))
+		print('Using topic: {}'.format(topic))
 		print('Press "q" to quit')
-		s = zmq.Sub(topics=topic, connect_to=hostinfo)
+		s = zmq.Sub(topics=topic, connect_to=hostinfo, hwm=100)
 		while True:
 			try:
 				tp, msg = s.recv()
