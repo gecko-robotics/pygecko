@@ -23,7 +23,7 @@ class Kludge(mp.Process):
 	"""
 	This listens to zmq and passes into between zmq and the client webpage
 	"""
-	def __init__(self, topics, host="localhost", port=9000):
+	def __init__(self, topics, host="0.0.0.0", port=9000):
 		mp.Process.__init__(self)
 		self.host = host
 		self.port = port
