@@ -7,7 +7,9 @@
 from __future__ import print_function
 from __future__ import division
 import argparse
-import sys, tty, termios
+import sys
+import tty
+import termios
 import pygecko.lib.ZmqClass as Zmq
 import pygecko.lib.Messages as Msg
 
@@ -52,8 +54,6 @@ class Keyboard(object):
 			elif key == 'w': twist.linear.x += 0.1
 			elif key == 'x': twist.linear.y -= 0.1
 			elif key == 's':  # stop - all 0's
-				# twist.update(dict(linear=Msg.Vector()))
-				# twist.update(dict(angular=Msg.Vector()))
 				twist.linear.set(0, 0, 0)
 				twist.angular.set(0, 0, 0)
 			elif key == 'q': exit()

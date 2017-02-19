@@ -6,6 +6,7 @@ from pygecko.lib.Messages import Buttons, Axes
 from pygecko.lib.Messages import serialize, deserialize
 # from pygecko.lib.ZmqClass import Pub, Sub
 import numpy as np
+from nose.tools import raises
 
 
 def test_twist():
@@ -159,3 +160,9 @@ def test_joytstick():
 	assert p.axes.L2 == m.axes.L2
 	assert p.stamp == m.stamp
 	assert p.Class == m.Class
+
+
+@raises(Exception)
+def test_msg():
+	v = Vector()
+	v.m = 5.0

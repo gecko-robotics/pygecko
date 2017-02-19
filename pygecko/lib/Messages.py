@@ -10,13 +10,18 @@ from functools import wraps
 # import time
 
 
+class MessageError(Exception):
+	pass
+
+
 # http://stackoverflow.com/questions/3603502/prevent-creating-new-attributes-outside-init
 def froze_it(cls):
 	cls.__frozen = False
 
 	def frozensetattr(self, key, value):
 		if self.__frozen and not hasattr(self, key):
-			print("Class {} is frozen. Cannot set {} = {}".format(cls.__name__, key, value))
+			# print("Class {} is frozen. Cannot set {} = {}".format(cls.__name__, key, value))
+			raise MessageError("Class {} is frozen. Cannot set {} = {}".format(cls.__name__, key, value))
 		else:
 			object.__setattr__(self, key, value)
 
