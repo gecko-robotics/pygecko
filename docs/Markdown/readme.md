@@ -4,7 +4,7 @@
 
 ## Overview
 
-This is my long running hobby. Goals:
+This is my long running hobby and what I want to get out of it:
 
 * practice computer vision
 * learn about SLAM
@@ -22,9 +22,9 @@ Robot:
    * floor (so it doesn't fall down stairs)
 * can sense itself
    * hunger (power)
-   * orientation 
+   * orientation
 * can navigate from one location to another
-   * determine how far it has traveled 
+   * determine how far it has traveled
    * builds a map of where it has been
 * can interact with a person
    * listen/talk
@@ -39,39 +39,42 @@ The robot software is broken up into individual processes (python scripts) and t
 
 ## Interfaces
 
-There are various processes running and these processes talk to each other through multiple interfaces.
+There are various processes running and these processes talk to each other
+through multiple interfaces.
 
 ![singal flow](https://github.com/walchko/pygecko/raw/master/pics/Robot_Processes.png)
 
-My system draws from messages defined by [ROS](www.ros.org). A list of the interfaces is below:
+My system draws from messages defined by [ROS](www.ros.org). A list of the
+interfaces is below:
 
-| Header | Format                                 |
-|--------|----------------------------------------|
-|header     | {sequence_id[int], time_stamp[int]{secs,nsec}}      |
-|point      | {x,y,z}                                             |
-|vec        | {x,y,z}                                             |
-|quaternion | {x,y,z,w}                                           |
-|twist      | {linear[vec],angular[vec]}                          |
-|wrench     | {force[vec],torque[vec]}                            |
-|imu        | {header, accel[vec],gyro[vec],comp[vec],temp}       |
-|range      | {header, fov[float], limits[float]{min,max}, range} |
-|image      | {header, image}                                     |
-|pose       | {position[point], orientation[quaternion]}  |
-|poseStamped| {header, position[point], orientation[quaternion]}  |
-|odom       | {header, frame[string], pose(position), twist(velocity)}  |
-|text       | {header, message[string]}                           |
-|path       | {header, poses[poseStamped]}                           |
-|getPlan    | {start[poseStamped], stop[poseStamped]}                           |
+| Header    | Format                                              |
+|-----------|-----------------------------------------------------|
+|Vector     | {x,y,z}                                             |
+|Quaternion | {x,y,z,w}                                           |
+|Twist      | {linear[vec],angular[vec]}                          |
+|Wrench     | {force[vec],torque[vec]}                            |
+|IMU        | {header, accel[vec],gyro[vec],comp[vec],temp}       |
+|Range      | {header, fov[float], limits[float]{min,max}, range} |
+|Image      | {header, image}                                     |
+|Pose       | {position[point], orientation[quaternion]}          |
+|PoseStamped| {header, position[point], orientation[quaternion]}  |
+|Odom       | {header, frame[string], pose(position), twist(velocity)}  |
+|Text       | {header, message[string]}                           |
+|Path       | {header, poses[poseStamped]}                        |
+|GetPlan    | {start[poseStamped], stop[poseStamped]}             |
 
-These are all passed as Python Dictionaries.
+Not all of these are implemented, but they are classes.
 
 ## Processes
 
-The system is setup to run using multiple process. This adds flexibility and modularity compared to a monolithic code base. An overview of the different processes is shown below: 
+The system is setup to run using multiple process. This adds flexibility and
+modularity compared to a monolithic code base. An overview of the different
+processes is shown below:
 
 ![processes](https://github.com/walchko/pygecko/raw/master/pics/Robot.png)
 
-The above diagram shows the current processes done or under development. They are connected by a messaging system: 
+The above diagram shows the current processes done or under development. They
+are connected by a messaging system:
 
 * **P**: publisher
 * **S**: subscriber
@@ -91,6 +94,20 @@ This architecture allows processes to be run or stopped without the entire syste
 * **Navigation** - uses optimal filtering to perform sensor fusion (imu, video, etc) and determine distance travelled
 * **Control** - takes motion commands and calculates motor values
 * **Map** - given desired start/stop/time, this will perform path planning
+
+# Imagery
+
+*move to better location*
+
+These come from common ROS descriptions
+
+|Topic            |  Description|
+|---|---|
+|image_raw        |  raw data from the camera driver, possibly Bayer encoded|
+|image            |  monochrome, distorted|
+|image_color      |  color, distorted|
+|image_rect       |  monochrome, rectified|
+|image_rect_color |  color, rectified|
 
 # Install
 
@@ -126,7 +143,7 @@ You will need the following libraries from Adafruit for:
 	git clone https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code.git
 
 Have a look at the LEDBackpack 8x8_pixel example
-	
+
 ###[IMU](https://github.com/adafruit/Adafruit_Python_BNO055):
 
 	git clone git@github.com:adafruit/Adafruit_Python_BNO055.git
@@ -143,3 +160,13 @@ Have a look at the LEDBackpack 8x8_pixel example
 	pip install cffi smbus-cffi
 	pip install pysdl2
 	pip install pyzmq
+
+
+---
+
+<p align="center">
+	<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+		<img alt="Creative Commons License"  src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" />
+	</a>
+	<br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+</p>

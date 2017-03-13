@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2016 Kevin Walchko
+# see LICENSE for full details
+##############################################
 import time
 import simplejson as json  # supposed to be better than json
 import math
@@ -55,14 +59,10 @@ class Vector(object):
 		self.z = z
 
 	def __str__(self):
-		s = 'x:{} y:{} z:{}'.format(self.x, self.y, self.z)
+		s = 'x: {:.2f} y: {:.2f} z: {:.2f}'.format(self.x, self.y, self.z)
 		return s
 
 	def __eq__(self, v):
-		# if self.x == v.x and self.y == v.y and self.z == v.z:
-		# 	return True
-		# else:
-		# 	return False
 		return (self.x == v.x and self.y == v.y and self.z == v.z)
 
 
@@ -93,14 +93,10 @@ class Quaternion(object):
 		self.z = z
 
 	def __str__(self):
-		s = 'w:{} x:{} y:{} z:{}'.format(self.w, self.x, self.y, self.z)
+		s = 'w: {:.3f} x: {:.3f} y: {:.3f} z: {:.3f}'.format(self.w, self.x, self.y, self.z)
 		return s
 
 	def __eq__(self, q):
-		# if self.x == q.x and self.y == q.y and self.z == q.z and self.w == q.w:
-		# 	return True
-		# else:
-		# 	return False
 		return (self.x == q.x and self.y == q.y and self.z == q.z and self.w == q.w)
 
 
@@ -112,9 +108,14 @@ class Compass(object):
 	"""
 	COMPASS_RADIANS = 0
 	COMPASS_DEGREES = 1
+	kind = {
+		0: 'Rads',
+		1: 'Deg'
+	}
 
-	def __init__(self, data=None):
+	def __init__(self, data=None, units=COMPASS_RADIANS):
 		self.Class = 'Compass'
+		self.units = units
 		self.roll = 0
 		self.pitch = 0
 		self.heading = 0
@@ -129,7 +130,7 @@ class Compass(object):
 		self.heading = z
 
 	def __str__(self):
-		s = 'r:{} p:{} h:{}'.format(self.roll, self.pitch, self.heading)
+		s = 'r: {:.2f} p: {:.2f} h: {:.2f} {}'.format(self.roll, self.pitch, self.heading, self.kind[self.units])
 		return s
 
 
@@ -139,8 +140,12 @@ class IMU(object):
 	Simple tilt compensated compass message, the roll, pitch, and heading angles
 	are stored either in radians or degrees.
 	"""
-	COMPASS_RADIANS = 0
-	COMPASS_DEGREES = 1
+	IMU_RADIANS = 0
+	IMU_DEGREES = 1
+	kind = {
+		0: 'Rads',
+		1: 'Deg'
+	}
 
 	def __init__(self, data=None):
 		self.Class = 'IMU'
@@ -159,9 +164,10 @@ class IMU(object):
 					setattr(self, key, data[key])
 
 	def __str__(self):
-		s = 'a: ' + self.linear_acceleration.__str__()
-		s += 'g: ' + self.angular_velocity.__str__()
-		s += 'q: ' + self.orientation.__str__()
+		# s = 'a: ' + self.linear_acceleration.__str__()
+		# s += 'g: ' + self.angular_velocity.__str__()
+		# s += 'q: ' + self.orientation.__str__()
+		s = 'IMU: a: {} w: {} q: {}'.format(self.linear_acceleration, self.angular_velocity, self.orientation)
 		return s
 
 
@@ -183,7 +189,8 @@ class Image(object):
 			s = 'image empty'
 		elif not self.b64:
 			w, h = self.img.shape[:2]
-			s = 'Image[{}] w:{} h:{} d:{}'.format(self.stamp, w, h, self.depth)
+			depth = 'color' if self.depth else 'gray'
+			s = 'Image[{}] w:{} h:{}'.format(depth, w, h)
 		else:
 			s = 'image is b46 encoded'
 
@@ -240,8 +247,8 @@ class Twist(object):
 					setattr(self, key, data[key])
 
 	def __str__(self):
-		s = 'linear: {} {} {} '.format(self.linear.x, self.linear.y, self.linear.z)
-		s += 'angular: {} {} {}'.format(self.angular.x, self.angular.y, self.angular.z)
+		s = 'linear: {:2f} {:2f} {:2f} '.format(self.linear.x, self.linear.y, self.linear.z)
+		s += 'angular: {:2f} {:2f} {:2f}'.format(self.angular.x, self.angular.y, self.angular.z)
 		# s += '\n' + str(self.img)
 		return s
 
@@ -261,6 +268,9 @@ class Wrench(object):
 				else:
 					setattr(self, key, data[key])
 
+	def __str__(self):
+		return 'Wrench: force: {} torque: {}'.format(self.force, self.torque)
+
 
 @froze_it
 class Pose(object):
@@ -279,18 +289,54 @@ class Pose(object):
 				else:
 					setattr(self, key, data[key])
 
+	def __str__(self):
+		s = 'Pose: position: {}, orientation: {}'.format(self.postion, self.orientataion)
+		return s
+
 
 @froze_it
 class Range(object):
+	UNKNOWN = 0
+	ULTRASOUND = 1
+	LIDAR = 2
+	IR = 3
+	kind = {
+		0: 'Unknown',
+		1: 'Ultrasound',
+		2: 'Lidar',
+		3: 'IR'
+	}
+
 	def __init__(self, data=None):
 		self.Class = 'Range'
 		self.range = []
 		self.fov = 0.0
+		self.type = self.UNKNOWN
 		self.stamp = time.time()
 
 		if data:
 			for key in data:
 				setattr(self, key, data[key])
+
+	def __str__(self):
+		s = 'Range[{}]: {}'.format(self.kind[self.type], self.range)
+		return s
+
+
+@froze_it
+class Power(object):
+	def __init__(self, data=None):
+		self.Class = 'Power'
+		self.current = 0.0
+		self.voltage = 0.0
+		self.stamp = time.time()
+
+		if data:
+			for key in data:
+				setattr(self, key, data[key])
+
+	def __str__(self):
+		return 'Power: current: {} voltage: {}'.format(self.current, self.voltage)
 
 
 @froze_it
@@ -309,6 +355,9 @@ class Odom(object):
 					setattr(self, key, Twist(data[key]))
 				else:
 					setattr(self, key, data[key])
+
+	def __str__(self):
+		return 'Odom: position: {} velocity: {}'.format(self.position, self.velocity)
 
 
 class Axes(object):
@@ -365,6 +414,10 @@ class Buttons(object):
 
 @froze_it
 class Joystick(object):
+	"""
+	This is a joystick message and setup to only support a PS4 controller ...
+	suck it XBox! :)
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Joystick'
 		self.axes = Axes()
@@ -379,6 +432,29 @@ class Joystick(object):
 					setattr(self, key, Buttons(data[key]))
 				else:
 					setattr(self, key, data[key])
+
+	def __str__(self):
+		return 'Joystick not setup'
+
+
+@froze_it
+class Array(object):
+	"""
+	Array
+	"""
+	def __init__(self, data=None):
+		self.Class = 'Array'
+		self.array = []
+		# self.stamp = time.time()
+
+		if data:
+			for key in data:
+				print('Array >>', key, data[key])
+				# setattr(self, key, list(data[key]))
+				setattr(self, key, data[key])
+
+	def __str__(self):
+		return 'Array[{}]: {}'.format(len(self.array), self.array)
 
 
 def serialize(c):
@@ -403,7 +479,9 @@ idc = {
 	'Buttons': Buttons,
 	'Joystick': Joystick,
 	'Compass': Compass,
-	'Range': Range
+	'Range': Range,
+	'Power': Power,
+	'Array': Array
 }
 
 
