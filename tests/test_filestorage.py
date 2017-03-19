@@ -2,7 +2,7 @@
 
 
 import os
-from pygecko.lib import FileStorage
+from pygecko import FileStorage
 
 
 def test_yaml():

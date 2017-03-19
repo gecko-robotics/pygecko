@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from pygecko.lib import pyWit
-from pygecko.lib import Audio
+from pygecko import pyWit
+from pygecko import Audio
 import os
 # from pprint import pprint
 

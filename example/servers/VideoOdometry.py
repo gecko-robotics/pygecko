@@ -7,8 +7,8 @@ import cv2
 import datetime as dtm
 import logging
 import multiprocessing as mp
-import pygecko.lib.Messages as Msg
-import pygecko.lib.ZmqClass as Zmq
+import pygecko.Messages as Msg
+import pygecko.ZmqClass as Zmq
 from opencvutils.video import Camera as Cam
 
 

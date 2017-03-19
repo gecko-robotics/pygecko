@@ -13,8 +13,8 @@ import datetime as dt
 import numpy as np
 from math import sin, cos, sqrt
 from pyrk import RK4
-import pygecko.lib.ZmqClass as zmq
-import pygecko.lib.Messages as msg
+import pygecko.ZmqClass as zmq
+import pygecko.Messages as msg
 from numpy import dot, cross
 from numpy.linalg import inv
 # from pyrk import RK4

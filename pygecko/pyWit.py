@@ -2,28 +2,7 @@
 
 import os
 from wit import Wit
-# import ZmqClass as zmq
-# from time import sleep
 import socket
-
-
-class Audio(object):
-	# path ?
-
-	def play(self, snd):
-		os.system('afplay {0!s}'.format((snd)))
-
-	def save(self, filename, text):
-		"""
-		Convert text to speech and then save the output as a wav file. This is
-		primarily useful for testing/debuging.
-
-		You must install ``say``
-
-		kevin@Logan ~ $ file test.wav
-		test.wav: RIFF (little-endian) data, WAVE audio, Microsoft PCM, 16 bit, mono 16000 Hz
-		"""
-		os.system('say -o {} --data-format LEI16@16000 {}'.format(filename, text))
 
 
 class pyWit(object):

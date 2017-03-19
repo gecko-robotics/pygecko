@@ -5,15 +5,15 @@
 
 from __future__ import print_function
 from __future__ import division
-import pygecko.lib.ZmqClass as zmq
-from pygecko.lib import Messages as Msg
-import multiprocessing as mp
+import pygecko.ZmqClass as zmq
+from pygecko import Messages as Msg
+# import multiprocessing as mp
 # import logging
 import datetime as dt
 # import cv2
 import argparse
 from opencvutils.video import Camera
-import time
+# import time
 
 # --- topics --------------------------------------------------------------
 #   image_raw - raw data from the camera driver, possibly Bayer encoded

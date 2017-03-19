@@ -5,9 +5,9 @@ from __future__ import print_function
 import logging						# logging
 import multiprocessing as mp		# multiprocess
 import pygecko.lib.ZmqClass as zmq
-from pygecko.lib.TTS import TTS
-from pygecko.lib.Chatbot import Chatbot
-# import speech_recognition
+from pygecko.TTS import TTS
+from pygecko.Chatbot import Chatbot
+import speech_recognition
 
 
 class SphinxServer(mp.Process):

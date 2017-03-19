@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import os
-from pygecko.lib.Bag import Bag
-import pygecko.lib.Messages as Msg
+from pygecko import Bag
+import pygecko.Messages as Msg
 import random
 
 

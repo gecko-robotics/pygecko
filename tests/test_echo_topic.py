@@ -3,11 +3,11 @@
 # import sys
 import threading
 import time
-from pygecko.lib import ZmqClass as Zmq
-from pygecko.lib import Messages as Msg
-from pygecko.lib.Topic import TopicPub
+from pygecko import ZmqClass as Zmq
+from pygecko import Messages as Msg
+# from pygecko.Topic import TopicPub
 # import random
-import zmq
+# import zmq
 
 
 def subscriber(msg):

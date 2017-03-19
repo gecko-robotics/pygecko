@@ -66,7 +66,7 @@ setup(
 		'pyserial',
 		'numpy',
 		'opencvutils',
-		'wit',
+		# 'wit',
 		# 'pyaudio',  # this is crap!
 		'quaternions'
 	],
@@ -74,16 +74,26 @@ setup(
 	long_description=readme,
 	# packages=['pygecko'],
 	# packages=find_packages(exclude=['drivers', 'example', 'docs', 'test']),
-	packages=['pygecko', 'pygecko.lib', 'pygecko.tools', 'pygecko.servers'],
+	packages=['pygecko'],
 	cmdclass={
 		'test': NoseTestCommand,
 		'publish': PublishCommand,
 		'tag': GitTagCommand,
 		'clean': CleanCommand
 	},
-	# scripts=[
-	# 	'chi/tools/mjpeg-server.py'
-	# ]
+	scripts=[
+		'bin/mjpeg-server.py',
+		'bin/bag_play.py',
+		'bin/bag_record.py',
+		'bin/camera_calibrate.py',
+		'bin/image_view.py',
+		'bin/service.py',
+		'bin/topic_echo.py',
+		'bin/topic_pub.py',
+		'bin/twist_keyboard.py',
+		# 'bin/video.py',
+		# 'bin/webserver.py'
+	]
 	# entry_points={
 	# 	'console_scripts': [
 	# 		# 'pyarchey=pyarchey.pyarchey:main',

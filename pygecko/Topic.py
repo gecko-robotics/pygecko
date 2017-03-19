@@ -9,7 +9,7 @@ from __future__ import division, print_function
 import time
 import logging
 import multiprocessing as mp
-from pygecko.lib import ZmqClass as Zmq
+from pygecko import ZmqClass as Zmq
 
 
 class TopicPub(mp.Process):

@@ -3,8 +3,8 @@
 
 import numpy as np
 # import multiprocessing as mp
-import pygecko.lib.ZmqClass as zmq
-from pygecko.lib.Messages import Image, Vector, dict_to_class
+import pygecko.ZmqClass as zmq
+from pygecko.Messages import Image, Vector, dict_to_class
 # from pygecko.lib.Messages import serialize, deserialize
 # import simplejson as json
 

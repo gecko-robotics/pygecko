@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2010 Kevin Walchko'
 __author__ = 'Kevin J. Walchko'
@@ -13,6 +13,12 @@ python.
 
 """
 
-import lib
-import servers
-import tools
+from Bag import Bag, Record, Play
+from ZmqClass import Sub, Pub, ServiceProvider, ServiceClient
+# import Microphone  # travis fails of this, no pyaudio
+from Sound import Audio
+from pyWit import pyWit
+from TTS import TTS
+from Transforms import from_euler
+from FileStorage import FileStorage
+from Topic import TopicPub, TopicSub

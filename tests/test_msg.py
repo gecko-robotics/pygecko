@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from pygecko.lib.Messages import Twist, Image, IMU, Joystick, Vector
-from pygecko.lib.Messages import Pose, Compass, Range, Quaternion
-from pygecko.lib.Messages import Buttons, Axes
-from pygecko.lib.Messages import serialize, deserialize
+from pygecko.Messages import Twist, Image, IMU, Joystick, Vector
+from pygecko.Messages import Pose, Compass, Range, Quaternion
+from pygecko.Messages import Buttons, Axes
+from pygecko.Messages import serialize, deserialize
 # from pygecko.lib.ZmqClass import Pub, Sub
 import numpy as np
 from nose.tools import raises
