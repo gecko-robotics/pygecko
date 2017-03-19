@@ -135,6 +135,9 @@ on for years.
 Change Log
 -------------
 
+
+============ ======= ============================
+Date         Ver      Notes
 ============ ======= ============================
 2017-Mar-19  0.7.0   this is now a library in ``pygecko``, ``tools`` moved to ``bin``, and ``servers`` were put under examples because you will always have to tweak the server for your application
 2017-Mar-12  0.6.0   changed messages from dict to classes
