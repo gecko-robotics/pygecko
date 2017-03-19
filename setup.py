@@ -54,7 +54,7 @@ setup(
 		'Topic :: Scientific/Engineering',
 		'Topic :: Scientific/Engineering :: Artificial Intelligence',
 		'Topic :: Scientific/Engineering :: Image Recognition',
-		'Topic :: Software Development :: Libraries :: Python Modules',
+		'Topic :: Software Development :: Libraries :: Python Modules'
 	],
 	install_requires=[
 		'pyrk',
@@ -66,13 +66,12 @@ setup(
 		'pyserial',
 		'numpy',
 		'opencvutils',
-		# 'wit',
+		'wit',
 		# 'pyaudio',  # this is crap!
 		'quaternions'
 	],
 	url="https://github.com/walchko/pygecko",
 	long_description=readme,
-	# packages=['pygecko'],
 	# packages=find_packages(exclude=['drivers', 'example', 'docs', 'test']),
 	packages=['pygecko'],
 	cmdclass={
@@ -82,7 +81,7 @@ setup(
 		'clean': CleanCommand
 	},
 	scripts=[
-		'bin/mjpeg-server.py',
+		'bin/mjpeg_server.py',
 		'bin/bag_play.py',
 		'bin/bag_record.py',
 		'bin/camera_calibrate.py',
@@ -90,7 +89,7 @@ setup(
 		'bin/service.py',
 		'bin/topic_echo.py',
 		'bin/topic_pub.py',
-		'bin/twist_keyboard.py',
+		'bin/twist_keyboard.py'
 		# 'bin/video.py',
 		# 'bin/webserver.py'
 	]
