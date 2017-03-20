@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # --------------------------------------------------------------------
 # Kevin J. Walchko
 # 4 May 2014
@@ -10,10 +11,8 @@
 # x pass save file name from command line
 # - remove getOptimalNewCameraMatrix()? not sure of its value
 # --------------------------------------------------------------------
-
 # A good resource:
 # http://docs.opencv.org/3.1.0/dc/dbb/tutorial_py_calibration.html
-
 # storing numpy arrays
 # http://robotfantastic.org/serializing-python-data-to-json-some-edge-cases.html
 # >>> a = np.array_equal(data, json.loads(json.dumps(data.tolist())))
@@ -23,15 +22,7 @@ import numpy as np
 import cv2
 import glob
 import yaml
-# import json
 import argparse
-# import os
-# import sys
-
-# sys.path.insert(0, os.path.abspath('..'))
-# import lib.zmqclass as zmq
-# import lib.Message as msg
-# import lib.Camera as Camera
 
 
 class CameraCalibration(object):

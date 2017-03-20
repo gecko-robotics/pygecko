@@ -3,7 +3,7 @@
 import os
 from pygecko import Bag
 import pygecko.Messages as Msg
-import random
+# import random
 
 
 def test_bag():

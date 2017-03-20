@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+
 ##############################################
 # The MIT License (MIT)
 # Copyright (c) 2016 Kevin Walchko
 # see LICENSE for full details
 ##############################################
+
 import time
 import simplejson as json  # supposed to be better than json
 import math
