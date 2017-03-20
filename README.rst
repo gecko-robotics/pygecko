@@ -12,8 +12,9 @@ pyGecko
 	:target: https://github.com/walchko/pygecko
 .. image:: https://travis-ci.org/walchko/pygecko.svg?branch=master
 	:target: https://travis-ci.org/walchko/pygecko
-.. image:: https://api.codacy.com/project/badge/Grade/7e526b9907754837a15beff59d393e10
-	:target: https://www.codacy.com/app/kevin-walchko/pygecko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=walchko/pygecko&amp;utm_campaign=Badge_Grade
+.. image:: https://landscape.io/github/walchko/pygecko/master/landscape.svg?style=flat
+	:target: https://landscape.io/github/walchko/pygecko/master
+	:alt: Code Health
 .. image:: https://requires.io/github/walchko/pygecko/requirements.svg?branch=master
 	:target: https://requires.io/github/walchko/pygecko/requirements/?branch=master
 	:alt: Requirements Status

@@ -4,7 +4,7 @@
 import base64
 import cv2
 import timeit
-from pygecko.lib import Messages as Msg
+from pygecko import Messages as Msg
 import numpy as np
 # import math
 # import time
