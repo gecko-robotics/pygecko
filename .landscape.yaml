@@ -12,7 +12,9 @@ pylint:
 ignore-paths:
     - docs
     - pics
-    - test
+    - tests
+    - example
+    - drivers
     - pygecko/__init__.py
 
 python-targets:
