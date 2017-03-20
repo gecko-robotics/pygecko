@@ -20,8 +20,7 @@ pyGecko
 
 My robot software.
 
-* Doesn't use `ROS <http://ros.org>`_, ROS is a pain to install and maintain on
-OSX and various linux systems
+* Doesn't use `ROS <http://ros.org>`_, ROS is a pain to install and maintain on macOS and various linux systems
 	* Uses some of the same ideas, but not RPC-XML
 * Uses `Zero MQ <http://http://zeromq.org/>`_ instead of ``roscore``
 * Uses OpenCV to process on-board or stream video off-board to remote
@@ -135,16 +134,13 @@ on for years.
 Change Log
 -------------
 
-
-============ ======= ============================
-Date         Ver      Notes
 ============ ======= ============================
 2017-Mar-19  0.7.0   this is now a library in ``pygecko``, ``tools`` moved to ``bin``, and ``servers`` were put under examples because you will always have to tweak the server for your application
 2017-Mar-12  0.6.0   changed messages from dict to classes
 2016-Dec-26  0.5.0   refactor
 2016-Oct-09  0.4.1   published to PyPi
 2010-Mar-10  0.0.1   init
-============ ======= =============================
+============ ======= ============================
 
 
 License
