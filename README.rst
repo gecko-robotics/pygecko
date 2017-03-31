@@ -142,7 +142,7 @@ Change Log
 
 
 License
----------
+----------
 
 **The MIT License (MIT)**
 
