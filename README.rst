@@ -48,7 +48,7 @@ The recommended way to install this library is::
 Development
 ~~~~~~~~~~~~~
 
-If you wish to develope and submit git-pulls, you can do::
+If you wish to develop and submit git-pulls, you can do::
 
 	git clone https://github.com/walchko/pygecko
 	cd pygecko
