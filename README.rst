@@ -33,23 +33,22 @@ parts.
 Install
 -----------
 
-Use ``brew`` or ``apt-get`` to install:
+Use ``brew`` or ``apt-get`` to install these dependencies:
 
 * zeromq
 * opencv 3.x
-* [optional] SDL 2.0 for PS4 joystick control
 
 pip
 ~~~~~
 
-::
+The recommended way to install this library is::
 
 	pip install pygecko
 
 Development
 ~~~~~~~~~~~~~
 
-::
+If you wish to develope and submit git-pulls, you can do::
 
 	git clone https://github.com/walchko/pygecko
 	cd pygecko
@@ -120,9 +119,6 @@ ToDo
 	* only handles one connection at a time ... make threaded?
 	* sometimes the video stream is slow to load, but then it works fine
 	* handle client disconnect (broken pipe - 32) better
-* ``opencvutils`` - replacing ``lib/Camera.py`` and move calibration stuff to it
-	* these are good capabilities that can be used beyond just this library, make a stand alone library/tool
-* ``simplehtml`` - use for dynamic webpages
 * ``quaternions`` - use/update
 * implement a simple dynamic html server that takes json data in and produces webpages of diagnostic/status info
 
@@ -130,7 +126,8 @@ History
 -----------
 
 ``pyGecko`` comes from my previous robotics projects that I have been working
-on for years.
+on for years. Why gecko?? I am from Florida and I remember seeing a lot of geckos
+running around when I was at college ... my cats were scared of them.
 
 Change Log
 -------------
