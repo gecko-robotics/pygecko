@@ -1,9 +1,9 @@
 pyGecko
 ============================
 
-.. image:: https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg
-	:align: center
-	:width: 200 px
+.. raw:: html
+
+    <img src="https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg" alt="logo" title="The man himself" align="right"  width="200px"/>
 
 
 .. image:: https://img.shields.io/pypi/v/pygecko.svg
@@ -136,7 +136,7 @@ Change Log
 -------------
 
 ============ ======= ============================
-2017-Mar-19  0.7.0   this is now a library in ``pygecko``, ``tools`` moved to ``bin``, and ``servers`` were put under examples because you will always have to tweak the server for your application
+2017-Mar-19  0.7.0   refactored
 2017-Mar-12  0.6.0   changed messages from dict to classes
 2016-Dec-26  0.5.0   refactor
 2016-Oct-09  0.4.1   published to PyPi
