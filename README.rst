@@ -1,9 +1,8 @@
 pyGecko
 ============================
 
-.. raw:: html
-
-    <img src="https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg" alt="logo" title="The man himself" align="right"  width="200px"/>
+.. image:: https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg
+	:target: https://github.com/walchko/pygecko
 
 
 .. image:: https://img.shields.io/pypi/v/pygecko.svg

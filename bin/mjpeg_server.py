@@ -75,7 +75,6 @@ class mjpgServer(BaseHTTPRequestHandler):
 		# 	self.sub = zmq.Sub(topics=self.topic, connect_to=self.hostinfo)
 		# 	return False, None
 
-
 	def do_GET(self):
 		print 'connection from:', self.address_string()
 
