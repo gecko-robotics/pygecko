@@ -1,9 +1,9 @@
-pyGecko
-============================
 
 .. image:: https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg
 	:target: https://github.com/walchko/pygecko
 
+pyGecko
+============================
 
 .. image:: https://img.shields.io/pypi/v/pygecko.svg
 	:target: https://github.com/walchko/pygecko
@@ -132,6 +132,7 @@ Change Log
 -------------
 
 ============ ======= ============================
+2017-Apr-02  0.8.2   fix pypi doc and refactor
 2017-Mar-19  0.7.0   refactored
 2017-Mar-12  0.6.0   changed messages from dict to classes
 2016-Dec-26  0.5.0   refactor
