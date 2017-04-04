@@ -6,7 +6,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 from BaseHTTPServer import HTTPServer
 import time
 import argparse
-from opencvutils.video import Camera
+from opencvutils import Camera
 import socket as Socket
 # import errno
 
