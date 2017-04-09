@@ -20,3 +20,4 @@ ignore-paths:
 
 python-targets:
     - 2
+    - 3

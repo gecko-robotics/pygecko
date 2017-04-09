@@ -13,7 +13,18 @@ import simplejson as json  # supposed to be better than json
 import math
 import numpy as np
 import base64
-import cv2
+
+# are we testing in travis-ci, if so, do fake cv2
+# eventually I will fix this
+import os
+env = os.environ
+if 'TRAVIS' in env:
+	class cv2(object):
+		def imdecode(self, a, b): pass
+		def imencode(self, a, b): pass
+
+else:
+	import cv2
 from functools import wraps
 # import time
 
