@@ -2,7 +2,7 @@
 
 import os
 from pygecko import Bag
-import pygecko.Messages as Msg
+from pygecko import Messages as Msg
 # import random
 
 

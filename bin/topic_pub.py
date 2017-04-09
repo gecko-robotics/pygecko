@@ -3,7 +3,7 @@
 from __future__ import print_function
 import argparse
 import pygecko.lib.Messages as Msg
-from pygecko.lib import TopicPub
+from pygecko import TopicPub
 
 
 def handleArgs():

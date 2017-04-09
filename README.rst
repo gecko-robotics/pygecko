@@ -53,6 +53,13 @@ If you wish to develop and submit git-pulls, you can do::
 	cd pygecko
 	pip install -e .
 
+Testing
+~~~~~~~~~
+
+Since I have both python2 and python3 installed, I need to test with both::
+
+	python2 -m nose *.py
+	python3 -m nose *.py
 
 Layout
 ------------

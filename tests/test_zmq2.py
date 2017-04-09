@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 # import sys
 import threading
 import time
 # import random
-
 import zmq
 
 
@@ -27,7 +27,7 @@ def subscriber(msg):
 	# Get and process messages
 	while True:
 		clock = float(sub.recv())
-		print 'recvd:', clock
+		print('recvd:', clock)
 		time.sleep(1)
 		# Suicide snail logic
 		# if (time.time() - clock > MAX_ALLOWED_DELAY):

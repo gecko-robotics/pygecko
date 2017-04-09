@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 ##############################################
 # The MIT License (MIT)
 # Copyright (c) 2016 Kevin Walchko
@@ -15,7 +13,7 @@ from __future__ import division
 import zmq
 import simplejson as json
 import socket as Socket
-from Messages import serialize, deserialize
+from .Messages import serialize, deserialize
 
 
 class ZMQError(Exception):
@@ -71,7 +69,7 @@ class Pub(Base):
 			self.socket.bind(self.bind_to)
 			# self.socket.setsockopt(zmq.SNDHWM, 1)
 
-		except Exception, e:
+		except Exception as e:
 			error = '[-] Pub Error, {0!s}'.format((str(e)))
 			# print error
 			raise ZMQError(error)
@@ -118,7 +116,7 @@ class Sub(Base):
 				for t in topics:
 					self.socket.setsockopt(zmq.SUBSCRIBE, t)
 
-		except Exception, e:
+		except Exception as e:
 			error = '[-] Sub Error, {0!s}'.format((str(e)))
 			# print error
 			raise ZMQError(error)
@@ -197,7 +195,3 @@ class ServiceClient(Base):
 		jmsg = self.socket.recv()
 		msg = json.loads(jmsg)
 		return msg
-
-
-# if __name__ == "__main__":
-# 	print('hello cowboy!')

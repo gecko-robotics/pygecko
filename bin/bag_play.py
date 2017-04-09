@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from pygecko.lib.Bag import Play
+from pygecko import Play
 import argparse
 
 

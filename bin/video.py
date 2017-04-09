@@ -15,8 +15,8 @@
 import cv2
 import yaml
 import argparse
-from opencvutils.video.Camera import Camera
-from opencvutils.video.Camera import SaveVideo
+from opencvutils import Camera
+from opencvutils import SaveVideo
 
 
 def read(matrix_name):

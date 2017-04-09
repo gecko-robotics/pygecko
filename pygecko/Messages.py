@@ -6,6 +6,8 @@
 # see LICENSE for full details
 ##############################################
 
+from __future__ import print_function
+from __future__ import division
 import time
 import simplejson as json  # supposed to be better than json
 import math
@@ -210,7 +212,7 @@ class Image(object):
 		elif len(shp) == 3:
 			self.depth = 1  # color ... why not shp[2]
 		else:
-			print 'crap, wrong shape {}'.format(shp)
+			print('crap, wrong shape {}'.format(shp))
 		self._img = image
 
 	@staticmethod

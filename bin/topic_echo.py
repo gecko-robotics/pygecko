@@ -8,7 +8,7 @@
 
 from __future__ import print_function
 import argparse
-from pygecko.lib import TopicSub
+from pygecko import TopicSub
 
 
 def handleArgs():

@@ -11,8 +11,8 @@ import argparse
 import sys
 import tty
 import termios
-import pygecko.lib.ZmqClass as Zmq
-import pygecko.lib.Messages as Msg
+from pygecko import ZmqClass as Zmq
+from pygecko import Messages as Msg
 
 
 class Keyboard(object):

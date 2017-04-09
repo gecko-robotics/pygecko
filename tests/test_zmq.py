@@ -1,9 +1,5 @@
-#!/usr/bin/env python
-
-
 import numpy as np
-# import multiprocessing as mp
-import pygecko.ZmqClass as zmq
+from pygecko import ZmqClass as zmq
 from pygecko.Messages import Image, Vector, dict_to_class
 # from pygecko.lib.Messages import serialize, deserialize
 # import simplejson as json
@@ -30,7 +26,6 @@ def test_pub_sub_dict():
 	pub = zmq.Pub(tcp)
 	sub = zmq.Sub('test', tcp)
 	d = {'Class': 'Vector', 'x': 1.0, 'z': 2.0}
-	# dd = json.dumps(d)
 	tmsg = dict_to_class(d)
 	while True:
 		pub.pub('test', tmsg)
@@ -51,9 +46,6 @@ def test_pub_sub_b64():
 	tmsg.img = im
 	# print(tmsg['size'], tmsg['depth'])
 	while True:
-		# pub.pubB64('test', tmsg)
-		# topic, msg = sub.recvB64()
-
 		pub.pub('test', tmsg)
 		topic, msg = sub.recv()
 

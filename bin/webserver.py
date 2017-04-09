@@ -10,7 +10,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 from socket import gethostname, gethostbyname
 import time
 import multiprocessing as mp
-import pygecko.ZmqClass as zmq
+from pygecko import ZmqClass as zmq
 
 
 class Kludge(mp.Process):

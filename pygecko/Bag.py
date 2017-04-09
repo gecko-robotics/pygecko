@@ -10,8 +10,8 @@ from __future__ import print_function
 import logging
 import gzip  # compression
 import time  # filename date/time
-import ZmqClass as Zmq
-import Messages as Msg  # deserialize topics
+from . import ZmqClass as Zmq
+from . import Messages as Msg  # deserialize topics
 
 # useful to turn off for debugging
 use_compression = True

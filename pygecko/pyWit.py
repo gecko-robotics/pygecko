@@ -6,6 +6,8 @@
 # see LICENSE for full details
 ##############################################
 
+from __future__ import print_function
+from __future__ import division
 import os
 from wit import Wit
 import socket

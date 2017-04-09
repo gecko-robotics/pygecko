@@ -7,7 +7,7 @@
 
 from __future__ import print_function
 import cv2
-import pygecko.lib.ZmqClass as zmq
+from pygecko import ZmqClass as zmq
 # from opencvutils.video import Camera
 import argparse
 import socket
