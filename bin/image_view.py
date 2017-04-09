@@ -58,8 +58,6 @@ if __name__ == '__main__':
 	client.run(args['topic'], (args['host'], args['port']))
 
 
-
-
 	# class LocalCamera(object):
 	# 	"""
 	# 	More of the same?

@@ -5,6 +5,8 @@
 # although this might be the page --- canvas and two.js???
 
 # for the webserver
+from __future__ import print_function
+from __future__ import division
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
 from socket import gethostname, gethostbyname
@@ -23,7 +25,7 @@ class Kludge(mp.Process):
 		self.port = port
 
 	def __del__(self):
-		print 'Kludge says goodbye'
+		print('Kludge says goodbye')
 
 	def run(self):
 		self.sub = zmq.Sub(['voice'])
@@ -32,7 +34,7 @@ class Kludge(mp.Process):
 			time.sleep(3)
 			msg = self.sub.recv()
 			if msg:
-				print msg
+				print(msg)
 
 
 PORT = 8800
@@ -50,7 +52,7 @@ class GetHandler(BaseHTTPRequestHandler):
 		return results
 
 	def do_GET(self):
-		print 'Processing request: {0!s}'.format(self.path)
+		print('Processing request: {0!s}'.format(self.path))
 		if self.path == '/':
 			response = self.page()
 			self.send_response(200)
@@ -58,7 +60,7 @@ class GetHandler(BaseHTTPRequestHandler):
 			self.end_headers()
 			self.wfile.write(response)
 		else:
-			print "GetHandler doesn't support {0!s}".format(self.path)
+			print("GetHandler doesn't support {0!s}".format(self.path))
 			self.send_response(404)
 			self.send_header('Content-type', 'text/html')
 			self.end_headers()
@@ -74,7 +76,7 @@ if __name__ == '__main__':
 	k = Kludge()
 	k.start()
 
-	print 'Starting server on ' + str(ipaddr) + ':' + str(PORT) + ', use <Ctrl-C> to stop'
+	print('Starting server on ' + str(ipaddr) + ':' + str(PORT) + ', use <Ctrl-C> to stop')
 	server = HTTPServer(('0.0.0.0', PORT), GetHandler)
 	server.serve_forever()
 

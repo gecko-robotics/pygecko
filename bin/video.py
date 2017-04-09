@@ -11,7 +11,8 @@
 # To do:
 # - add camera calibration matrix
 #
-
+from __future__ import print_function
+from __future__ import division
 import cv2
 import yaml
 import argparse
@@ -68,11 +69,11 @@ if __name__ == '__main__':
 	cap = Camera()
 	cap.init(win=size, cameraNumber=source)
 
-	print '---------------------------------'
-	print ' ESC/q to quit'
-	print ' v to start/stop video capture'
-	print ' f to grab a frame'
-	print '---------------------------------'
+	print('---------------------------------')
+	print(' ESC/q to quit')
+	print(' v to start/stop video capture')
+	print(' f to grab a frame')
+	print('---------------------------------')
 
 	shot_idx = 0
 	video_idx = 0
@@ -100,18 +101,18 @@ if __name__ == '__main__':
 				vfn = '{0!s}_{1:d}.mp4v'.format(filename, video_idx)
 				h, w = img.shape[:2]
 				save.start(vfn, (w, h), 20.0)
-				print '[+] start capture', vfn
+				print('[+] start capture', vfn)
 			else:
 				save.release()
 				video_idx += 1
-				print '[-] stop capture', vfn
+				print('[-] stop capture', vfn)
 			video = not video
 
 		# Capture a single frame
 		elif ch == ord('f'):
 			fn = '{0!s}/shot_{1:03d}.png'.format(shotdir, shot_idx)
 			cv2.imwrite(fn, img)
-			print '[*] saved image to', fn
+			print('[*] saved image to', fn)
 			shot_idx += 1
 
 		if video:
