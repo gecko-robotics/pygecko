@@ -7,7 +7,7 @@ from build_utils import BinaryDistribution
 
 
 BuildCommand.pkg = 'pygecko'
-BuildCommand.py3 = False
+BuildCommand.py3 = False  # python 3 build isn't working yet with zmq, need time to fix
 PublishCommand.pkg = 'pygecko'
 PublishCommand.version = VERSION
 README = open('README.rst').read()
@@ -36,7 +36,7 @@ setup(
 	],
 	install_requires=[
 		# 'pyrk',
-		'numdifftools',
+		'numdifftools',  # do I really need this? pulls in scipy (issues with RPi), move to drivers?
 		'pyyaml',
 		'pyzmq',
 		'zmq',
@@ -44,7 +44,7 @@ setup(
 		'pyserial',
 		'numpy',
 		'opencvutils',
-		'wit',
+		'wit',  # do I really need this? Voice should be an add on?
 		# 'pyaudio',  # this is crap!
 		'quaternions',
 		'build_utils'
@@ -57,12 +57,12 @@ setup(
 		'make': BuildCommand
 	},
 	scripts=[
-		'bin/mjpeg_server.py',
+		'bin/mjpeg_server.py',  # why? use opencvutils instead
 		'bin/bag_play.py',
 		'bin/bag_record.py',
 		'bin/camera_calibrate.py',
 		'bin/image_view.py',
-		'bin/service.py',
+		'bin/service.py',  # fix
 		'bin/topic_echo.py',
 		'bin/topic_pub.py',
 		'bin/twist_keyboard.py'
