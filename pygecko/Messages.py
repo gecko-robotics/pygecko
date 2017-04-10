@@ -18,15 +18,16 @@ from functools import wraps
 
 # are we testing in travis-ci, if so, do fake cv2
 # eventually I will fix this
-import os
-env = os.environ
-if 'TRAVIS' in env:
-	class cv2(object):
-		def imdecode(self, a, b): pass
-		def imencode(self, a, b): pass
-else:
-	import cv2
+# import os
+# env = os.environ
+# if 'TRAVIS' in env:
+# 	class cv2(object):
+# 		def imdecode(self, a, b): pass
+# 		def imencode(self, a, b): pass
+# else:
+# 	import cv2
 
+import cv2
 
 class MessageError(Exception):
 	pass
