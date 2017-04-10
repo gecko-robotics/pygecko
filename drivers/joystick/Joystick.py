@@ -5,6 +5,9 @@
 # PS4 has 6 axes, 14 buttons, 1 hat
 # This program doesn't grab all buttons, just the most useful :)
 
+# Warning: this code needs to be updated to support the new py2/py3 library. This
+# may crash under py3 and hasn't been tested with the currentl pygecko library.
+
 
 from __future__ import division
 from __future__ import print_function
@@ -17,8 +20,8 @@ except:
 
 import time  # sleep ... why?
 import argparse
-import lib.ZmqClass as zmq
-import lib.Messages as Msg
+from pygecko import ZmqClass as zmq
+from pygecko import Messages as Msg
 
 
 class Joystick(object):
