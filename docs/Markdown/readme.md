@@ -1,6 +1,6 @@
 # pyGecko
 
-![gecko image](https://github.com/walchko/pygecko/raw/master/pics/noun_11784_cc.png)
+![gecko image](https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg)
 
 ## Overview
 
@@ -29,6 +29,8 @@ Robot:
 * can interact with a person
    * listen/talk
    * lights/LCD colors mean different things
+* be both python 2 and python 3 compliant
+   * this is currently in process
 
 # Quick Start
 
@@ -43,6 +45,7 @@ There are various processes running and these processes talk to each other
 through multiple interfaces.
 
 ![singal flow](https://github.com/walchko/pygecko/raw/master/pics/Robot_Processes.png)
+#### Figure 1. Old soccer robot data flow. There are multiple processes each with data [P] publishers and [S] subscribers. Each of these sends messages (explained below) across the interfaces. ZeroMQ is used to create this ROS like pub/sub architecture. There are plans to include ROS-like [V] services, but those aren't done yet.
 
 My system draws from messages defined by [ROS](www.ros.org). A list of the
 interfaces is below:
@@ -115,7 +118,7 @@ These come from common ROS descriptions
 
 Use `pip` to install the following python libraries:
 
-* PySDL2 - PS4 joystick
+* PySDL2 - PS4 joystick (optional)
 * PyYAML - read yaml config files
 * pyzmq - interprocess communication library
 * smbus-cffi - [I2C](https://pypi.python.org/pypi/smbus-cffi) support
@@ -130,7 +133,7 @@ Use `pip` to install the following python libraries:
 
 You will need the following libraries from Adafruit for:
 
-###[GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
+### [GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
 
 	sudo apt-get update
 	sudo apt-get install build-essential python-pip python-dev python-smbus git
@@ -138,13 +141,13 @@ You will need the following libraries from Adafruit for:
 	cd Adafruit_Python_GPIO
 	python setup.py install
 
-###[LED Matrix](https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code):
+### [LED Matrix](https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code):
 
 	git clone https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code.git
 
 Have a look at the LEDBackpack 8x8_pixel example
 
-###[IMU](https://github.com/adafruit/Adafruit_Python_BNO055):
+### [IMU](https://github.com/adafruit/Adafruit_Python_BNO055):
 
 	git clone git@github.com:adafruit/Adafruit_Python_BNO055.git
 	cd Adafruit_Python_BNO055
