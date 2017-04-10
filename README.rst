@@ -26,8 +26,13 @@ My robot software.
 * Uses OpenCV to process on-board or stream video off-board to remote
 * All of this runs on `Raspberry Pi3 <http://www.raspberrypi.org>`_
 
+Documentation
+-------------------
+
 **Note:** This re-write is still very early and not fully running yet, just
 parts.
+
+The documentation can be found `here <docs/Markdown>`_.
 
 Install
 -----------
@@ -60,6 +65,9 @@ Since I have both python2 and python3 installed, I need to test with both::
 
 	python2 -m nose *.py
 	python3 -m nose *.py
+
+**Warning:** python3 is not fully supported yet, it is giving me problems. Only
+python2 is currently supported.
 
 Layout
 ------------
