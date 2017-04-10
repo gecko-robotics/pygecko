@@ -36,7 +36,7 @@ setup(
 	],
 	install_requires=[
 		# 'pyrk',
-		'numdifftools',  # do I really need this? pulls in scipy (issues with RPi), move to drivers?
+		# 'numdifftools',  # do I really need this? pulls in scipy (issues with RPi), move to drivers?
 		'pyyaml',
 		'pyzmq',
 		'zmq',
@@ -44,7 +44,7 @@ setup(
 		'pyserial',
 		'numpy',
 		'opencvutils',
-		'wit',  # do I really need this? Voice should be an add on?
+		# 'wit',  # do I really need this? Voice should be an add on?
 		# 'pyaudio',  # this is crap!
 		'quaternions',
 		'build_utils'
