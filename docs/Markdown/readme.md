@@ -2,6 +2,8 @@
 
 ![gecko image](https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg)
 
+**2017-04-10: This is a little out of date and needs updating**
+
 ## Overview
 
 This is my long running hobby and what I want to get out of it:
