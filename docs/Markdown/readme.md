@@ -45,7 +45,7 @@ There are various processes running and these processes talk to each other
 through multiple interfaces.
 
 ![singal flow](https://github.com/walchko/pygecko/raw/master/pics/Robot_Processes.png)
-#### Figure 1. Old soccer robot data flow. There are multiple processes each with data [P] publishers and [S] subscribers. Each of these sends messages (explained below) across the interfaces. ZeroMQ is used to create this ROS like pub/sub architecture. There are plans to include ROS-like [V] services, but those aren't done yet.
+###### **Figure 1.** Old soccer robot data flow. There are multiple processes each with data [P] publishers and [S] subscribers. Each of these sends messages (explained below) across the interfaces. ZeroMQ is used to create this ROS like pub/sub architecture. There are plans to include ROS-like [V] services, but those aren't done yet.
 
 My system draws from messages defined by [ROS](www.ros.org). A list of the
 interfaces is below:
