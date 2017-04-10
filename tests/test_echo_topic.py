@@ -1,5 +1,6 @@
-#!/usr/bin/env python
 
+
+from __future__ import print_function
 # import sys
 import threading
 import time
@@ -19,7 +20,7 @@ def subscriber(msg):
 		tp, ret = sub.recv()
 		if ret:
 			assert ret == msg
-			print 'found:', ret == msg
+			print('found:', ret == msg)
 			return
 		time.sleep(0.1)
 
@@ -86,6 +87,3 @@ def test():
 # 	pub_thread.join()
 # 	sub_thread.join()
 # 	time.sleep(0.1)
-
-if __name__ == '__main__':
-	test()

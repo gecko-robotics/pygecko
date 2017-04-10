@@ -11,38 +11,85 @@ class BinaryDistribution(Distribution):
 		return False
 
 
-class BuildCommand(TestCommand):
-	"""Build binaries/packages"""
-	def run_tests(self):
-		print('Delete dist directory and clean up binary files')
-		os.system('rm -fr dist')
-		os.system('rm pygecko/*.pyc')
-		os.system('rm pygecko/__pycache__/*.pyc')
+def py2(cmd):
+	return os.system("unset PYTHONPATH && python2 {}".format(cmd))
 
+
+def py3(cmd):
+	return os.system("unset PYTHONPATH && python3 {}".format(cmd))
+
+
+def kbuild(pkg, test=True):
+	print('Delete dist directory and clean up binary files')
+	os.system('rm -fr dist')
+	os.system('rm -fr build')
+	os.system('rm -fr .eggs')
+	# os.system('rm -fr {}.egg-info'.format(pkg))
+	os.system('rm {}/*.pyc'.format(pkg))
+	os.system('rm -fr {}/__pycache__'.format(pkg))
+
+	if test:
 		print('Run Nose tests')
-		# ret = os.system("cd tests && python2 -m nose -v *.py")
-		# if ret > 0:
-		# 	print('<<< Python2 nose tests failed >>>')
-		# 	return
-		# ret = os.system("cd tests && python3 -m nose -v *.py")
+		ret = os.system("unset PYTHONPATH; python2 -m nose -w tests -v test.py")
+		# ret = py2('-m nose -w tests -v test.py')
+		if ret > 0:
+			print('<<< Python2 nose tests failed >>>')
+			return
+
+		# ret = os.system("unset PYTHONPATH; python3 -m nose -w tests -v test.py")
+		# # ret = py3('-m nose -w tests -v test.py')
 		# if ret > 0:
 		# 	print('<<< Python3 nose tests failed >>>')
 		# 	return
 
-		print('Building packages ...')
-		print('>> Python source ----------------------------------------------')
-		os.system("python setup.py sdist")
-		print('>> Python 2.7 -------------------------------------------------')
-		os.system("python2 setup.py bdist_wheel")
-		print('>> Python 3.6 -------------------------------------------------')
-		os.system("python3 setup.py bdist_wheel")
+	print('Building packages ...')
+	print('>> Python source ----------------------------------------------')
+	os.system("unset PYTHONPATH && python setup.py sdist")
+	print('>> Python 2 ---------------------------------------------------')
+	os.system("unset PYTHONPATH && python2 setup.py bdist_wheel")
+	# print('>> Python 3 ---------------------------------------------------')
+	# os.system("unset PYTHONPATH && python3 setup.py bdist_wheel")
+
+
+def package(pkg, version):
+	print('Publishing to PyPi ...')
+	os.system("unset PYTHONPATH && twine upload dist/{}-{}*".format(pkg, version))
+
+
+class BuildCommand(TestCommand):
+	"""Build binaries/packages"""
+	def run_tests(self):
+		kbuild('pygecko')
+		# print('Delete dist directory and clean up binary files')
+		# os.system('rm -fr dist')
+		# os.system('rm pygecko/*.pyc')
+		# os.system('rm pygecko/__pycache__/*.pyc')
+		#
+		# print('Run Nose tests')
+		# ret = os.system("unset PYTHONPATH && cd tests && python2 -m nose -v *.py")
+		# if ret > 0:
+		# 	print('<<< Python2 nose tests failed >>>')
+		# 	return
+		# ret = os.system("unset PYTHONPATH && cd tests && python3 -m nose -v *.py")
+		# if ret > 0:
+		# 	print('<<< Python3 nose tests failed >>>')
+		# 	return
+		#
+		# print('Building packages ...')
+		# print('>> Python source ----------------------------------------------')
+		# os.system("unset PYTHONPATH && python setup.py sdist")
+		# print('>> Python 2.7 -------------------------------------------------')
+		# os.system("unset PYTHONPATH && python2 setup.py bdist_wheel")
+		# print('>> Python 3.6 -------------------------------------------------')
+		# os.system("unset PYTHONPATH && python3 setup.py bdist_wheel")
 
 
 class PublishCommand(TestCommand):
 	"""Publish to Pypi"""
 	def run_tests(self):
-		print('Publishing to PyPi ...')
-		os.system("twine upload dist/pygecko-{}*".format(VERSION))
+		package('pygecko', VERSION)
+		# print('Publishing to PyPi ...')
+		# os.system("unset PYTHONPATH && twine upload dist/pygecko-{}*".format(VERSION))
 
 
 README = open('README.rst').read()
@@ -70,7 +117,7 @@ setup(
 		'Topic :: Software Development :: Libraries :: Python Modules'
 	],
 	install_requires=[
-		'pyrk',
+		# 'pyrk',
 		'numdifftools',
 		'pyyaml',
 		'pyzmq',
