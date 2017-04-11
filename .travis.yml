@@ -63,9 +63,9 @@ env:
 # install other libraries using pip
 install:
     - ./install-opencv.sh
-    - pip install -U --user pip setuptools wheel
+    - pip install -U pip setuptools wheel
     # - pip install -U pyzmq pyyaml opencvutils simplejson wit quaternions numdifftools pyrk
-    - pip install -U --user pyzmq pyyaml opencvutils simplejson quaternions pyrk
+    - pip install -U pyzmq pyyaml opencvutils simplejson quaternions pyrk fake_rpi build_utils
     - pip install .
     # - pip install -U -r requirements.txt
 
