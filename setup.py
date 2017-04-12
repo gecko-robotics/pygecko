@@ -6,14 +6,15 @@ from build_utils import PublishCommand
 from build_utils import BinaryDistribution
 
 
-BuildCommand.pkg = 'pygecko'
+PACKAGE_NAME = 'pygecko'
+BuildCommand.pkg = PACKAGE_NAME
 BuildCommand.py3 = False  # python 3 build isn't working yet with zmq, need time to fix
-PublishCommand.pkg = 'pygecko'
+PublishCommand.pkg = PACKAGE_NAME
 PublishCommand.version = VERSION
 README = open('README.rst').read()
 
 setup(
-	name="pygecko",
+	name=PACKAGE_NAME,
 	version=VERSION,
 	author="Kevin Walchko",
 	keywords=['framework', 'robotic', 'robot', 'vision', 'ros', 'distributed'],
@@ -49,7 +50,7 @@ setup(
 		'quaternions',
 		'build_utils'
 	],
-	url="https://github.com/walchko/pygecko",
+	url="https://github.com/walchko/{}".format(PACKAGE_NAME),
 	long_description=README,
 	packages=['pygecko'],
 	cmdclass={
