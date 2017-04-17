@@ -1,6 +1,6 @@
 from __future__ import print_function
 from setuptools import setup
-from pygecko import __version__ as VERSION
+from pygecko.version import __version__ as VERSION
 from build_utils import BuildCommand
 from build_utils import PublishCommand
 from build_utils import BinaryDistribution

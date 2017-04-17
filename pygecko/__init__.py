@@ -9,8 +9,9 @@ from .TTS import TTS
 from .Transforms import from_euler
 from .FileStorage import FileStorage
 from .Topic import TopicPub, TopicSub
+from pygecko import __version__
 
-__version__ = '0.8.2'
+
 __license__ = 'MIT'
 __copyright__ = 'Copyright (c) 2010 Kevin Walchko'
 __author__ = 'Kevin J. Walchko'
