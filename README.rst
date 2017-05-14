@@ -147,6 +147,7 @@ Change Log
 -------------
 
 ============ ======= ============================
+2017-May-14  0.8.3   updates and refactor
 2017-Apr-02  0.8.2   fix pypi doc and refactor
 2017-Mar-19  0.7.0   refactored
 2017-Mar-12  0.6.0   changed messages from dict to classes
@@ -156,12 +157,10 @@ Change Log
 ============ ======= ============================
 
 
-License
-----------
+MIT License
+---------------
 
-**The MIT License (MIT)**
-
-Copyright (c) 2010 Kevin J. Walchko
+**Copyright (c) 2010 Kevin J. Walchko**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
