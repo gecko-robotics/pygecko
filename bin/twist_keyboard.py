@@ -15,6 +15,16 @@ from pygecko import ZmqClass as Zmq
 from pygecko import Messages as Msg
 
 
+def limit_max(x):
+	x = 1.0 if x > 1.0 else x
+	return x
+
+
+def limit_min(x):
+	x = -1.0 if x < -1.0 else x
+	return x
+
+
 class Keyboard(object):
 	"""
 	Keyboard class to handle input and then
@@ -24,10 +34,10 @@ class Keyboard(object):
 	"""
 	def __init__(self, host, port):
 		self.addr = (host, port)
-		pass
+		# pass
 
 	def run(self):
-		pub = Zmq.Pub(self.addr)
+		pub = Zmq.Pub(self.addr, hwm=100)
 		twist = Msg.Twist()
 
 		# fd = sys.stdin.fileno()
@@ -45,19 +55,23 @@ class Keyboard(object):
 
 			print('>>>', key)
 
-			# if key == 'a': twist['angular']['z'] += 0.1
-			# elif key == 'd': twist['angular']['z'] -= 0.1
-			# elif key == 'w': twist['linear']['x'] += 0.1
-			# elif key == 'x': twist['linear']['y'] -= 0.1
-
-			if key == 'a': twist.angular.z += 0.1
-			elif key == 'd': twist.angular.z -= 0.1
-			elif key == 'w': twist.linear.x += 0.1
-			elif key == 'x': twist.linear.y -= 0.1
+			if key == 'a':
+				twist.angular.z += 0.1
+				twist.angular.z = limit_max(twist.angular.z)
+			elif key == 'd':
+				twist.angular.z -= 0.1
+				twist.angular.z = limit_min(twist.angular.z)
+			elif key == 'w':
+				twist.linear.x += 0.1
+				twist.linear.x = limit_max(twist.linear.x)
+			elif key == 'x':
+				twist.linear.x -= 0.1
+				twist.linear.x = limit_min(twist.linear.x)
 			elif key == 's':  # stop - all 0's
-				twist.linear.set(0, 0, 0)
-				twist.angular.set(0, 0, 0)
-			elif key == 'q': exit()
+				twist.linear.set(0.0, 0.0, 0.0)
+				twist.angular.set(0.0, 0.0, 0.0)
+			elif key == 'q':
+				exit()
 
 			pub.pub('twist_kb', twist)
 
@@ -73,6 +87,8 @@ def handleArgs():
 
 def main():
 	args = handleArgs()
+
+	print('Twist Keyboard on {}:{}'.format(args['publish'][0], args['publish'][1]))
 
 	print('------------------------')
 	print('q - quit')

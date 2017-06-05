@@ -40,7 +40,6 @@ setup(
 		# 'numdifftools',  # do I really need this? pulls in scipy (issues with RPi), move to drivers?
 		'pyyaml',
 		'pyzmq',
-		'zmq',
 		'simplejson',
 		'pyserial',
 		'numpy',
