@@ -471,6 +471,25 @@ class Array(object):
 	def __str__(self):
 		return 'Array[{}]: {}'.format(len(self.array), self.array)
 
+@froze_it
+class Dictionary(object):
+	"""
+	Dictionary
+	"""
+	def __init__(self, data=None):
+		self.Class = 'Dictionary'
+		self.dict = {}
+		# self.stamp = time.time()
+
+		if data:
+			for key, value in data.items():
+				print('Dictionary >>', key, data[key])
+				# setattr(self, key, list(data[key]))
+				getattr(self, dict)[key] = value
+
+	def __str__(self):
+		return 'Array[{}]: {}'.format(len(self.array), self.array)
+
 
 def serialize(c):
 	"""
@@ -496,7 +515,8 @@ idc = {
 	'Compass': Compass,
 	'Range': Range,
 	'Power': Power,
-	'Array': Array
+	'Array': Array,
+	'Dictionary': Dictionary
 }
 
 
