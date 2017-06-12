@@ -1,21 +1,21 @@
 
-.. image:: https://github.com/walchko/pygecko/raw/master/pics/gecko.jpg
-	:target: https://github.com/walchko/pygecko
+.. image:: https://github.com/MomsFriendlyRobotCompany/pygecko/raw/master/pics/gecko.jpg
+	:target: https://github.com/MomsFriendlyRobotCompany/pygecko
 
 pyGecko
 ============================
 
 .. image:: https://img.shields.io/pypi/v/pygecko.svg
-	:target: https://github.com/walchko/pygecko
+	:target: https://github.com/MomsFriendlyRobotCompany/pygecko
 .. image:: https://img.shields.io/pypi/l/pygecko.svg
-	:target: https://github.com/walchko/pygecko
-.. image:: https://travis-ci.org/walchko/pygecko.svg?branch=master
-	:target: https://travis-ci.org/walchko/pygecko
-.. image:: https://landscape.io/github/walchko/pygecko/master/landscape.svg?style=flat
-	:target: https://landscape.io/github/walchko/pygecko/master
+	:target: https://github.com/MomsFriendlyRobotCompany/pygecko
+.. image:: https://travis-ci.org/MomsFriendlyRobotCompany/pygecko.svg?branch=master
+	:target: https://travis-ci.org/MomsFriendlyRobotCompany/pygecko
+.. image:: https://landscape.io/github/MomsFriendlyRobotCompany/pygecko/master/landscape.svg?style=flat
+	:target: https://landscape.io/github/MomsFriendlyRobotCompany/pygecko/master
 	:alt: Code Health
-.. image:: https://requires.io/github/walchko/pygecko/requirements.svg?branch=master
-	:target: https://requires.io/github/walchko/pygecko/requirements/?branch=master
+.. image:: https://requires.io/github/MomsFriendlyRobotCompany/pygecko/requirements.svg?branch=master
+	:target: https://requires.io/github/MomsFriendlyRobotCompany/pygecko/requirements/?branch=master
 	:alt: Requirements Status
 
 My robot software.
@@ -54,7 +54,7 @@ Development
 
 If you wish to develop and submit git-pulls, you can do::
 
-	git clone https://github.com/walchko/pygecko
+	git clone https://github.com/MomsFriendlyRobotCompany/pygecko
 	cd pygecko
 	pip install -e .
 
