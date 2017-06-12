@@ -11,10 +11,7 @@ pyGecko
 	:target: https://github.com/MomsFriendlyRobotCompany/pygecko
 .. image:: https://travis-ci.org/MomsFriendlyRobotCompany/pygecko.svg?branch=master
 	:target: https://travis-ci.org/MomsFriendlyRobotCompany/pygecko
-.. image:: https://landscape.io/github/MomsFriendlyRobotCompany/pygecko/master/landscape.svg?style=flat
-	:target: https://landscape.io/github/MomsFriendlyRobotCompany/pygecko/master
-	:alt: Code Health
-.. image:: https://requires.io/github/MomsFriendlyRobotCompany/pygecko/requirements.svg?branch=master
+.. image:: https://requires.io/github/walchko/pygecko/requirements.svg?branch=master
 	:target: https://requires.io/github/MomsFriendlyRobotCompany/pygecko/requirements/?branch=master
 	:alt: Requirements Status
 
