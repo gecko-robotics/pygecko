@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from pygecko.Messages import Twist, Image, IMU, Joystick, Vector
+from pygecko.Messages import Twist, Image, IMU, Joystick, Vector, Array, Dictionary
 from pygecko.Messages import Pose, Compass, Range, Quaternion
 from pygecko.Messages import Buttons, Axes
 from pygecko.Messages import serialize, deserialize
@@ -161,6 +161,25 @@ def test_joytstick():
 	assert p.stamp == m.stamp
 	assert p.Class == m.Class
 
+	
+def test_array():
+	a = Array()
+	a.array.append(1,2,3,4)
+	
+	m = serialize(a)
+	m = deserialize(m)
+	assert len(m.array) == 4
+	for i in range(4):
+		assert m[i] == i
+
+		
+def test_dictionary():
+	d = Dictionary()
+	d.dict['bob'] = 5
+	m = serialize(p)
+	m = deserialize(m)
+	assert 'bob' in m.dict
+	assert m['bob'] == 5
 
 @raises(Exception)
 def test_msg():
