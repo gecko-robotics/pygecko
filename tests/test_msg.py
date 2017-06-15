@@ -164,7 +164,9 @@ def test_joytstick():
 	
 def test_array():
 	a = Array()
-	a.array.append([1,2,3,4])
+	
+	for i in range(4):
+		a.array.append(i)
 	
 	m = serialize(a)
 	m = deserialize(m)
