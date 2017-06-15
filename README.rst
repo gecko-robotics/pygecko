@@ -31,6 +31,41 @@ parts.
 
 The documentation can be found `here <docs/Markdown>`_.
 
+Simple example, publisher:
+
+.. code-block:: python
+
+	from pygecko import ZmqClass as zmq
+	from pygecko.Messages import Vector
+	import time
+	
+	tcp = ('0.0.0.0', 9000)
+	pub = zmq.Pub(tcp)
+	
+	tmsg = Vector(1, 2, 3.456)
+	
+	while True:
+		pub.pub('test', tmsg)
+		time.sleep(1)
+
+Subscriber:
+
+.. code-block:: python
+
+	from __future__ import print_function
+	from pygecko import ZmqClass as zmq
+	import time
+	
+	sub = zmq.Sub(['test'], ('0.0.0.0', 9000))
+	
+	while True:
+		topic, msg = sub.recv()
+
+		if msg and (topic == 'test'):
+			print('Recv:', msg)
+		
+		time.sleep(0.5)
+
 Install
 -----------
 
