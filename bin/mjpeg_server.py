@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import cv2
 from BaseHTTPServer import BaseHTTPRequestHandler
 from BaseHTTPServer import HTTPServer
@@ -15,6 +14,11 @@ import socket as Socket
 
 # not sure flask is any better:
 # https://blog.miguelgrinberg.com/post/video-streaming-with-flask
+
+#``mjpeg_server``
+#	* only handles one connection at a time ... make threaded?
+#	* sometimes the video stream is slow to load, but then it works fine
+#	* handle client disconnect (broken pipe - 32) better
 
 
 def compress(orig, comp):
@@ -55,25 +59,6 @@ class mjpgServer(BaseHTTPRequestHandler):
 			raise Exception('Error, you must specify "cv" or "pi" for camera type')
 
 		time.sleep(3)
-
-	# def getImage(self):
-	# 	if self.cam:
-	# 		print 'cam'
-	# 		return self.cam.read()
-
-		# elif self.sub:
-		# 	# print 'sub'
-		# 	_, msg = self.sub.recvB64()
-		# 	if msg:
-		# 		return True, msg['image']
-		# 	else:
-		# 		return False, None
-		# else:
-		# 	print 'sub init'
-		# 	if not self.topic or not self.hostinfo:
-		# 		raise Exception('Error, you must either setup camera or setup subscriber topic/hostinfo')
-		# 	self.sub = zmq.Sub(topics=self.topic, connect_to=self.hostinfo)
-		# 	return False, None
 
 	def do_GET(self):
 		print 'connection from:', self.address_string()
@@ -122,9 +107,6 @@ class mjpgServer(BaseHTTPRequestHandler):
 			self.wfile.write('<h1>{0!s}:{1!s}</h1>'.format(ip, port))
 			self.wfile.write('<img src="http://{}:{}/mjpg"/>'.format(ip, port))
 			self.wfile.write('<p>{0!s}</p>'.format((self.version_string())))
-			# self.wfile.write('<p>The mjpg stream can be accessed directly at:<ul>')
-			# self.wfile.write('<li><a href="http://{0!s}:{1!s}/mjpg"/>http://{0!s}:{1!s}/mjpg</a></li>'.format(ip, port))
-			# self.wfile.write('<li><a href="http://{0!s}:{1!s}/mjpg"/>http://{0!s}:{1!s}/mjpg</a></li>'.format(hostname, port))
 			self.wfile.write('</p></ul>')
 			self.wfile.write('<p>This only handles one connection at a time</p>')
 			self.wfile.write('</body></html>')
