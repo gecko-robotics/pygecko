@@ -154,20 +154,6 @@ twist_keyboard       Y       simple keyboard interface to send twist messages to
 
 **Note:** There is some duplication between these, and it will eventually be sorted out.
 
-
-ToDo
------
-
-* fix speech ... not sure best way to do this
-* better modularity for various robots ... not sure how to do this
-	* multiple robots use same/similar software ... not sure how to best divide things up
-* ``mjpeg_server``
-	* only handles one connection at a time ... make threaded?
-	* sometimes the video stream is slow to load, but then it works fine
-	* handle client disconnect (broken pipe - 32) better
-* ``quaternions`` - use/update
-* implement a simple dynamic html server that takes json data in and produces webpages of diagnostic/status info
-
 History
 -----------
 
