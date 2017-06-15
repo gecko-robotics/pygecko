@@ -66,6 +66,25 @@ Subscriber:
 		
 		time.sleep(0.5)
 
+========== ====================================================
+Message    Description
+========== ====================================================
+Vector     (x,y,z)
+Quaternion (w,x,y,z)
+Wrench     force and torque vectors
+Twist      linear and angualr vectors
+Pose       position and orientation vectors
+IMU        linear_acceleration [vector], angular_velocity [vector], orientation [Quaternion], magnetometer [vector]
+Odom       position and velocity vectors
+Power      current and voltage
+Image      OpenCV image; this will automatically be converted/unconverted into/from base64
+Joystick   PS4 joystick; there are sub-messages: axes and buttons
+Compass    roll, pitch, and heading
+Range      range measurements held in an array from type: IR, Ultrasound, Lidar, or Unknown
+Array      an n dimensional array: [1,2,3 ... n]
+Dictionary a python dictionary
+========== ====================================================
+
 Install
 -----------
 
