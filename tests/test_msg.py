@@ -172,7 +172,7 @@ def test_array():
 	m = deserialize(m)
 	assert len(m.array) == 4
 	for i in range(4):
-		assert m[i] == i
+		assert m.array[i] == i
 
 		
 def test_dictionary():
@@ -181,7 +181,7 @@ def test_dictionary():
 	m = serialize(p)
 	m = deserialize(m)
 	assert 'bob' in m.dict
-	assert m['bob'] == 5
+	assert m.dict['bob'] == 5
 
 @raises(Exception)
 def test_msg():
