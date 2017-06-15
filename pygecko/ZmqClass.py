@@ -88,7 +88,7 @@ class Pub(Base):
 		out: none
 		"""
 		jmsg = serialize(msg)
-		self.socket.send_multipart([topic, jmsg])
+		self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
 
 
 class Sub(Base):
@@ -99,6 +99,12 @@ class Sub(Base):
 		Base.__init__(self)
 		self.connect_to = self.getAddress(connect_to)
 		self.poll_time = poll_time
+
+		if type(topics) is list:
+			pass
+		else:
+			raise Exception('topics must be a list')
+
 		self.topics = topics
 		try:
 			self.socket = self.ctx.socket(zmq.SUB)
@@ -110,11 +116,12 @@ class Sub(Base):
 			# can also use: self.socket.subscribe(topic) or unsubscribe()
 			if topics is None:
 				print("Receiving messages on ALL topics...")
-				self.socket.setsockopt(zmq.SUBSCRIBE, '')
+				self.socket.setsockopt(zmq.SUBSCRIBE, b'')
 			else:
-				print("{}:{} receiving messages on topics: {} ...".format(connect_to[0], connect_to[1], topics))
+				# print("{}:{} receiving messages on topics: {} ...".format(connect_to[0], connect_to[1], topics))
 				for t in topics:
-					self.socket.setsockopt(zmq.SUBSCRIBE, t)
+					print("{}:{} receiving messages on topics: {} ...".format(connect_to[0], connect_to[1], t))
+					self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
 
 		except Exception as e:
 			error = '[-] Sub Error, {0!s}'.format((str(e)))
@@ -123,10 +130,10 @@ class Sub(Base):
 
 	def __del__(self):
 		if self.topics is None:
-			self.socket.setsockopt(zmq.UNSUBSCRIBE, '')
+			self.socket.setsockopt(zmq.UNSUBSCRIBE, b'')
 		else:
 			for t in self.topics:
-				self.socket.setsockopt(zmq.UNSUBSCRIBE, t)
+				self.socket.setsockopt(zmq.UNSUBSCRIBE, t.encode('ascii'))
 		self.socket.close()
 		self._stop()
 

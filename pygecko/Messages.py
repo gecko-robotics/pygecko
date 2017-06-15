@@ -29,6 +29,7 @@ from functools import wraps
 
 import cv2
 
+
 class MessageError(Exception):
 	pass
 
@@ -464,12 +465,16 @@ class Array(object):
 
 		if data:
 			for key in data:
-				print('Array >>', key, data[key])
+				# print('Array >>', key, data[key])
 				# setattr(self, key, list(data[key]))
 				setattr(self, key, data[key])
+				# if key == 'dict':
+
+		print(self)
 
 	def __str__(self):
 		return 'Array[{}]: {}'.format(len(self.array), self.array)
+
 
 @froze_it
 class Dictionary(object):
@@ -480,15 +485,25 @@ class Dictionary(object):
 		self.Class = 'Dictionary'
 		self.dict = {}
 		# self.stamp = time.time()
+		# print('data:', data)
+		# print('type(data):', type(data))
 
 		if data:
 			for key, value in data.items():
-				print('Dictionary >>', key, data[key])
+				# print('Dictionary >>', key, data[key])
+
 				# setattr(self, key, list(data[key]))
-				getattr(self, dict)[key] = value
+				if key == 'dict':
+					for k, v in value.items():
+						# print('sub:', k, v)
+						getattr(self, key)[k] = v
+				else:
+					setattr(self, key, data[key])
+
+		print(self)
 
 	def __str__(self):
-		return 'Array[{}]: {}'.format(len(self.array), self.array)
+		return 'Dictionary: {}'.format(len(self.dict))
 
 
 def serialize(c):

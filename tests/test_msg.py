@@ -161,27 +161,28 @@ def test_joytstick():
 	assert p.stamp == m.stamp
 	assert p.Class == m.Class
 
-	
+
 def test_array():
 	a = Array()
-	
+
 	for i in range(4):
 		a.array.append(i)
-	
+
 	m = serialize(a)
 	m = deserialize(m)
 	assert len(m.array) == 4
 	for i in range(4):
 		assert m.array[i] == i
 
-		
+
 def test_dictionary():
 	d = Dictionary()
 	d.dict['bob'] = 5
-	m = serialize(p)
+	m = serialize(d)
 	m = deserialize(m)
 	assert 'bob' in m.dict
 	assert m.dict['bob'] == 5
+
 
 @raises(Exception)
 def test_msg():

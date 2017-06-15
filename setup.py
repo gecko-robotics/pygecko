@@ -49,7 +49,7 @@ setup(
 		'quaternions',
 		'build_utils'
 	],
-	url="https://github.com/walchko/{}".format(PACKAGE_NAME),
+	url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),
 	long_description=README,
 	packages=['pygecko'],
 	cmdclass={

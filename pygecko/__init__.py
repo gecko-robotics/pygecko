@@ -7,7 +7,7 @@ from .TTS import TTS
 from .Transforms import from_euler
 from .FileStorage import FileStorage
 from .Topic import TopicPub, TopicSub
-from version import __version__
+from .version import __version__
 
 
 __license__ = 'MIT'
