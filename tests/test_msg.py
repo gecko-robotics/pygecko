@@ -166,22 +166,30 @@ def test_array():
 	a = Array()
 
 	for i in range(4):
-		a.array.append(i)
+		a.append(i)
 
 	m = serialize(a)
 	m = deserialize(m)
 	assert len(m.array) == 4
 	for i in range(4):
-		assert m.array[i] == i
+		assert m[i] == a[i]
 
 
 def test_dictionary():
 	d = Dictionary()
 	d.dict['bob'] = 5
+	d.dict['jim'] = -7
 	m = serialize(d)
 	m = deserialize(m)
+	
 	assert 'bob' in m.dict
-	assert m.dict['bob'] == 5
+	assert m['bob'] == d['bob']
+
+	for key in m.keys():
+		assert m[key] == d[key]
+
+	for k, v in m.items():
+		assert d[k] == v
 
 
 @raises(Exception)

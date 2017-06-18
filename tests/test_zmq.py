@@ -3,6 +3,7 @@ from pygecko import ZmqClass as zmq
 from pygecko.Messages import Image, Vector, dict_to_class
 # from pygecko.lib.Messages import serialize, deserialize
 # import simplejson as json
+from pygecko import Messages as Msgs
 
 
 def test_pub_sub():
@@ -11,6 +12,7 @@ def test_pub_sub():
 	sub = zmq.Sub(['test'], tcp)
 	# tmsg = {'a': 1, 'b': 2}
 	tmsg = Vector()
+	tmsg.set(2, 3, 4)
 	while True:
 		pub.pub('test', tmsg)
 		topic, msg = sub.recv()
@@ -21,24 +23,51 @@ def test_pub_sub():
 			break
 
 
+def test_pub_sub_msgs():
+	tcp = ('127.0.0.1', 9001)
+	pub = zmq.Pub(tcp)
+	sub = zmq.Sub(['test'], tcp)
+	msgs = [
+		Msgs.Vector(),
+		Msgs.Quaternion(),
+		Msgs.Array(),
+		Msgs.IMU(),
+		Msgs.Dictionary(),
+		Msgs.Odom(),
+		Msgs.Joystick(),
+		Msgs.Twist(),
+		Msgs.Wrench()
+	]
+	for tmsg in msgs:
+		while True:
+			print(tmsg)
+			pub.pub('test', tmsg)
+			topic, msg = sub.recv()
+
+			if msg:
+				assert msg == tmsg
+				assert topic == b'test'
+				break
+
+
 def test_pub_sub_vector():
-	tcp = ('127.0.0.1', 9000)
+	tcp = ('127.0.0.1', 9001)
 	pub = zmq.Pub(tcp)
 	sub = zmq.Sub(['test'], tcp)
 	d = {'Class': 'Vector', 'x': 1.0, 'z': 2.0}
 	tmsg = dict_to_class(d)
-	while True:
+	for _ in range(10):
 		pub.pub('test', tmsg)
 		topic, msg = sub.recv()
 
 		if msg:
 			assert msg == tmsg
 			assert topic == b'test'
-			break
+			# break
 
 
 def test_pub_sub_b64():
-	tcp = ('127.0.0.1', 9000)
+	tcp = ('127.0.0.1', 9002)
 	pub = zmq.Pub(tcp)
 	sub = zmq.Sub(['test'], tcp)
 	im = np.random.rand(100, 100)

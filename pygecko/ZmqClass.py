@@ -18,7 +18,7 @@ from .Messages import serialize, deserialize
 
 """
 14.3.0
-PyZMQ no longer calls Socket.close() or Context.term() during process cleanup. 
+PyZMQ no longer calls Socket.close() or Context.term() during process cleanup.
 Changes to garbage collection in Python 3.4 make this impossible to do sensibly.
 """
 
@@ -102,7 +102,12 @@ class Pub(Base):
 		out: none
 		"""
 		jmsg = serialize(msg)
-		self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
+		# self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
+		done = True
+		while done:
+			done = self.socket.send_multipart([topic, jmsg])
+		# print('pub >>', topic.encode('ascii'))
+
 
 """
 # http://zguide.zeromq.org/py:all
@@ -142,6 +147,7 @@ while True:
         # process weather update
 """
 
+
 class Sub(Base):
 	"""
 	Simple subscriber
@@ -154,14 +160,14 @@ class Sub(Base):
 		if type(topics) is list:
 			pass
 		else:
-			raise Exception('topics must be a list')
+			# raise Exception('topics must be a list')
+			topics = [topics]
 
 		self.topics = topics
 		try:
 			self.socket = self.ctx.socket(zmq.SUB)
-# 			self.socket.set_hwm(hwm)  # set high water mark, so imagery doesn't buffer and slow things down
+			self.socket.set_hwm(hwm)  # set high water mark, so imagery doesn't buffer and slow things down
 			self.socket.connect(self.connect_to)
-# 			self.socket.poll(self.poll_time, zmq.POLLIN)
 
 			# manage subscriptions
 			# can also use: self.socket.subscribe(topic) or unsubscribe()
@@ -172,10 +178,11 @@ class Sub(Base):
 				# print("{}:{} receiving messages on topics: {} ...".format(connect_to[0], connect_to[1], topics))
 				for t in topics:
 					print("{}:{} receiving messages on topics: {} ...".format(connect_to[0], connect_to[1], t))
-					self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
-					
-# 			self.poller = zmq.Poller()
-# 			self.poller.register(self.socket, zmq.POLLIN)
+					# self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
+					self.socket.setsockopt(zmq.SUBSCRIBE, t)
+
+			self.poller = zmq.Poller()
+			self.poller.register(self.socket, zmq.POLLIN)
 # 			print('POLLER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
 		except Exception as e:
@@ -194,36 +201,52 @@ class Sub(Base):
 
 	def recv(self):
 		# check to see if there is read, write, or erros
-# 		r, w, e = zmq.select([self.socket], [], [], self.poll_time)
+		r, w, e = zmq.select([self.socket], [], [], self.poll_time)
 
 		topic = None
 		msg = None
-		
-		print('recv', self.socket.recv(zmq.NOBLOCK))
 
-		# should this be a for loop? I don't think so???
-# 		if len(r) > 0:
-# 			topic, jmsg = r[0].recv_multipart()
-# 			# import sys
-# 			# print(sys.getsizeof(jmsg))
-# 			# msg = json.loads(jmsg)
-# 			msg = deserialize(jmsg)
-# 		if len(w) > 0:
-# 			print('recv:: i see write socket events?')
-# 		if len(e) > 0:
-# 			print('recv:: i see error socket events?')
-		print('recv')
-		
-# 		zmq.zmq_poll([(self.socket, zmq.POLLIN,)], 10)
-# 		socks = dict(self.poller.poll(10))
-		
-# 		print('socks:', socks)
-# 		
-# 		if socks.get(self.socket) == zmq.POLLIN:
-# 			topic, jmsg = self.socket.recv_multipart()
-# 			msg = deserialize(jmsg)
-			
+		if len(r) > 0:
+			print('r', len(r))
+			topic, jmsg = r[0].recv_multipart(flags=zmq.NOBLOCK)
+			msg = deserialize(jmsg)
+		if len(w) > 0:
+			print('recv:: i see write socket events?')
+		if len(e) > 0:
+			print('recv:: i see error socket events?')
+
 		return topic, msg
+
+	# def recv(self):
+	# 	# check to see if there is read, write, or erros
+	#
+	# 	topic = None
+	# 	msg = None
+	#
+	# 	zmq.zmq_poll([(self.socket, zmq.POLLIN,)], 10)
+	# 	socks = self.poller.poll(10)
+	# 	print('socks', socks)
+	# 	socks = dict(socks)
+	# 	topic, jmsg = self.socket.recv_multipart()
+	# 	print(topic)
+	#
+	# 	print('socks:', socks)
+	#
+	# 	cnt = 0
+	# 	if socks.get(self.socket) == zmq.POLLIN:
+	# 		print('pollin:')
+	# 		try:
+	# 			for i in range(10):
+	# 				topic, jmsg = self.socket.recv_multipart()
+	# 				msg = deserialize(jmsg)
+	# 				cnt = i
+	# 		except:
+	# 			pass
+	#
+	# 		print('recv looped', cnt)
+	# 	# print(topic, msg)
+	#
+	# 	return topic, msg
 
 
 class ServiceProvider(Base):

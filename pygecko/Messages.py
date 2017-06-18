@@ -149,6 +149,9 @@ class Compass(object):
 		s = 'r: {:.2f} p: {:.2f} h: {:.2f} {}'.format(self.roll, self.pitch, self.heading, self.kind[self.units])
 		return s
 
+	def __eq__(self, v):
+		return self.Class == v.Class
+
 
 @froze_it
 class IMU(object):
@@ -185,6 +188,9 @@ class IMU(object):
 		# s += 'q: ' + self.orientation.__str__()
 		s = 'IMU: a: {} w: {} q: {}'.format(self.linear_acceleration, self.angular_velocity, self.orientation)
 		return s
+
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 
 @froze_it
@@ -248,6 +254,9 @@ class Image(object):
 			self._img = b64
 			self.b64 = True
 
+	def __eq__(self, v):
+		return self.Class == v.Class
+
 
 @froze_it
 class Twist(object):
@@ -272,6 +281,9 @@ class Twist(object):
 		# s += '\n' + str(self.img)
 		return s
 
+	def __eq__(self, v):
+		return self.Class == v.Class
+
 
 @froze_it
 class Wrench(object):
@@ -292,6 +304,9 @@ class Wrench(object):
 
 	def __str__(self):
 		return 'Wrench: force: {} torque: {}'.format(self.force, self.torque)
+
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 
 @froze_it
@@ -314,8 +329,11 @@ class Pose(object):
 					setattr(self, key, data[key])
 
 	def __str__(self):
-		s = 'Pose: position: {}, orientation: {}'.format(self.postion, self.orientataion)
+		s = 'Pose: position: {}, orientation: {}'.format(self.position, self.orientation)
 		return s
+
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 
 @froze_it
@@ -348,10 +366,12 @@ class Range(object):
 		s = 'Range[{}]: {}'.format(self.kind[self.type], self.range)
 		return s
 
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 	def __getitem__(self, index):
 		return self.range[index]
-		
+
 	def __contains__(self, value):
 		if value in self.range:
 			return True
@@ -375,6 +395,9 @@ class Power(object):
 
 	def __str__(self):
 		return 'Power: current: {} voltage: {}'.format(self.current, self.voltage)
+
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 
 @froze_it
@@ -400,6 +423,9 @@ class Odom(object):
 	def __str__(self):
 		return 'Odom: position: {} velocity: {}'.format(self.position, self.velocity)
 
+	def __eq__(self, v):
+		return self.Class == v.Class
+
 
 class Axes(object):
 	"""
@@ -423,6 +449,9 @@ class Axes(object):
 		self.dPad = dp
 		self.L2 = l2
 		self.R2 = r2
+
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 
 class Buttons(object):
@@ -483,6 +512,9 @@ class Joystick(object):
 	def __str__(self):
 		return 'Joystick not setup'
 
+	def __eq__(self, v):
+		return self.Class == v.Class
+
 
 @froze_it
 class Array(object):
@@ -508,12 +540,19 @@ class Array(object):
 
 	def __getitem__(self, index):
 		return self.array[index]
-		
+
+	def append(self, value):
+		self.array.append(value)
+
 	def __contains__(self, value):
 		if value in self.array:
 			return True
 		else:
 			return False
+
+	def __eq__(self, v):
+		return self.Class == v.Class
+
 
 @froze_it
 class Dictionary(object):
@@ -543,15 +582,24 @@ class Dictionary(object):
 
 	def __str__(self):
 		return 'Dictionary[{}]: {}'.format(len(self.dict), self.dict)
-	
+
 	def __getitem__(self, index):
 		return self.dict[index]
-		
+
+	def keys(self):
+		return self.dict.keys()
+
+	def items(self):
+		return self.dict.items()
+
 	def __contains__(self, value):
 		if value in self.dict:
 			return True
 		else:
 			return False
+
+	def __eq__(self, v):
+		return self.Class == v.Class
 
 
 def serialize(c):
