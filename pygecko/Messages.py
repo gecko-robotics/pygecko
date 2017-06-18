@@ -189,6 +189,8 @@ class IMU(object):
 
 @froze_it
 class Image(object):
+	"""
+	"""
 	def __init__(self, data=None):
 		self.depth = -1   # 0-grayscale, 1-bgr ... why?
 		self._img = None  # image, either numpy or b64
@@ -249,6 +251,8 @@ class Image(object):
 
 @froze_it
 class Twist(object):
+	"""
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Twist'
 		self.linear = Vector()
@@ -271,6 +275,8 @@ class Twist(object):
 
 @froze_it
 class Wrench(object):
+	"""
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Wrench'
 		self.force = Vector()
@@ -290,6 +296,8 @@ class Wrench(object):
 
 @froze_it
 class Pose(object):
+	"""
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Pose'
 		self.position = Vector()
@@ -312,6 +320,8 @@ class Pose(object):
 
 @froze_it
 class Range(object):
+	"""
+	"""
 	UNKNOWN = 0
 	ULTRASOUND = 1
 	LIDAR = 2
@@ -339,8 +349,20 @@ class Range(object):
 		return s
 
 
+	def __getitem__(self, index):
+		return self.range[index]
+		
+	def __contains__(self, value):
+		if value in self.range:
+			return True
+		else:
+			return False
+
 @froze_it
 class Power(object):
+	"""
+	Power contains: current, voltage, and a timestamp
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Power'
 		self.current = 0.0
@@ -357,6 +379,9 @@ class Power(object):
 
 @froze_it
 class Odom(object):
+	"""
+	Odom is for robot odometry. It contains: Pose, Twist, and a timestamp
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Odom'
 		self.position = Pose()
@@ -377,6 +402,9 @@ class Odom(object):
 
 
 class Axes(object):
+	"""
+	Axes are a component in Joystick
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Axes'
 		self.leftStick = [0.0, 0.0]
@@ -398,6 +426,9 @@ class Axes(object):
 
 
 class Buttons(object):
+	"""
+	Buttons are a component in Joystick
+	"""
 	def __init__(self, data=None):
 		self.Class = 'Buttons'
 		self.x = False
@@ -456,7 +487,7 @@ class Joystick(object):
 @froze_it
 class Array(object):
 	"""
-	Array
+	A python Array
 	"""
 	def __init__(self, data=None):
 		self.Class = 'Array'
@@ -470,16 +501,24 @@ class Array(object):
 				setattr(self, key, data[key])
 				# if key == 'dict':
 
-		print(self)
+		# print(self)
 
 	def __str__(self):
 		return 'Array[{}]: {}'.format(len(self.array), self.array)
 
+	def __getitem__(self, index):
+		return self.array[index]
+		
+	def __contains__(self, value):
+		if value in self.array:
+			return True
+		else:
+			return False
 
 @froze_it
 class Dictionary(object):
 	"""
-	Dictionary
+	A python Dictionary
 	"""
 	def __init__(self, data=None):
 		self.Class = 'Dictionary'
@@ -500,10 +539,19 @@ class Dictionary(object):
 				else:
 					setattr(self, key, data[key])
 
-		print(self)
+		# print(self)
 
 	def __str__(self):
-		return 'Dictionary: {}'.format(len(self.dict))
+		return 'Dictionary[{}]: {}'.format(len(self.dict), self.dict)
+	
+	def __getitem__(self, index):
+		return self.dict[index]
+		
+	def __contains__(self, value):
+		if value in self.dict:
+			return True
+		else:
+			return False
 
 
 def serialize(c):
