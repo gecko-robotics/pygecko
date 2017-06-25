@@ -51,7 +51,7 @@ setup(
 	],
 	url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),
 	long_description=README,
-	packages=['pygecko'],
+	packages=[PACKAGE_NAME],
 	cmdclass={
 		'publish': PublishCommand,
 		'make': BuildCommand
