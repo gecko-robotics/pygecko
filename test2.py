@@ -13,7 +13,7 @@ from plotly.graph_objs import Scatter, Figure, Layout, Histogram2dContour, Conto
 import numpy as np
 
 
-class Main(object):
+# class Main(object):
 	# def __init__(self):
 	# 	pp = plot([Scatter(x=[1, 2, 3], y=[3, 1, 6])], show_link=False, include_plotlyjs=True, output_type='div')
 	# 	# x = np.random.randn(2000)
