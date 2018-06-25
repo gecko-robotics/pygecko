@@ -52,3 +52,7 @@ how I was doing it before.
         - show meta data for collect
         - allow deletion of folder/data
         - show available and used hard drive space
+
+# Existing
+
+- [the collector: saving data to files](https://github.com/MomsFriendlyRobotCompany/the_collector)
