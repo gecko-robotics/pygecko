@@ -1,4 +1,4 @@
-# pyGecko
+# :lizard:  pyGecko
 
 ok, so I am redoing this whole thing! I have learned a lot and I don't like
 how I was doing it before.
