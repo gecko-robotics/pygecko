@@ -13,8 +13,24 @@ how I was doing it before.
 - use more built in python libraries
 - take advantage of multiprocessing more: events, namespaces, etc
 - use Google's protobuf as a serializer instead of rolling my own with json/dicts
+  - Protocol Buffers are not designed to handle large messages. As a general rule of thumb, if you are dealing in messages larger than a megabyte each, it may be time to consider an alternate strategy. [ref](https://developers.google.com/protocol-buffers/docs/techniques)
 - less of a library to maintain and more of a "How to code"
 
+```python
+import numpy as np
+
+# Create a dummy matrix
+img = np.ones((50, 50, 3), dtype=np.uint8) * 255
+# Save the shape of original matrix.
+img_shape = img.shape
+
+message_image = np.ndarray.tobytes(img)
+
+re_img = np.frombuffer(message_image, dtype=np.uint8)
+
+# Convert back the data to original image shape.
+re_img = np.reshape(re_img, img_shape)
+```
 
 # Architecture
 
