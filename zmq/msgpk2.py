@@ -3,12 +3,62 @@
 from __future__ import print_function
 import msgpack
 from collections import namedtuple
+import time
 
+# class TimeStamp(object):
+#     def get(self):
+#         return time.time()
+#     def format(self, ts):
+#         return "fix me"
+
+"""
+idc = {
+	'Image': Image,
+	'Vector': Vector,
+	'Quaternion': Quaternion,
+	'Wrench': Wrench,
+	'Pose': Pose,
+	'Twist': Twist,
+	'IMU': IMU,
+	'Odom': Odom,
+	'Axes': Axes,
+	'Buttons': Buttons,
+	'Joystick': Joystick,
+	'Compass': Compass,
+	'Range': Range,
+	'Power': Power,
+	'Array': Array,
+	'Dictionary': Dictionary
+}
+"""
+
+def makets():
+    """
+    returns a timestamp
+    """
+    return time.time()
+
+def formatts(ts):
+    return "fixme"
+
+# simple ones, no stamp
+# cant do: func(*Vector); you would pass in timestamp too!
+# but you could do: func(Vector[:3]); cut off stamp
 Vector = namedtuple('Vector', 'x y z')
 Quaternion = namedtuple('Quaternion', 'w x y z')
-Pose = namedtuple('Pose', 'p o')
-Image = namedtuple('Image', 'shape data')
-Lidar = namedtuple('Lidar', 'len data')
+
+# with timestamp
+Image = namedtuple('Image', 'shape data timestamp')
+Lidar = namedtuple('Lidar', 'len data timestamp')
+Pose = namedtuple('Pose', 'position orientation timestamp')
+IMU = nametuple('IMU', 'linear_accel angular_vel magnetic_field timestamp') 
+
+a = (1,2,3)
+g = (1,2,3)
+m = (1,2,3)
+IMU(Vector(*a),Vector(*g),Vector(*m),makets())
+
+Pose(Vector(1,2,3),Quaternion(1,0,0,0), makets())
 
 """
 >>> v = Vector(1,2,3)
