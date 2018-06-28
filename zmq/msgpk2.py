@@ -41,30 +41,38 @@ def makets():
 def formatts(ts):
     return "fixme"
 
-# simple ones, no stamp
+# simple ones, no stamp, wouldn't just send these. They are datatypes that
+# get put into a messagel
+#
 # cant do: func(*Vector); you would pass in timestamp too!
 # but you could do: func(Vector[:3]); cut off stamp
 Vector = namedtuple('Vector', 'x y z')
 Quaternion = namedtuple('Quaternion', 'w x y z')
 
+"""
+d = img.tobytes()
+s = img.shape
+msg = Image(s, d, makets())
+
+img = np.frombytes(msg.d, dtype=np.uint8)
+img.reshape(msg.shape)
+"""
+
 # with timestamp
 Image = namedtuple('Image', 'shape data timestamp')
 Lidar = namedtuple('Lidar', 'len data timestamp')
 Pose = namedtuple('Pose', 'position orientation timestamp')
-IMU = nametuple('IMU', 'linear_accel angular_vel magnetic_field timestamp') 
+IMU = namedtuple('IMU', 'linear_accel angular_vel magnetic_field timestamp')
+Path = namedtuple("Path", 'path')
 
-a = (1,2,3)
-g = (1,2,3)
-m = (1,2,3)
-IMU(Vector(*a),Vector(*g),Vector(*m),makets())
 
-Pose(Vector(1,2,3),Quaternion(1,0,0,0), makets())
+a = (1, 2, 3)
+g = (1, 2, 3)
+m = (1, 2, 3)
+IMU(Vector(*a), Vector(*g), Vector(*m), makets())
 
-"""
->>> v = Vector(1,2,3)
->>> v.__class__.__name__
-'Vector'
-"""
+Pose(Vector(1, 2, 3), Quaternion(1, 0, 0, 0), makets())
+
 
 # if i use this: use_list=False
 # then do i change the below to a tuple?
