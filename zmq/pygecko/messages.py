@@ -28,7 +28,7 @@ def serialize(msg):
 
 
 def deserialize(data):
-    return msgpack.unpack(data, ext_hook=ext_unpack, raw=False)
+    return msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
 
 
 def makets():

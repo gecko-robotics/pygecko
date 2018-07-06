@@ -33,6 +33,8 @@ setup.py(
 
 try:
     import numpy as np
+    # import warnings
+    # warnings.warn('test warning')
 
     def image_pack(img):
         d = img.tobytes()
@@ -101,76 +103,76 @@ class BagError(Exception):
     pass
 
 
-class Base(object):
-    """
-    Base class. It holds the encode/decodeB64() functions.
+# class Base(object):
+#     """
+#     Base class. It holds the encode/decodeB64() functions.
+#
+#     Defaults:
+#       encode: .jpg
+#       use_compression: False
+#     """
+#     # fd = None
+#
+#     def open(self, filename):
+#         pass
 
-    Defaults:
-      encode: .jpg
-      use_compression: False
-    """
-    fd = None
 
-    def open(self, filename):
-        pass
-
-
-class BagReader(Base):
+class BagReader(object):
     """
     """
-    def read(self, filename):
-        """
-        Read and return one data message
-        """
-        pass
+    # def read(self, filename):
+    #     """
+    #     Read and return one data message
+    #     """
+    #     pass
 
     def read_all(self, filename):
         """
         Given a filename, it opens it and read all data into memory and return
         """
-        try:
-            with open(filename, 'r') as f:
-                data = msgpack.unpack(f, raw=False)
+        with open(filename, 'rb') as f:
+            d = f.read()
 
-        except Exception as e:
-            print('Error reading file: {}'.format(filename))
-            print(e)
-            raise
-
-        return data
+        return deserialize(d)
 
 
-class BagWriter(Base):
+class BagWriter(object):
     """
     """
 
-    def __init__(self, buffer_size=10240):
+    def __init__(self, filename):
         """
         buffer_size: number of Bytes, default 10MB
         """
         self.buffer = []
         # self.fd = None
-        self.buffer_size = buffer_size
-
-    def __del__(self):
-        self.close()
-        print('Bag exiting')
-
-    def open(self, filename):
-        """
-        Open data file
-        """
+        # self.buffer_size = buffer_size
         # append .bag to end of filename if necessary
         if filename.rfind('.bag') < 0:
             filename = filename + '.bag'
-        self.fd = open(filename, "w")
+        # self.fd = open(filename, "wb")
+        self.file = filename
 
-    def close(self):
-        """
-        Close data file
-        """
+    def __del__(self):
         self.write()
-        self.fd.close()
+        print('Bag exiting')
+
+    # def open(self, filename):
+    #     """
+    #     Open data file
+    #     """
+    #     # append .bag to end of filename if necessary
+    #     if filename.rfind('.bag') < 0:
+    #         filename = filename + '.bag'
+    #     # self.fd = open(filename, "wb")
+    #     self.file = filename
+
+    # def close(self):
+    #     """
+    #     Close data file
+    #     """
+    #     self.write()
+    #     # self.fd.close()
 
     def push(self, msg):
         """
@@ -178,28 +180,22 @@ class BagWriter(Base):
         Buffer is serialized, easier to track memory consumption because it is
         all turned into bytes.
         """
-        # dmsg = {'ts': time.time(), 'msg': msg}
-        m = serialize(msg)
-        self.buffer.append(m)
+        self.buffer.append(msg)
 
-        if len(self.buffer) >= self.buffer_size:
-            print('- bag wrote:', len(self.buffer))
-            self.write()
+        # if len(self.buffer) >= self.buffer_size:
+        #     print('- bag wrote:', len(self.buffer))
+        #     self.write()
 
     def write(self):
-        if self.fd is None:
-            # how do we get here? it has to be open already ... right?
-            raise IOError('Bag: please open file first')
-
         # check if buffer is empty
         if not self.buffer:
             return
 
-        print('buffer:', self.buffer)
-
-        # for m in self.buffer:
-        #     self.fd.write(m)
-
+        with open(self.file, 'wb') as outfile:
+            # msgpack.pack(self.buffer, outfile, strict_types=True, use_bin_type=True)
+            m = serialize(self.buffer)
+            outfile.write(m)
+            
         self.buffer = []
 
 

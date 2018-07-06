@@ -5,14 +5,16 @@ from pygecko.bag import BagWriter, BagReader
 if __name__ == "__main__":
     filename = "bob.bag"
 
-    bw = BagWriter(buffer_size=100)  # make buffer small to for writing
-    bw.open(filename)
+    bw = BagWriter(filename)  # make buffer small to for writing
+    # bw.open(filename)
 
-    data = range(20)
+    data = range(100)
     for d in data:
         bw.push(d)
 
-    bw.close()
+    bw.write()
+
+    print("\n\n=====================================\n\n")
 
     br = BagReader()
     data_in = br.read_all(filename)
