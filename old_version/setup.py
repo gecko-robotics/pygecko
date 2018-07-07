@@ -8,10 +8,10 @@ from build_utils import BinaryDistribution
 
 PACKAGE_NAME = 'pygecko'
 BuildCommand.pkg = PACKAGE_NAME
-BuildCommand.py3 = False  # python 3 build isn't working yet with zmq, need time to fix
+# BuildCommand.py3 = False  # python 3 build isn't working yet with zmq, need time to fix
 PublishCommand.pkg = PACKAGE_NAME
 PublishCommand.version = VERSION
-README = open('README.rst').read()
+README = open('readme.rst').read()
 
 setup(
 	name=PACKAGE_NAME,
@@ -38,15 +38,15 @@ setup(
 	install_requires=[
 		# 'pyrk',
 		# 'numdifftools',  # do I really need this? pulls in scipy (issues with RPi), move to drivers?
-		'pyyaml',
-		'pyzmq',
+		# 'pyyaml',
+		# 'pyzmq',
 		'simplejson',
-		'pyserial',
-		'numpy',
-		'opencvutils',
+		# 'pyserial',
+		# 'numpy',
+		# 'opencvutils',
 		# 'wit',  # do I really need this? Voice should be an add on?
 		# 'pyaudio',  # this is crap!
-		'quaternions',
+		# 'quaternions',
 		'build_utils'
 	],
 	url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),
@@ -56,17 +56,17 @@ setup(
 		'publish': PublishCommand,
 		'make': BuildCommand
 	},
-	scripts=[
-		'bin/mjpeg_server.py',  # why? use opencvutils instead
-		'bin/bag_play.py',
-		'bin/bag_record.py',
-		'bin/camera_calibrate.py',
-		'bin/image_view.py',
-		'bin/service.py',  # fix
-		'bin/topic_echo.py',
-		'bin/topic_pub.py',
-		'bin/twist_keyboard.py'
-		# 'bin/video.py',
-		# 'bin/webserver.py'
-	]
+	# scripts=[
+	# 	# 'bin/mjpeg_server.py',  # why? use opencvutils instead
+	# 	# 'bin/bag_play.py',
+	# 	# 'bin/bag_record.py',
+	# 	# 'bin/camera_calibrate.py',
+	# 	# 'bin/image_view.py',
+	# 	# 'bin/service.py',  # fix
+	# 	# 'bin/topic_echo.py',
+	# 	# 'bin/topic_pub.py',
+	# 	# 'bin/twist_keyboard.py'
+	# 	# 'bin/video.py',
+	# 	# 'bin/webserver.py'
+	# ]
 )
