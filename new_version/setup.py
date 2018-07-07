@@ -41,7 +41,7 @@ setup(
         'simplejson',     # config files
         'msgpack',  # send to collector!!!
         'pyzmq',          # connecting to different processes and computers
-        'bjoern',         # http server, multiple connections
+        # 'bjoern',         # http server, multiple connections
         'the_collector',  # saving data
         'build_utils'     # installing and building the library
     ],

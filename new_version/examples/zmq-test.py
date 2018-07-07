@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from pygecko.ZmqClass import Pub, Sub
-from pygecko.ZmqClass import Core, zmqTCP, GeckoCore
+
+# fix path for now
+import sys
+sys.path.append("../")
+
+from pygecko.transport import Pub, Sub
+from pygecko.transport import zmqTCP, GeckoCore
 import multiprocessing as mp
 import time
 
 
 def publisher(e, topic):
     p = Pub()
-    addr = zmqTCP('dalek.local', 9998)
+    addr = zmqTCP('localhost', 9998)
     p.connect(addr)
     try:
         cnt = 0
@@ -18,7 +23,7 @@ def publisher(e, topic):
             p.pub(topic, msg)  # topic msg
             cnt += 1
             print('published msg')
-            # time.sleep(1)
+            time.sleep(1)
     except Exception:
         pass
     print('pub bye ...')

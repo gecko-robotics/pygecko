@@ -45,7 +45,6 @@ re_img = np.reshape(re_img, img_shape)
 - pyzmq - IPC or machine-to-machine publish/subscribe
 - simplejson/pyyaml - config files
 - bjoern - efficient web server written in C with python bindings
-- websocket - update http via python
 
 ## Ideas
 

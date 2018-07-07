@@ -5,6 +5,13 @@ import msgpack
 from collections import namedtuple
 import time
 
+
+# fix path for now
+import sys
+sys.path.append("../")
+
+from pygecko.transport.messages import *
+
 # class TimeStamp(object):
 #     def get(self):
 #         return time.time()
@@ -41,29 +48,29 @@ def makets():
 def formatts(ts):
     return "fixme"
 
-# simple ones, no stamp, wouldn't just send these. They are datatypes that
-# get put into a messagel
+# # simple ones, no stamp, wouldn't just send these. They are datatypes that
+# # get put into a messagel
+# #
+# # cant do: func(*Vector); you would pass in timestamp too!
+# # but you could do: func(Vector[:3]); cut off stamp
+# Vector = namedtuple('Vector', 'x y z')
+# Quaternion = namedtuple('Quaternion', 'w x y z')
 #
-# cant do: func(*Vector); you would pass in timestamp too!
-# but you could do: func(Vector[:3]); cut off stamp
-Vector = namedtuple('Vector', 'x y z')
-Quaternion = namedtuple('Quaternion', 'w x y z')
-
-"""
-d = img.tobytes()
-s = img.shape
-msg = Image(s, d, makets())
-
-img = np.frombytes(msg.d, dtype=np.uint8)
-img.reshape(msg.shape)
-"""
-
-# with timestamp
-Image = namedtuple('Image', 'shape data timestamp')
-Lidar = namedtuple('Lidar', 'len data timestamp')
+# """
+# d = img.tobytes()
+# s = img.shape
+# msg = Image(s, d, makets())
+#
+# img = np.frombytes(msg.d, dtype=np.uint8)
+# img.reshape(msg.shape)
+# """
+#
+# # with timestamp
+# Image = namedtuple('Image', 'shape data timestamp')
+# Lidar = namedtuple('Lidar', 'len data timestamp')
 Pose = namedtuple('Pose', 'position orientation timestamp')
 IMU = namedtuple('IMU', 'linear_accel angular_vel magnetic_field timestamp')
-Path = namedtuple("Path", 'path')
+# Path = namedtuple("Path", 'path')
 
 
 a = (1, 2, 3)
@@ -99,7 +106,7 @@ data = {'a list': [1, 42, 3.141, 1337, 'help'],
         # 6: bytearray(range(255))*1000,
         8: Vector(1.22, 3.44, 5.66),
         9: Quaternion(1, 2, 3, 4),
-        10: Pose(Vector(1, 2, 3), Quaternion(1, 2, 3, 4)),
+        10: Pose(Vector(1, 2, 3), Quaternion(1, 2, 3, 4), makets()),
         'another dict': {'foo': 'bar',
                          'key': 'value',
                          'the answer': 42}}

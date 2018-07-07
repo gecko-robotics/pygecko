@@ -1,4 +1,5 @@
-from pygecko.transport.zmq import GeckoCore
-from pygecko.transport.zmq import ZMQError
-from pygecko.transport.zmq import zmq_version
-from pygecko.transport.zmq import Pub, Sub
+from pygecko.transport.zmqclass import GeckoCore
+from pygecko.transport.zmqclass import ZMQError
+from pygecko.transport.zmqclass import zmq_version
+from pygecko.transport.zmqclass import Pub, Sub
+from pygecko.transport.zmqclass import zmqTCP, zmqUDS

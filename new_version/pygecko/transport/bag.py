@@ -143,7 +143,7 @@ class BagWriter(object):
     """
     """
 
-    def __init__(self, filename):
+    def __init__(self):
         """
         buffer_size: number of Bytes, default 10MB
         """
@@ -151,13 +151,13 @@ class BagWriter(object):
         # self.fd = None
         # self.buffer_size = buffer_size
         # append .bag to end of filename if necessary
-        if filename.rfind('.bag') < 0:
-            filename = filename + '.bag'
+        # if filename.rfind('.bag') < 0:
+        #     filename = filename + '.bag'
         # self.fd = open(filename, "wb")
-        self.file = filename
+        # self.file = filename
 
     def __del__(self):
-        self.write()
+        # self.write()
         print('Bag exiting')
 
     # def open(self, filename):
@@ -189,12 +189,16 @@ class BagWriter(object):
         #     print('- bag wrote:', len(self.buffer))
         #     self.write()
 
-    def write(self):
+    def write(self, filename):
+        # fix file name
+        if filename.rfind('.bag') < 0:
+            filename = filename + '.bag'
+
         # check if buffer is empty
         if not self.buffer:
             return
 
-        with open(self.file, 'wb') as outfile:
+        with open(filename, 'wb') as outfile:
             # msgpack.pack(self.buffer, outfile, strict_types=True, use_bin_type=True)
             m = serialize(self.buffer)
             outfile.write(m)
@@ -202,18 +206,18 @@ class BagWriter(object):
         self.buffer = []
 
 
-class Record(object):
-    """
-    connects to topic(s) and saves to a file
-    """
-    pass
-
-
-class Play(object):
-    """
-    read a bag file and pump the messages into the system
-    """
-    pass
+# class Record(object):
+#     """
+#     connects to topic(s) and saves to a file
+#     """
+#     pass
+#
+#
+# class Play(object):
+#     """
+#     read a bag file and pump the messages into the system
+#     """
+#     pass
 
 
     #
