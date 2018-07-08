@@ -39,7 +39,6 @@ setup(
     install_requires=[
         'pyyaml',         # config files
         'simplejson',     # config files
-        'msgpack',  # send to collector!!!
         'pyzmq',          # connecting to different processes and computers
         # 'bjoern',         # http server, multiple connections
         'the_collector',  # saving data
@@ -47,6 +46,7 @@ setup(
     ],
     url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),
     long_description=README,
+    long_description_content_type='text/markdown',
     packages=[PACKAGE_NAME],
     cmdclass={
         'publish': PublishCommand,
