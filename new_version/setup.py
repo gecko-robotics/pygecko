@@ -39,6 +39,7 @@ setup(
     install_requires=[
         'pyyaml',         # config files
         'simplejson',     # config files
+        'msgpack',        # efficient message serialization through zmq
         'pyzmq',          # connecting to different processes and computers
         # 'bjoern',         # http server, multiple connections
         'the_collector',  # saving data
