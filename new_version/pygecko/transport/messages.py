@@ -10,16 +10,18 @@ import msgpack
 
 # if i use this: use_list=False
 # then do i change the below to a tuple?
-def ext_pack(x):
+# def ext_pack(x):
+def serialize(x):
     if x.__class__.__name__ in ['Quaternion', 'Vector', 'Pose', 'Image', 'Lidar']:
-        return msgpack.ExtType(1, msgpack.packb([x.__class__.__name__,] + list(x[:]), default=ext_pack, strict_types=True))
+        return msgpack.ExtType(1, msgpack.packb([x.__class__.__name__,] + list(x[:]), default=serialize, strict_types=True))
     return x
 
 
-def ext_unpack(code, data):
+# def ext_unpack(code, data):
+def deserialize(code, data):
     if code == 1:
         # you call this again to unpack and ext_hook for nested
-        d = msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
+        d = msgpack.unpackb(data, ext_hook=deserialize, raw=False)
 
         # print d[0]   # holds class name
         # print d[1:]  # holds data inorder
@@ -28,12 +30,12 @@ def ext_unpack(code, data):
     return msgpack.ExtType(code, data)
 
 
-def serialize(msg):
-    return msgpack.packb(msg, default=ext_pack, strict_types=True, use_bin_type=True)
-
-
-def deserialize(data):
-    return msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
+# def serialize(msg):
+#     return msgpack.packb(msg, default=ext_pack, strict_types=True, use_bin_type=True)
+#
+#
+# def deserialize(data):
+#     return msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
 
 
 def makets():
