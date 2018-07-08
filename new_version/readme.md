@@ -50,6 +50,8 @@ re_img = np.reshape(re_img, img_shape)
 
 - all data is immutable, should be faster, smaller and eliminate the possibility
   of a user trying to change data accidentally
+- use `the_collector` to save or retrieve data
+    - it uses `msgpack` for efficient data storage and transmission 
 - everything has to be lightweight enough to run on a raspberry pi
     - might code in some C stuff for speed if necessary, but I don't think I need it
 - used `Process` to get work done and write them in their own file
