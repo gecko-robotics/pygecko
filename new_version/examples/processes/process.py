@@ -2,8 +2,20 @@
 from __future__ import print_function
 import multiprocessing as mp
 import time
+import signal
 
 def runable_process(ns, e, **kwargs):
+    def signal_handler(signalnum, stackframe):
+        print('ignore ctrl-c signal:', signalnum)
+        # e.clear()
+        # sys.exit(0)
+
+    # kill -l
+    # signal.signal(signal.SIGINT, signal_handler)
+    # signal.signal(signal.SIGTERM, signal_handler)
+    if kwargs.get('signal', False):
+        signal.signal(signal.SIGINT, signal_handler)
+
     if kwargs:
         for k,v in kwargs.items():
             print('got: {} and {}'.format(k, v))
