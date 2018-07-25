@@ -129,7 +129,6 @@ def writeout(filename, data):
 # Read msgpack file
 def readin(filename):
     with open(filename) as data_file:
-        # data_loaded = json.load(data_file)
         data_loaded = msgpack.unpack(data_file, ext_hook=deserialize, raw=False)
     return data_loaded
 
