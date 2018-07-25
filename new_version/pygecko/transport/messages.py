@@ -8,29 +8,50 @@ import time
 import msgpack
 
 
-# # if i use this: use_list=False
-# # then do i change the below to a tuple?
-# # def ext_pack(x):
-# def serialize(x):
-#     print('serialize', x)
-#     if x.__class__.__name__ in ['Quaternion', 'Vector', 'Pose', 'Image', 'Lidar', 'IMU']:
-#         return msgpack.ExtType(1, msgpack.packb([x.__class__.__name__,] + list(x[:]), default=serialize, strict_types=True))
-#         # return msgpack.ExtType(1, msgpack.packb([x.__class__.__name__,] + list(x[:]), default=serialize))
-#     return x
-#
-#
-# # def ext_unpack(code, data):
-# def deserialize(code, data):
-#     print('deserialize', code, data)
-#     if code == 1:
-#         # you call this again to unpack and ext_hook for nested
-#         d = msgpack.unpackb(data, ext_hook=deserialize, raw=False)
-#
-#         # print d[0]   # holds class name
-#         # print d[1:]  # holds data inorder
-#         # finds constructor in namespace and calls it
-#         return globals()[d[0]](*d[1:])
-#     return msgpack.ExtType(code, data)
+class Messages(object):
+    msgs = ['Quaternion', 'Vector', 'Pose', 'Image', 'Lidar', 'IMU']
+    def __init__(self, new_msgs=None):
+        if new_msgs:
+            for m in new_msgs:
+                self.msgs.append(m)
+
+    def serialize(self, x):
+        if x.__class__.__name__ in self.msgs:
+            return msgpack.ExtType(1, msgpack.packb([x.__class__.__name__,] + list(x[:]), default=self.serialize, strict_types=True))
+        return x
+
+    def deserialize(self, code, data):
+        if code == 1:
+            # you call this again to unpack and ext_hook for nested
+            d = msgpack.unpackb(data, ext_hook=self.deserialize, raw=False)
+
+            # print d[0]   # holds class name
+            # print d[1:]  # holds data inorder
+            # finds constructor in namespace and calls it
+            return globals()[d[0]](*d[1:])
+        return msgpack.ExtType(code, data)
+
+
+# if i use this: use_list=False
+# then do i change the below to a tuple?
+# def ext_pack(x):
+def serialize(x):
+    if x.__class__.__name__ in ['Quaternion', 'Vector', 'Pose', 'Image', 'Lidar', 'IMU']:
+        return msgpack.ExtType(1, msgpack.packb([x.__class__.__name__,] + list(x[:]), default=serialize, strict_types=True))
+    return x
+
+
+# def ext_unpack(code, data):
+def deserialize(code, data):
+    if code == 1:
+        # you call this again to unpack and ext_hook for nested
+        d = msgpack.unpackb(data, ext_hook=deserialize, raw=False)
+
+        # print d[0]   # holds class name
+        # print d[1:]  # holds data inorder
+        # finds constructor in namespace and calls it
+        return globals()[d[0]](*d[1:])
+    return msgpack.ExtType(code, data)
 
 
 def makets():
