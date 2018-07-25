@@ -1,1 +1,1 @@
-from pygecko.multiprocessing import GeckoProcess
+from pygecko.multiprocessing.gecko import GeckoProcess

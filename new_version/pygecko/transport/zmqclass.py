@@ -14,7 +14,7 @@ from __future__ import division
 import zmq
 from zmq.devices import ProcessProxy
 import time
-import simplejson as json
+# import simplejson as json
 import socket as Socket
 # from .Messages import serialize, deserialize
 import msgpack
@@ -32,12 +32,18 @@ def zmq_version():
 
 
 def zmqTCP(host, port):
+    """
+    Set the zmq address as TCP: tcp://host:port
+    """
     if host == 'localhost':  # do I need to do this?
         host = Socket.gethostbyname(Socket.gethostname())
     return 'tcp://{}:{}'.format(host, port)
 
 
 def zmqUDS(mnt_pt):
+    """
+    Set the zmq address as a Unix Domain Socket: ipc://file
+    """
     return 'ipc://{}'.format(mnt_pt)
 
 
@@ -87,6 +93,7 @@ class Base(object):
     """
     # ctx = zmq.Context()
     socket = None
+    pack = None
 
     def __init__(self):
         self.ctx = zmq.Context()
@@ -108,7 +115,7 @@ class Pub(Base):
     """
     Simple publisher
     """
-    def __init__(self, hwm=100):
+    def __init__(self, hwm=100, pack=None):
         Base.__init__(self)
 
         try:
@@ -120,6 +127,9 @@ class Pub(Base):
             error = '[-] Pub Error, {0!s}'.format((str(e)))
             raise ZMQError(error)
 
+        if pack:
+            self.pack = pack
+
     def __del__(self):
         self.socket.close()
 
@@ -130,7 +140,10 @@ class Pub(Base):
         out: none
         """
         # jmsg = serialize(msg)
-        jmsg = msgpack.packb(msg, use_bin_type=True)
+        if self.pack:
+            jmsg = msgpack.packb(msg, default=self.pack, use_bin_type=True, strict_types=True)
+        else:
+            jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
         done = True
         while done:
@@ -143,7 +156,9 @@ class Sub(Base):
     """
     Simple subscriber
     """
-    def __init__(self, topics=None, hwm=100):
+    unpack = None
+
+    def __init__(self, topics=None, hwm=100, unpack=None):
         Base.__init__(self)
         if type(topics) is list:
             pass
@@ -172,6 +187,9 @@ class Sub(Base):
             # print error
             raise ZMQError(error)
 
+        if unpack:
+            self.unpack = unpack
+
     def __del__(self):
         if self.topics is None:
             self.socket.setsockopt(zmq.UNSUBSCRIBE, b'')
@@ -188,7 +206,10 @@ class Sub(Base):
         msg = None
         try:
             topic, jmsg = self.socket.recv_multipart(flags=flags)
-            msg = msgpack.unpackb(jmsg, raw=False)
+            if self.unpack:
+                msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
+            else:
+                msg = msgpack.unpackb(jmsg, raw=False)
         except zmq.Again as e:
             # no message has arrived yet
             print(e)
