@@ -2,6 +2,7 @@
   "processes":
   [
     ["process", "publish", {"topic": "hello"}],
+    ["process", "subscribe", {"topic": "hello"}],
     ["process", "subscribe", {"topic": "hello"}]
   ]
 }
