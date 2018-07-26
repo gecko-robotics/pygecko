@@ -6,6 +6,7 @@ So this is sort of a copy of roslaunch
 
 import sys
 sys.path.append("../../")
+from pygecko.transport import GeckoCore
 from pygecko.multiprocessing import GeckoProcess
 from pygecko.file_storage import FileJson, FileYaml
 import multiprocessing as mp
@@ -22,6 +23,8 @@ class Test(GeckoProcess):
         GeckoProcess.__init__(self, ps)
 
     def loop(self):
+
+        core = GeckoCore()
         # q = Queue()
 
         d = {
@@ -92,9 +95,11 @@ class Test(GeckoProcess):
             print('\n>> Received {}\n'.format(err))
             # set the kill flag
             self.event.clear()
+            time.sleep(0.1)
 
         finally:
             self.end()
+            core.join(1)
 
 
 if __name__ == '__main__':

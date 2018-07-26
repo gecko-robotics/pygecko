@@ -4,7 +4,8 @@
 # see LICENSE for full details
 ##############################################
 
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
+# from pygecko.transport import GeckoCore
 import multiprocessing as mp
 from multiprocessing.managers import SyncManager
 import platform

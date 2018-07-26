@@ -68,11 +68,13 @@ class Core(object):
         core.bind_out(outaddr)
         core.start()
 
-        print('Core ---------------------')
+        print('+', '-'*30, sep='')
+        print('| Core')
+        print('+', '-'*30, sep='')
         # print("core:", core)
-        print('  In[sub]: {}'.format(inaddr))
-        print('  Out[pub]: {}'.format(outaddr))
-        print('-'*30)
+        print('|  In[sub]: {}'.format(inaddr))
+        print('|  Out[pub]: {}'.format(outaddr))
+        print('+', '-'*30, sep='')
 
     def __del__(self):
         # self.input.close()

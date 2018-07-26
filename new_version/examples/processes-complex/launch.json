@@ -1,15 +1,7 @@
 {
   "processes":
   [
-    [
-      "process",
-      "runable_process",
-      {
-        "a": 1,
-        "b": 2
-        }
-    ],
-    ["process", "runable_process"],
-    ["process", "runable_process"]
+    ["process", "publish", {"topic": "hello"}],
+    ["process", "subscribe", {"topic": "hello"}]
   ]
 }
