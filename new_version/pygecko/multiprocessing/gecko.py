@@ -63,10 +63,10 @@ class GeckoProcess(object):
         print('')
 
         self.ps = ps
-        self.mgr = mp.Manager()
+        # self.mgr = mp.Manager()
         # self.mgr = SyncManager(address=address, authkey=authkey)
         # self.mgr.start()
-        self.namespace = self.mgr.Namespace()
+        # self.namespace = self.mgr.Namespace()
         self.event = mp.Event()
         self.timeout = to
 
@@ -106,7 +106,8 @@ class GeckoProcess(object):
             #     p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event,))
             # else:
             #     p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event,), kwargs=args)
-            p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event), kwargs=args)
+            # p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event), kwargs=args)
+            p = mp.Process(name=fun, target=ff, kwargs=args)
 
             p.start()
             print('>> Started:', mod + '.' + fun)

@@ -25,8 +25,8 @@ class Test(GeckoProcess):
 
     def loop(self):
 
-        core = GeckoCore()
-        core.start()
+        # core = GeckoCore()
+        # core.start()
         # q = Queue()
         #
         # d = {
@@ -91,7 +91,7 @@ class Test(GeckoProcess):
                     # pd = p.as_dict(attrs=['cpu_percent'])  # first time it is called is meaningless
                     pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
                     label = '{}[{}]'.format(p.name, p.pid)
-                    print('| {:.<30} cpu: {}%    mem: {:.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+                    print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
                 # debugging info here via print or logging or webpage
                 # record = q.get()
                 # if record:
@@ -109,7 +109,7 @@ class Test(GeckoProcess):
 
         finally:
             self.end()
-            core.join(1)
+            # core.join(1)
 
 
 if __name__ == '__main__':
@@ -122,11 +122,11 @@ if __name__ == '__main__':
     #         ('process', 'runable_process', None,),
     #     ]
     # }
-    from pprint import pprint
+    # from pprint import pprint
 
     reader = FileJson()
     ps = reader.read('launch.json')
-    pprint(ps)
+    # pprint(ps)
 
     g = Test(ps)
     g.loop()

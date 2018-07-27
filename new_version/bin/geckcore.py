@@ -13,6 +13,7 @@ from pygecko.transport import GeckoCore
 
 if __name__ == "__main__":
     core = GeckoCore()
+    core.start()
 
     try:
         while True:
