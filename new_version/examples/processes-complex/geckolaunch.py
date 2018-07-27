@@ -14,6 +14,7 @@ import time
 import logging
 import logging.config
 import logging.handlers
+import psutil as psu
 
 # https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
 
@@ -75,18 +76,26 @@ class Test(GeckoProcess):
         self.start()
 
         try:
+            alive = mp.active_children()
+            palive = [psu.Process(p.pid) for p in alive]
             # logger = logging
             while self.event.is_set():
-                time.sleep(1)
-                alive = mp.active_children()
-                print('-'*30)
-                print('Alive processes:', len(alive))
-                for p in alive:
-                   print('  ', p.name, p.pid)
+                time.sleep(2)
+                # alive = mp.active_children()
+                print('+', '-'*30, sep='')
+                print('| Alive processes:', len(alive))
+                print('+', '-'*30, sep='')
+                for ps, p in zip(palive, alive):
+                    # p = psu.Process(ps.pid)
+                    # pd = p.as_dict(attrs=['cpu_percent'])  # first time it is called is meaningless
+                    pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+                    label = '{}[{}]'.format(p.name, p.pid)
+                    print('| {:.<30} cpu: {}%    mem: {:.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
                 # debugging info here via print or logging or webpage
                 # record = q.get()
                 # if record:
                 #     logger.handle(record)
+                # exit(1)
         except (KeyboardInterrupt, SystemExit) as e:
             if KeyboardInterrupt == type(e):
                 err = 'ctrl-C'

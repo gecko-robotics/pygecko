@@ -2,7 +2,13 @@
   "processes":
   [
     ["process", "publish", {"topic": "hello"}],
+    ["process", "publish", {"topic": "hey there"}],
     ["process", "subscribe", {"topic": "hello"}],
-    ["process", "subscribe", {"topic": "hello"}]
+    ["process", "subscribe", {"topic": "hello"}],
+    ["process", "subscribe", {"topic": "hey there"}],
+    ["process", "subscribe", {"topic": "hey there"}],
+    ["process", "subscribe", {"topic": "hey there"}],
+    ["process", "subscribe", {"topic": "hey there"}],
+    ["process", "subscribe", {"topic": "hey there"}]
   ]
 }

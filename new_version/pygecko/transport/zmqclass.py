@@ -14,80 +14,13 @@ from __future__ import division
 import zmq
 from zmq.devices import ProcessProxy
 import time
-# import simplejson as json
 import socket as Socket
-# from .Messages import serialize, deserialize
 import msgpack
 
 
 class ZMQError(Exception):
     pass
 
-
-def zmq_version():
-    """
-    What version of the zmq (C++) library is python tied to?
-    """
-    print('Using ZeroMQ version: {0!s}'.format((zmq.zmq_version())))
-
-
-def zmqTCP(host, port):
-    """
-    Set the zmq address as TCP: tcp://host:port
-    """
-    if host == 'localhost':  # do I need to do this?
-        host = Socket.gethostbyname(Socket.gethostname())
-    return 'tcp://{}:{}'.format(host, port)
-
-
-def zmqUDS(mnt_pt):
-    """
-    Set the zmq address as a Unix Domain Socket: ipc://file
-    """
-    return 'ipc://{}'.format(mnt_pt)
-
-
-class Core(object):
-    """
-    http://learning-0mq-with-pyzmq.readthedocs.io/en/latest/pyzmq/devices/forwarder.html
-    """
-    def __init__(self, inaddr=None, outaddr=None):
-        core = ProcessProxy(zmq.SUB, zmq.PUB)
-        self.core = core
-
-        if inaddr is None:
-            inaddr = zmqTCP('localhost', 9998)
-        if outaddr is None:
-            outaddr = zmqTCP('localhost', 9999)
-
-        # inputs (sub)
-        core.bind_in(inaddr)
-        core.setsockopt_in(zmq.SUBSCRIBE, b'')
-
-        # outputs (pub)
-        core.bind_out(outaddr)
-        core.start()
-
-        print('+', '-'*30, sep='')
-        print('| Core')
-        print('+', '-'*30, sep='')
-        # print("core:", core)
-        print('|  In[sub]: {}'.format(inaddr))
-        print('|  Out[pub]: {}'.format(outaddr))
-        print('+', '-'*30, sep='')
-
-    def __del__(self):
-        # self.input.close()
-        # self.out.close()
-        # self.ctx.term()
-        self.core.join(1)
-        print("Core exiting")
-
-    def join(self, timeout=1):
-        self.core.join(timeout)
-
-class GeckoCore(Core):
-    pass
 
 class Base(object):
     """
@@ -104,20 +37,43 @@ class Base(object):
         self.ctx.term()
         print('[<] shutting down {}'.format(type(self).__name__))
 
-    def bind(self, addr):
-        print(type(self).__name__, 'bind to {}'.format())
-        self.socket.bind(addr)
+    def bind(self, addr, hwm=None):
+        """
+        Binds a socket to an addr. Only one socket can bind.
+        Usually pub binds and sub connects, but not always!
 
-    def connect(self, addr):
+        in: addr as tcp or uds, hwm (high water mark) a int that limits buffer length
+        out: none
+        """
+        print(type(self).__name__, 'bind to {}'.format(addr))
+        self.socket.bind(addr)
+        if hwm:
+            self.socket.set_hwm(hwm)
+
+    def connect(self, addr, hwm=None):
+        """
+        Connects a socket to an addr. Many different sockets can connect.
+        Usually pub binds and sub connects, but not always!
+
+        in: addr as tcp or uds, hwm (high water mark) a int that limits buffer length
+        out: none
+        """
         print(type(self).__name__, 'connect to {}'.format(addr))
         self.socket.connect(addr)
+        if hwm:
+            self.socket.set_hwm(hwm)
 
 
 class Pub(Base):
     """
     Simple publisher
     """
-    def __init__(self, hwm=100, pack=None):
+    def __init__(self, pack=None):
+        """
+        Publishes messages on a topic.
+
+        in: pack - function to serialize messages if needed
+        """
         Base.__init__(self)
 
         try:
@@ -137,7 +93,6 @@ class Pub(Base):
 
     def pub(self, topic, msg):
         """
-        It appears the send_json() doesn't work for pub/sub.
         in: topic, message
         out: none
         """
@@ -153,22 +108,31 @@ class Pub(Base):
             # done = self.socket.send(jmsg)
         # print('pub >>', topic.encode('ascii'))
 
+    def raw_pub(self, topic, msg):
+        done = True
+        while done:
+            done = self.socket.send_multipart([topic.encode('ascii'), msg])
+
 
 class Sub(Base):
     """
-    Simple subscriber
+    Simple subscriber that read messages on a topic(s)
     """
     unpack = None
 
-    def __init__(self, topics=None, hwm=100, unpack=None):
+    def __init__(self, topics=None, unpack=None):
+        """
+        topics: an array of topics, ex ['hello', 'cool messages']
+        unpack: a function to deserialize messages if necessary
+        """
         Base.__init__(self)
-        if type(topics) is list:
-            pass
-        else:
-            raise Exception('topics must be a list')
+        # if type(topics) is list:
+        #     pass
+        # else:
+        #     raise Exception('topics must be a list')
             # topics = [topics]
 
-        self.topics = topics
+        # self.topics = topics
         try:
             self.socket = self.ctx.socket(zmq.SUB)
             # self.socket.set_hwm(hwm)  # set high water mark, so imagery doesn't buffer and slow things down
@@ -178,7 +142,13 @@ class Sub(Base):
             if topics is None:
                 print("[>] Receiving messages on ALL topics...")
                 self.socket.setsockopt(zmq.SUBSCRIBE, b'')
+                self.topics = b''
             else:
+                if type(topics) is list:
+                    pass
+                else:
+                    raise Exception('topics must be a list')
+                self.topics = topics
                 for t in topics:
                     print("[>] Subscribed to messages on topics: {} ...".format(t))
                     # self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
@@ -221,6 +191,9 @@ class Sub(Base):
             print(e)
             raise
         return topic, msg
+
+    def raw_recv(self, flags=0):
+        return self.socket.recv_multipart(flags=flags)
 
     # def recv(self):
     #     # check to see if there is read, write, or erros
