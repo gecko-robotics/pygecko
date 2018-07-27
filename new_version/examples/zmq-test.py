@@ -14,7 +14,9 @@ sys.path.append("../")
 
 from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP, GeckoCore
-from pygecko.transport.core import GProcessProxy
+
+import numpy as np
+
 import multiprocessing as mp
 import time
 import signal
@@ -66,7 +68,6 @@ class GProcess(object):
             raise Exception("need to finish start()")
 
         self.ps.start()
-        # print(self.ps.name, self.ps.pid)
         print('>> Started: {}[{}]'.format(self.ps.name, self.ps.pid))
 
     def join(self, timeout=None):
@@ -85,8 +86,8 @@ class SignalCatch(object):
     """
     kill = False
     def kill_signals(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        # signal.signal(signal.SIGTERM, self.exit_gracefully)
+        signal.signal(signal.SIGINT, self.exit_gracefully)   # ctl-C
+        signal.signal(signal.SIGTERM, self.exit_gracefully)  # program termination
 
     def exit_gracefully(self,signum, frame):
         self.kill = True
@@ -101,12 +102,13 @@ class PubPs(GProcess, SignalCatch):
         p.connect(addr)
         print('Publisher connected to: {}'.format(addr))
         cnt = 0
+        raw_img = np.random.rand(640, 480)
         while not self.kill:
-            msg = {'a': cnt, 'b': bytearray([1, 2, 3])}
+            msg = {'a': cnt, 'b': raw_img.tobytes(), 'c': time.time()}
             p.pub(topic, msg)  # topic msg
             cnt += 1
-            print('[{}] published msg'.format(cnt))
-            time.sleep(1)
+            # print('[{}] published msg'.format(cnt))
+            time.sleep(0.05)
         print('pub bye ...')
 
 
@@ -122,8 +124,8 @@ def publisher(e, topic):
         msg = {'a': cnt, 'b': bytearray([1, 2, 3])}
         p.pub(topic, msg)  # topic msg
         cnt += 1
-        print('[{}] published msg'.format(cnt))
-        time.sleep(1)
+        # print('[{}] published msg'.format(cnt))
+        time.sleep(.05)
     print('pub bye ...')
 
 
@@ -135,7 +137,8 @@ def subscriber(e, topic):
     s.connect(addr)
     while e.is_set():
         # print(s.recv(flags=zmq.NOBLOCK))
-        print("recv[{}]: {}".format(*s.recv()))
+        topic, msg = s.recv()
+        # print("recv[{}]: {}".format(topic, msg))
 
     print('sub bye ...')
 
@@ -145,8 +148,8 @@ if __name__ == '__main__':
     e = mp.Event()
     e.set()
 
-    # core = GeckoCore()
-    core = GProcessProxy()
+    core = GeckoCore()
+    # core = GProcessProxy()
     core.start()
 
     procs = []
@@ -155,13 +158,18 @@ if __name__ == '__main__':
 
     p = PubPs()
     # p = mp.Process(target=publisher, args=(e, 'bob'), name='publisher')
-    p.start(args=('bob',))
+    p.start(args=('tom',))
     procs.append(p)
     # print('>> Started: {}[{}]'.format(p.name, p.pid))
 
-    # p = mp.Process(target=publisher, args=(e, 'sally'), name='publisher')
-    # p.start()
-    # procs.append(p)
+    p = mp.Process(target=publisher, args=(e, 'sally'), name='publisher')
+    p.start()
+    procs.append(p)
+
+
+    p = mp.Process(target=publisher, args=(e, 'bob'), name='publisher')
+    p.start()
+    procs.append(p)
 
     p = mp.Process(target=subscriber, args=(e, 'bob'), name='subscriber')
     p.start()
@@ -170,13 +178,13 @@ if __name__ == '__main__':
 
     print('-'*30)
 
-    # p = mp.Process(target=subscriber, args=(e, 'sally'), name='subscriber')
-    # p.start()
-    # procs.append(p)
-    #
-    # p = mp.Process(target=subscriber, args=(e, 'sally'), name='subscriber')
-    # p.start()
-    # procs.append(p)
+    p = mp.Process(target=subscriber, args=(e, 'sally'), name='subscriber')
+    p.start()
+    procs.append(p)
+
+    p = mp.Process(target=subscriber, args=(e, 'tom'), name='subscriber')
+    p.start()
+    procs.append(p)
 
     # def signal_handler(signalnum, stackframe):
     #     print('ctrl-c signal.')

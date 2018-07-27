@@ -104,14 +104,15 @@ class Pub(Base):
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
         done = True
         while done:
-            done = self.socket.send_multipart([topic.encode('ascii'), jmsg])
+            # done = self.socket.send_multipart([topic.encode('ascii'), jmsg])
+            done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
             # done = self.socket.send(jmsg)
         # print('pub >>', topic.encode('ascii'))
 
     def raw_pub(self, topic, msg):
         done = True
         while done:
-            done = self.socket.send_multipart([topic.encode('ascii'), msg])
+            done = self.socket.send_multipart([topic.encode('utf-8'), msg])
 
 
 class Sub(Base):
@@ -152,7 +153,7 @@ class Sub(Base):
                 for t in topics:
                     print("[>] Subscribed to messages on topics: {} ...".format(t))
                     # self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
-                    self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
+                    self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('utf-8'))
 
         except Exception as e:
             error = '[-] Sub Error, {0!s}'.format((str(e)))
@@ -167,7 +168,7 @@ class Sub(Base):
             self.socket.setsockopt(zmq.UNSUBSCRIBE, b'')
         else:
             for t in self.topics:
-                self.socket.setsockopt(zmq.UNSUBSCRIBE, t.encode('ascii'))
+                self.socket.setsockopt(zmq.UNSUBSCRIBE, t.encode('utf-8'))
         self.socket.close()
 
     def recv(self, flags=0):

@@ -26,51 +26,52 @@ class Test(GeckoProcess):
     def loop(self):
 
         core = GeckoCore()
+        core.start()
         # q = Queue()
-
-        d = {
-            'version': 1,
-            'formatters': {
-                'detailed': {
-                    'class': 'logging.Formatter',
-                    'format': '%(asctime)s %(name)-15s %(levelname)-8s %(processName)-10s %(message)s'
-                }
-            },
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
-                    'level': 'INFO',
-                },
-                'file': {
-                    'class': 'logging.FileHandler',
-                    'filename': 'mplog.log',
-                    'mode': 'w',
-                    'formatter': 'detailed',
-                },
-                'foofile': {
-                    'class': 'logging.FileHandler',
-                    'filename': 'mplog-foo.log',
-                    'mode': 'w',
-                    'formatter': 'detailed',
-                },
-                'errors': {
-                    'class': 'logging.FileHandler',
-                    'filename': 'mplog-errors.log',
-                    'mode': 'w',
-                    'level': 'ERROR',
-                    'formatter': 'detailed',
-                },
-            },
-            'loggers': {
-                'foo': {
-                    'handlers': ['foofile']
-                }
-            },
-            'root': {
-                'level': 'DEBUG',
-                'handlers': ['console', 'file', 'errors']
-            },
-        }
+        #
+        # d = {
+        #     'version': 1,
+        #     'formatters': {
+        #         'detailed': {
+        #             'class': 'logging.Formatter',
+        #             'format': '%(asctime)s %(name)-15s %(levelname)-8s %(processName)-10s %(message)s'
+        #         }
+        #     },
+        #     'handlers': {
+        #         'console': {
+        #             'class': 'logging.StreamHandler',
+        #             'level': 'INFO',
+        #         },
+        #         'file': {
+        #             'class': 'logging.FileHandler',
+        #             'filename': 'mplog.log',
+        #             'mode': 'w',
+        #             'formatter': 'detailed',
+        #         },
+        #         'foofile': {
+        #             'class': 'logging.FileHandler',
+        #             'filename': 'mplog-foo.log',
+        #             'mode': 'w',
+        #             'formatter': 'detailed',
+        #         },
+        #         'errors': {
+        #             'class': 'logging.FileHandler',
+        #             'filename': 'mplog-errors.log',
+        #             'mode': 'w',
+        #             'level': 'ERROR',
+        #             'formatter': 'detailed',
+        #         },
+        #     },
+        #     'loggers': {
+        #         'foo': {
+        #             'handlers': ['foofile']
+        #         }
+        #     },
+        #     'root': {
+        #         'level': 'DEBUG',
+        #         'handlers': ['console', 'file', 'errors']
+        #     },
+        # }
         # logging.config.dictConfig(d)
 
         self.start()

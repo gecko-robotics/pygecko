@@ -57,6 +57,7 @@ def publish(ns, e, **kwargs):
         raw_img = np.random.rand(640, 480)  # HD (1920x1080) kills performance
         while e.is_set():
             img = raw_img.tobytes()
+            ns.image = img
             msg = {'a': cnt, 'b': img, 's': time.time()}
             p.pub(topic, msg)  # topic msg
             cnt += 1
@@ -82,12 +83,32 @@ def subscribe(ns, e, **kwargs):
         while e.is_set():
             # print(s.recv(flags=zmq.NOBLOCK))
             t, msg = s.recv()
-            print("<< recv[{}][{}]: {}".format(t, msg['a'], time.time() - msg['s']))
+            # print("<< recv[{}][{}]: {}".format(t, msg['a'], time.time() - msg['s']))
             # chew up some cpu
             chew_up_cpu()
             chew_up_cpu()
             chew_up_cpu()
             chew_up_cpu()
+
+            # Holly crap namespace and pickle use a lot of cpu!
+            # zmq hs only 23%, but syncmanager is 77%
+            # ns == msg image True
+            # +------------------------------
+            # | Alive processes: 11
+            # +------------------------------
+            # | subscribe[19339].............. cpu: 12.2%    mem: 0.10%
+            # | subscribe[19343].............. cpu: 13.7%    mem: 0.10%
+            # | SyncManager-1[19327].......... cpu: 77.4%    mem: 0.19%
+            # | subscribe[19338].............. cpu: 12.5%    mem: 0.10%
+            # | subscribe[19341].............. cpu: 13.6%    mem: 0.10%
+            # | publish[19336]................ cpu: 8.7%    mem: 0.40%
+            # | GeckoCore[19328].............. cpu: 23.3%    mem: 0.11%
+            # | subscribe[19344].............. cpu: 13.8%    mem: 0.10%
+            # | subscribe[19342].............. cpu: 13.7%    mem: 0.11%
+            # | publish[19337]................ cpu: 8.8%    mem: 0.40%
+            # | subscribe[19340].............. cpu: 13.7%    mem: 0.10%
+            # if 'b' in msg:
+            #     print('ns == msg image', ns.image == msg['b'])
 
     except Exception as e:
         print(e)
