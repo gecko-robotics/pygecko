@@ -6,4 +6,4 @@ from pygecko.file_storage import FileYaml
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"
-__version__ = "2.0.1"
+__version__ = "1.0.1"

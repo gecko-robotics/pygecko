@@ -1,8 +1,5 @@
 # :lizard:  pyGecko
 
-ok, so I am redoing this whole thing! I have learned a lot and I don't like
-how I was doing it before.
-
 ## My robot software.
 
 - Doesn't use [ROS](http://ros.org), ROS is a pain to install and maintain
@@ -22,7 +19,60 @@ to save/retrieve data to a file
 
 # Architecture
 
-TBD
+```bash
+          geckocore
+pub --\  +---------+  /---> sub
+pub ---->|in    out|------> sub
+pub --/  +---------+  \---> sub
+```
+
+## `geckocore.py`
+
+This is the main message hub and keeps track of messages statistics that pass
+through it along with connections.
+
+```bash
++------------------------------------------------------------
+| GeckoCore[32871].............. cpu:   6.7%    mem:   0.06%
+| Total messages seen: 1058
++------------------------------
+| LISTEN 192.168.86.213:9998 connected to None:None
+| LISTEN 192.168.86.213:9999 connected to None:None
+| ESTABLISHED 192.168.86.213:9998 connected to 192.168.86.213:49793
+| ESTABLISHED 192.168.86.213:9998 connected to 192.168.86.213:49792
+| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49794
+| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49795
+| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49796
+| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49797
+| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49798
+| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49799
+| ESTABLISHED 192.168.86.213:9998 connected to 192.168.86.213:49800
++------------------------------
+ hello.........................   39.3 msgs/s      1.8 kB/s
+ hey there.....................   39.3 msgs/s      1.8 kB/s
+ cv............................   14.3 msgs/s   4298.6 kB/s
+```
+
+## `geckolaunch.py`
+
+This launches a bunch of process at once and keeps track of CPU and memory
+consumption.
+
+```bash
++------------------------------
+| Alive processes: 9
++------------------------------
+| subscribe2[32880]............. cpu:   3.5%    mem:   0.07%
+| subscribe2[32882]............. cpu:   3.5%    mem:   0.07%
+| subscribe2[32885]............. cpu:   2.2%    mem:   0.08%
+| subscribe2[32884]............. cpu:   2.2%    mem:   0.08%
+| pcv[32886].................... cpu:   5.7%    mem:   0.18%
+| subscribe2[32881]............. cpu:   3.5%    mem:   0.07%
+| subscribe2[32883]............. cpu:   3.4%    mem:   0.07%
+| publish[32879]................ cpu:   0.9%    mem:   0.07%
+| publish[32878]................ cpu:   0.9%    mem:   0.07%
+```
+
 
 # Todo
 
