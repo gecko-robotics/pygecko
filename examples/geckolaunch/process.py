@@ -20,7 +20,8 @@ from math import sin, cos, pi, sqrt
 try:
     import cv2
 except ImportError:
-    from pygecko.test import cv2  # this works the cpu! only for testing
+    # this works the cpu! only for testing when opencv not installed
+    from pygecko.test import cv2
 
 
 def chew_up_cpu():
@@ -39,7 +40,6 @@ def publish(**kwargs):
     p = geckopy.Publisher()
 
     while not geckopy.is_shutdown():
-        img = raw_img.tobytes()
         msg = {'time': time.time(), 'double': 3.14, 'int': 5, 'array': [1, 2, 3, 4, 5]}
         p.pub(topic, msg)
         # print('>> published msg on topic {}'.format(topic))

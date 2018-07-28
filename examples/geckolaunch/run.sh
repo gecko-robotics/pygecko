@@ -1,4 +1,8 @@
 #!/bin/bash
+# simple script to run everything
+
+# run the message core
+geckocore.py &
 
 # once gecko is installed, the bin directory should be in your path
-../../bin/geckolaunch.py launch.json
+geckolaunch.py launch.json

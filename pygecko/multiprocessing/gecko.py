@@ -7,11 +7,13 @@
 from __future__ import division, print_function, absolute_import
 # from pygecko.transport import GeckoCore
 import multiprocessing as mp
-from multiprocessing.managers import SyncManager
+import os
+import sys
+# from multiprocessing.managers import SyncManager
 import platform
-import logging
-import logging.config
-import logging.handlers
+# import logging
+# import logging.config
+# import logging.handlers
 
 
 class GeckoProcess(object):
@@ -68,6 +70,7 @@ class GeckoProcess(object):
 
         plist = []
 
+        sys.path.append(os.getcwd())  # put module directory in path
         for cmd in self.ps['processes']:
             if len(cmd) == 2:
                 (mod, fun) = cmd
