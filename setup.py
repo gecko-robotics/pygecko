@@ -53,7 +53,9 @@ setup(
         'publish': PublishCommand,
         'make': BuildCommand
     },
-    # scripts=[
+    scripts=[
+        'bin/geckocore.py',
+        'bin/geckolaunch.py'
     #     # 'bin/mjpeg_server.py',  # why? use opencvutils instead
     #     # 'bin/bag_play.py',
     #     # 'bin/bag_record.py',
@@ -65,5 +67,5 @@ setup(
     #     # 'bin/twist_keyboard.py'
     #     # 'bin/video.py',
     #     # 'bin/webserver.py'
-    # ]
+    ]
 )
