@@ -40,3 +40,38 @@ These are ideas I really have not flushed out yet
         - show meta data for collect
         - allow deletion of folder/data
         - show available and used hard drive space
+
+# Change Log
+
+Date        |Version| Notes
+------------|-------|---------------------------------
+2018-Jul-28 | 1.0.0 | totally nuked everything from orbit and started over
+2017-May-14 | 0.8.3 | updates and refactor
+2017-Apr-02 | 0.8.2 | fix pypi doc and refactor
+2017-Mar-19 | 0.7.0 | refactored
+2017-Mar-12 | 0.6.0 | changed messages from dict to classes
+2016-Dec-26 | 0.5.0 | refactor
+2016-Oct-09 | 0.4.1 | published to PyPi
+2010-Mar-10 | 0.0.1 | init
+
+
+# MIT License
+
+**Copyright (c) 2010 Kevin J. Walchko**
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
