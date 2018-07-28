@@ -1,8 +1,12 @@
 from __future__ import print_function
 
-# fix path for now
-import sys
-sys.path.append("../")
+try:
+    import pygecko
+except ImportError:
+    # fix path for now
+    import sys
+    sys.path.append("../")
+    import pygecko
 
 from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP, zmqUDS, GeckoCore
@@ -85,7 +89,7 @@ def msg_zmq(pub_addr, sub_addr):
 
 
 def test_msg_zmq_tcp():
-    msg_zmq(zmqTCP('localhost', 9998), zmqTCP('localhost', 9999))\
+    msg_zmq(zmqTCP('localhost', 9998), zmqTCP('localhost', 9999))
 
 
 def py_zmq(pub_addr, sub_addr):
