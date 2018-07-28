@@ -6,12 +6,14 @@
 on macOS and various linux systems
     - Uses some of the same ideas, constructs, architecture ideas, APIs but
     not strictly adhering to them
-- Uses [Zero MQ](http://http://zeromq.org/) as the process to process communication
+- Uses [Zero MQ](http://http://zeromq.org/) as the inter-process communication
 (uses both TCP and UDS) instead of RPC-XML
     - looked at Google's protobuf, but was more complex than I needed
     - using [`msgpack`](https://msgpack.org/index.html) to serialize data
-    - instead of `roscore` use `geckocore.py`
+    - instead of `roscore` use `geckocore.py` as the message hub
+        - produce performance data (see below)
     - instead of `roslaunch` use `geckolaunch.py`
+        - produces performance data (see below)
 - Uses [`the_collector`]((https://github.com/MomsFriendlyRobotCompany/the_collector))
 to save/retrieve data to a file
 - `simplejson`/`pyyaml` - config and launch files
@@ -20,11 +22,14 @@ to save/retrieve data to a file
 # Architecture
 
 ```bash
-          geckocore
-pub --\  +---------+  /---> sub
-pub ---->|in    out|------> sub
-pub --/  +---------+  \---> sub
+                                geckocore
+              spawn | pub --\  +---------+  /---> sub
+geckolaunch ------->| pub ---->|in    out|------> sub
+                    | pub --/  +---------+  \---> sub
+                                             \--> sub
 ```
+
+Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
 
 ## `geckocore.py`
 
@@ -53,6 +58,8 @@ through it along with connections.
  cv............................   14.3 msgs/s   4298.6 kB/s
 ```
 
+Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any string.
+
 ## `geckolaunch.py`
 
 This launches a bunch of process at once and keeps track of CPU and memory
@@ -73,11 +80,45 @@ consumption.
 | publish[32878]................ cpu:   0.9%    mem:   0.07%
 ```
 
+A launch file is just a simple json file that looks like this:
+
+```bash
+{
+  "processes":
+  [
+    ["process", "publish", {"topic": "hello"}],
+    ["process", "publish", {"topic": "hey there"}],
+    ["process", "subscribe2", {"topic": "hello"}],
+    ["process", "subscribe2", {"topic": "hello"}],
+    ["process", "subscribe2", {"topic": "hey there"}],
+    ["process", "subscribe2", {"topic": "hey there"}],
+    ["process", "subscribe2", {"topic": "cv"}],
+    ["process", "subscribe2", {"topic": "cv"}],
+    ["process", "pcv", {"topic": "cv"}]
+  ]
+}
+```
+
+Here we have a bunch of functions (`publish`,  `subscribe2`, and `pcv`) located in a 
+python file called `process.py` (note, the `.py` file extension is assumed because
+`pygecko` uses `import` to load these functions. There is no reason eveything has
+to be located in one file, I was just lazy when I wrote this example and did
+a lot of copy/paste. :smile:
+
+There are a bunch of `kwargs` (dictionaries) that are passed to the functions full
+of whatever args you want to pass. In this example, the args are mostly just
+topic names to pub/sub to.
+
+## `geckopy`
+
+See the examples, but this acts like a `rospy` and helps make writing
+pub/sub processes easy.
 
 # Todo
 
 These are ideas I really have not flushed out yet
 
+- ros-like services: requst <--> reply
 - serial-to-tcp to collect data
 - python/c example to use unix domain sockets
 - webserver displaying info
