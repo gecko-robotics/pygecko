@@ -21,123 +21,19 @@ sys.path.append("../../")
 from pygecko.transport import Pub, Sub
 from pygecko.transport.zmqclass import SubNB
 from pygecko.transport import zmqTCP, GeckoCore
+from pygecko.multiprocessing import GeckoPy
 from math import sin, cos, pi, sqrt
 
 import cv2
 
 import numpy as np
 
-# Holly crap namespace and pickle use a lot of cpu!
-# zmq hs only 23%, but syncmanager is 77%
-# ns == msg image True
-# +------------------------------
-# | Alive processes: 11
-# +------------------------------
-# | subscribe[19339].............. cpu: 12.2%    mem: 0.10%
-# | subscribe[19343].............. cpu: 13.7%    mem: 0.10%
-# | SyncManager-1[19327].......... cpu: 77.4%    mem: 0.19%
-# | subscribe[19338].............. cpu: 12.5%    mem: 0.10%
-# | subscribe[19341].............. cpu: 13.6%    mem: 0.10%
-# | publish[19336]................ cpu: 8.7%    mem: 0.40%
-# | GeckoCore[19328].............. cpu: 23.3%    mem: 0.11%
-# | subscribe[19344].............. cpu: 13.8%    mem: 0.10%
-# | subscribe[19342].............. cpu: 13.7%    mem: 0.11%
-# | publish[19337]................ cpu: 8.8%    mem: 0.40%
-# | subscribe[19340].............. cpu: 13.7%    mem: 0.10%
-# if 'b' in msg:
-#     print('ns == msg image', ns.image == msg['b'])
 
 def chew_up_cpu():
     # chew up some cpu
     for i in range(90):
         m = sin(i*pi/180)*cos(i*pi/180)*sin(i*pi/180)*cos(i*pi/180)*sin(i*pi/180)*cos(i*pi/180)
         sqrt(m**9)
-
-
-class GeckoRate(object):
-    def __init__(self, hertz):
-        self.last_time = time.time()
-        self.dt = 1/hertz
-
-    def sleep(self):
-        """
-        This uses sleep to delay the function. If your loop is faster than your
-        desired Hertz, then this will calculate the time difference so sleep
-        keeps you close to you desired hertz. If your loop takes longer than
-        your desired hertz, then it doesn't sleep.
-        """
-        now = time.time()
-        diff = now - self.last_time
-        # new_sleep = diff if diff < self.dt else 0
-        if diff < self.dt:
-            new_sleep = self.dt - diff
-        else:
-            new_sleep = 0
-
-        self.last_time = now
-
-        time.sleep(new_sleep)
-
-class GeckoPy(object):
-    def __init__(self):
-        signal.signal(signal.SIGINT, self.signal_handler)
-        self._kill = False
-        self.subs = []
-
-    def is_shutdown(self):
-        return self._kill
-
-    def Rate(self, hertz):
-        return GeckoRate(hertz)
-
-    def get_time(self):
-        return time.time()
-
-    def Publisher(self, uds_file=None, host='localhost', queue_size=10):
-
-        p = Pub()
-
-        if uds_file:
-            raise Exception()
-        else:
-            addr = zmqTCP(host, 9998)
-
-        p.connect(addr, queue_size=queue_size)
-        return p
-
-    def Subscriber(self, topics, cb, host='localhost', uds_file=None):
-        s = SubNB(cb, topics=topics)
-
-        if uds_file:
-            raise Exception()
-        else:
-            addr = zmqTCP(host, 9999)
-
-        s.connect(addr)
-        self.subs.append(s)
-
-    def signal_handler(self, signalnum, stackframe):
-        self._kill = True
-        # print('ignore ctrl-c signal:', signalnum)
-        print('GeckoPy got ctrl-c:', signalnum)
-        print('kill =', self._kill)
-
-    def spin(self, hertz=100):
-        rate = self.Rate(1.2*hertz)
-        while not self._kill:
-            for sub in self.subs:
-                sub.recv()
-            rate.sleep()
-
-
-# def gecko_setup():
-#     # kill -l
-#     # signal.signal(signal.SIGINT, signal_handler)
-#     # signal.signal(signal.SIGTERM, signal_handler)
-#     def signal_handler(signalnum, stackframe):
-#         # print('ignore ctrl-c signal:', signalnum)
-#         pass
-#     signal.signal(signal.SIGINT, signal_handler)
 
 
 def publish(**kwargs):
@@ -194,30 +90,6 @@ def pcv(**kwargs):
     # time.sleep(1)
     print('cv bye ...')
 
-# def subscribe(**kwargs):
-#     # if kwargs.get('signal', False):
-#     #     gecko_setup()
-#     geckopy = GeckoPy()
-#
-#     topic = kwargs.get('topic', 'test')
-#     s = Sub(topics=[topic])
-#     addr = zmqTCP('localhost', 9999)
-#     s.connect(addr)
-#     # s = geckopy.Subscriber([topic])
-#
-#     while not geckopy.is_shutdown():
-#         # print('loop')
-#         # print(s.recv(flags=zmq.NOBLOCK))
-#         t, msg = s.recv()
-#         # print("<< recv[{}][{}]: {}".format(t, msg['a'], time.time() - msg['s']))
-#         # chew up some cpu
-#         chew_up_cpu()
-#         chew_up_cpu()
-#         chew_up_cpu()
-#         chew_up_cpu()
-#
-#     print('sub bye ...')
-
 
 def subscribe2(**kwargs):
     geckopy = GeckoPy()
@@ -231,9 +103,6 @@ def subscribe2(**kwargs):
         pass
 
     topic = kwargs.get('topic', 'test')
-    # s = SubNB(f, topics=[topic])
-    # addr = zmqTCP('localhost', 9999)
-    # s.connect(addr)
     s = geckopy.Subscriber([topic], f)
     geckopy.spin(20)
 
@@ -242,3 +111,91 @@ if __name__ == "__main__":
     kw = {'topic': 'hello'}
     # publish(kwargs=kw)
     subscribe2(kwargs=kw)
+
+
+
+#
+# class GeckoRate(object):
+#     def __init__(self, hertz):
+#         self.last_time = time.time()
+#         self.dt = 1/hertz
+#
+#     def sleep(self):
+#         """
+#         This uses sleep to delay the function. If your loop is faster than your
+#         desired Hertz, then this will calculate the time difference so sleep
+#         keeps you close to you desired hertz. If your loop takes longer than
+#         your desired hertz, then it doesn't sleep.
+#         """
+#         now = time.time()
+#         diff = now - self.last_time
+#         # new_sleep = diff if diff < self.dt else 0
+#         if diff < self.dt:
+#             new_sleep = self.dt - diff
+#         else:
+#             new_sleep = 0
+#
+#         self.last_time = now
+#
+#         time.sleep(new_sleep)
+#
+# class GeckoPy(object):
+#     def __init__(self):
+#         signal.signal(signal.SIGINT, self.signal_handler)
+#         self._kill = False
+#         self.subs = []
+#
+#     def is_shutdown(self):
+#         return self._kill
+#
+#     def Rate(self, hertz):
+#         return GeckoRate(hertz)
+#
+#     def get_time(self):
+#         return time.time()
+#
+#     def Publisher(self, uds_file=None, host='localhost', queue_size=10):
+#
+#         p = Pub()
+#
+#         if uds_file:
+#             raise Exception()
+#         else:
+#             addr = zmqTCP(host, 9998)
+#
+#         p.connect(addr, queue_size=queue_size)
+#         return p
+#
+#     def Subscriber(self, topics, cb, host='localhost', uds_file=None):
+#         s = SubNB(cb, topics=topics)
+#
+#         if uds_file:
+#             raise Exception()
+#         else:
+#             addr = zmqTCP(host, 9999)
+#
+#         s.connect(addr)
+#         self.subs.append(s)
+#
+#     def signal_handler(self, signalnum, stackframe):
+#         self._kill = True
+#         # print('ignore ctrl-c signal:', signalnum)
+#         print('GeckoPy got ctrl-c:', signalnum)
+#         print('kill =', self._kill)
+#
+#     def spin(self, hertz=100):
+#         rate = self.Rate(1.2*hertz)
+#         while not self._kill:
+#             for sub in self.subs:
+#                 sub.recv()
+#             rate.sleep()
+
+
+# def gecko_setup():
+#     # kill -l
+#     # signal.signal(signal.SIGINT, signal_handler)
+#     # signal.signal(signal.SIGTERM, signal_handler)
+#     def signal_handler(signalnum, stackframe):
+#         # print('ignore ctrl-c signal:', signalnum)
+#         pass
+#     signal.signal(signal.SIGINT, signal_handler)

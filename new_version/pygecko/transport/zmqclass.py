@@ -248,42 +248,6 @@ class SubNB(Sub):
 
         self.cb_func = cb_func
 
-        # try:
-        #     self.socket = self.ctx.socket(zmq.SUB)
-        #
-        #     # manage subscriptions
-        #     # can also use: self.socket.subscribe(topic) or unsubscribe()
-        #     if topics is None:
-        #         print("[>] Receiving messages on ALL topics...")
-        #         self.socket.setsockopt(zmq.SUBSCRIBE, b'')
-        #         self.topics = b''
-        #     else:
-        #         if type(topics) is list:
-        #             pass
-        #         else:
-        #             raise Exception('topics must be a list')
-        #         self.topics = topics
-        #         for t in topics:
-        #             print("[>] Subscribed to messages on topics: {} ...".format(t))
-        #             # self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('ascii'))
-        #             self.socket.setsockopt(zmq.SUBSCRIBE, t.encode('utf-8'))
-        #
-        # except Exception as e:
-        #     error = '[-] Sub Error, {0!s}'.format((str(e)))
-        #     # print error
-        #     raise ZMQError(error)
-        #
-        # if unpack:
-        #     self.unpack = unpack
-
-    # def __del__(self):
-    #     if self.topics is None:
-    #         self.socket.setsockopt(zmq.UNSUBSCRIBE, b'')
-    #     else:
-    #         for t in self.topics:
-    #             self.socket.setsockopt(zmq.UNSUBSCRIBE, t.encode('utf-8'))
-    #     self.socket.close()
-
     def recv(self):
         """
         flags=zmq.NOBLOCK to implement non-blocking

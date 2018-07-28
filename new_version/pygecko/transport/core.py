@@ -56,6 +56,10 @@ class SignalCatch(object):
 
 
 class GProcess(object):
+    """
+    A class for setting up multiprocessing. It does nothing, but inheriting
+    from it allows a child class to spawn processes.
+    """
     ps = None
     name = None
     def __del__(self):
@@ -122,13 +126,13 @@ class MsgCounter(object):
         return cp
 
 
-class Performance(object):
-    def __init__(self):
-        self.ps.Process(os.getpid())
-    def get(self):
-        pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
-        label = '{}[{}]'.format(p.name, p.pid)
-        print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+# class Performance(object):
+#     def __init__(self):
+#         self.ps.Process(os.getpid())
+#     def get(self):
+#         pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+#         label = '{}[{}]'.format(p.name, p.pid)
+#         print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
 
 
 class GeckoCore(SignalCatch, GProcess):
@@ -147,7 +151,7 @@ class GeckoCore(SignalCatch, GProcess):
 
         self.name = "GeckoCore"
 
-        # self.process = psutil.Process(os.getpid())
+        self.print_interval = 3  # seconds
 
     def socket_setup(self):
 
@@ -186,25 +190,20 @@ class GeckoCore(SignalCatch, GProcess):
             # non-blocking so we can always check to see if there is a kill
             # signal to handle
             msg = None
-            # while not msg:
             try:
                 topic, msg = self.ins.raw_recv(flags=zmq.NOBLOCK)
             except Exception as e:
-                # print(e)
                 if self.kill:
                     return
                 time.sleep(0.005)
-                # continue
 
             if msg:
                 topic = topic.decode('utf-8')  # FIXME
-
-                self.outs.raw_pub(topic, msg)
-
-                mc.touch(topic, len(msg))
+                self.outs.raw_pub(topic, msg)  # transmit msg
+                mc.touch(topic, len(msg))      # update message/data counts
 
             delta = time.time() - datumn
-            if delta > 3:
+            if delta > self.print_interval:
                 pd = process.as_dict(attrs=['connections','cpu_percent','memory_percent'])
                 label = '{}[{}]'.format("GeckoCore", process.pid)
                 print('+', '-'*60, sep='')
@@ -226,4 +225,6 @@ class GeckoCore(SignalCatch, GProcess):
                 for k in mc.keys():
                     count, bytes = mc[k]
                     print(' {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(k, count/delta, bytes/delta))
+
+                # reset datumn
                 datumn = time.time()
