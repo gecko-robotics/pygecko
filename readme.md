@@ -63,7 +63,8 @@ Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any 
 ## `geckolaunch.py`
 
 This launches a bunch of process at once and keeps track of CPU and memory
-consumption.
+consumption. Command `geckolaunch.py launch.json`, would produce the 
+following:
 
 ```bash
 +------------------------------
@@ -80,7 +81,8 @@ consumption.
 | publish[32878]................ cpu:   0.9%    mem:   0.07%
 ```
 
-A launch file is just a simple json file that looks like this:
+A launch file is just a simple json file where each line takes the form:
+`[file, function, kwargs]`. Here is an example:
 
 ```bash
 {
