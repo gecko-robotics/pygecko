@@ -13,22 +13,6 @@ import logging
 import logging.config
 import logging.handlers
 
-"""
-kevin@Dalek ~ $ pstree -s python
--+= 00001 root /sbin/launchd
- |-+= 00309 kevin /Applications/Utilities/Terminal.app/Contents/MacOS/Terminal -psn_0_61455
- | \-+= 05608 root login -pfl kevin /bin/bash -c exec -la bash /bin/bash
- |   \-+= 05609 kevin -bash
- |     \-+= 10323 kevin /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Co
- |       |--- 10326 kevin /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/
- |       |--- 10327 kevin /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/
- |       |--- 10328 kevin /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/
- |       \--- 10329 kevin /usr/local/Cellar/python/3.7.0/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/
- |-+= 00491 kevin /Applications/Dropbox.app/Contents/MacOS/Dropbox
- | \--- 00496 kevin /Applications/Dropbox.app/Contents/MacOS/Dropbox -type:exit-monitor -python-version:2.7.11 -method:
- \--- 00495 kevin /Applications/Dropbox.app/Contents/MacOS/Dropbox -type:crashpad-handler --capture-python --no-upload-
-"""
-
 
 class GeckoProcess(object):
     """
@@ -51,7 +35,7 @@ class GeckoProcess(object):
 
     address=('127.0.0.1', 5000), authkey='abc'
     """
-    def __init__(self, ps, address=('127.0.0.1', 8888), authkey='hi', to=1.0):
+    def __init__(self, ps, to=1.0):
         print('+', '-'*40, sep='')
         print('| geckolaunch')
         print('+', '-'*40, sep='')
@@ -63,10 +47,6 @@ class GeckoProcess(object):
         print('')
 
         self.ps = ps
-        # self.mgr = mp.Manager()
-        # self.mgr = SyncManager(address=address, authkey=authkey)
-        # self.mgr.start()
-        # self.namespace = self.mgr.Namespace()
         self.event = mp.Event()
         self.timeout = to
 
@@ -87,26 +67,24 @@ class GeckoProcess(object):
         self.event.set()
 
         plist = []
-        # for i, (mod, fun, args) in enumerate(ps['processes']):
+
         for cmd in self.ps['processes']:
             if len(cmd) == 2:
                 (mod, fun) = cmd
-                args = {'signal': True}
+                args = {}
             elif len(cmd) == 3:
                 (mod, fun, args) = cmd
-                args['signal'] = True
             else:
                 raise Exception("** GeckoProcess Error: Wrong number of args for process **")
+
+            # i don't know, maybe this is stupid
+            args['pyton'] = tuple(platform.sys.version_info)[:3]
+            args['os'] = platform.system()
 
             # load the module and get the function
             m = __import__(mod)
             ff = getattr(m, fun)
 
-            # if args is None:
-            #     p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event,))
-            # else:
-            #     p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event,), kwargs=args)
-            # p = mp.Process(name=fun, target=ff, args=(self.namespace, self.event), kwargs=args)
             p = mp.Process(name=fun, target=ff, kwargs=args)
 
             p.start()

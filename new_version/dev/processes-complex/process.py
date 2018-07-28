@@ -24,7 +24,10 @@ from pygecko.transport import zmqTCP, GeckoCore
 from pygecko.multiprocessing import GeckoPy
 from math import sin, cos, pi, sqrt
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    from pygecko.test import cv2
 
 import numpy as np
 

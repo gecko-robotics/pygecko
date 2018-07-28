@@ -1,0 +1,18 @@
+{
+  "processes":
+  [
+    ["process", "publish", {"topic": "hello"}],
+    ["process", "publish", {"topic": "hey there"}],
+    ["process", "subscribe2", {"topic": "hello"}],
+    ["process", "subscribe2", {"topic": "hello"}],
+    ["process", "subscribe2", {"topic": "hey there"}],
+    ["process", "subscribe2", {"topic": "hey there"}],
+    ["process", "subscribe2", {"topic": "cv"}],
+    ["process", "subscribe2", {"topic": "cv"}],
+    ["process", "pcv", {"topic": "cv"}]
+  ],
+  "geckocore": {
+    "in": ["localhost", 9998],
+    "out": ["localhost", 9999]
+  }
+}
