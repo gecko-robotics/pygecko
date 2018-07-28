@@ -14,10 +14,10 @@ on macOS and various linux systems
         - produce performance data (see below)
     - instead of `roslaunch` use `geckolaunch.py`
         - produces performance data (see below)
-- Uses [`the_collector`]((https://github.com/MomsFriendlyRobotCompany/the_collector))
+- Uses [`the_collector`](https://github.com/MomsFriendlyRobotCompany/the_collector)
 to save/retrieve data to a file
 - `simplejson`/`pyyaml` - config and launch files
-- All of this runs on `Raspberry Pi3 <http://www.raspberrypi.org>`_
+- All of this runs on [Raspberry Pi 3](http://www.raspberrypi.org)
 
 # Architecture
 
@@ -29,7 +29,9 @@ geckolaunch ------->| pub ---->|in    out|------> sub
                                              \--> sub
 ```
 
-Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
+- Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
+- Subscriber can subscribe to multiple topics
+- Publishers are not bound to any one topic, but can also publish to multiple topics
 
 ## `geckocore.py`
 
@@ -63,7 +65,8 @@ Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any 
 ## `geckolaunch.py`
 
 This launches a bunch of process at once and keeps track of CPU and memory
-consumption.
+consumption. Command `geckolaunch.py launch.json`, would produce the 
+following:
 
 ```bash
 +------------------------------
@@ -80,7 +83,8 @@ consumption.
 | publish[32878]................ cpu:   0.9%    mem:   0.07%
 ```
 
-A launch file is just a simple json file that looks like this:
+A launch file is just a simple json file where each line takes the form:
+`[file, function, kwargs]`. Here is an example:
 
 ```bash
 {
@@ -123,6 +127,7 @@ These are ideas I really have not flushed out yet
 - python/c example to use unix domain sockets
 - webserver displaying info
     - `bjoern` - efficient web server written in C with python bindings
+- need some sort of logging system
 - data logger over tcp/unix domain sockets
     - need to have simple setup class to make this easy
     - automatically append time-date
