@@ -5,7 +5,9 @@ from __future__ import print_function
 import multiprocessing as mp
 import time
 import signal
+
 # fix path for now
+# once gecko is installed you don't need this kludge
 import sys
 sys.path.append("../../")
 
@@ -19,8 +21,6 @@ try:
     import cv2
 except ImportError:
     from pygecko.test import cv2  # this works the cpu! only for testing
-
-import numpy as np
 
 
 def chew_up_cpu():
@@ -38,14 +38,10 @@ def publish(**kwargs):
 
     p = geckopy.Publisher()
 
-    cnt = 0
-    # raw_img = np.random.rand(640, 480)  # HD (1920x1080) kills performance
-    raw_img = np.random.rand(1,5)
     while not geckopy.is_shutdown():
         img = raw_img.tobytes()
-        msg = {'a': cnt, 'b': img, 's': time.time()}
-        p.pub(topic, msg)  # topic msg
-        cnt += 1
+        msg = {'time': time.time(), 'double': 3.14, 'int': 5, 'array': [1, 2, 3, 4, 5]}
+        p.pub(topic, msg)
         # print('>> published msg on topic {}'.format(topic))
 
         # chew up some cpu
@@ -81,7 +77,6 @@ def pcv(**kwargs):
         rate.sleep()
 
     camera.release()
-    # time.sleep(1)
     print('cv bye ...')
 
 

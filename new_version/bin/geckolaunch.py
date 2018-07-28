@@ -6,7 +6,7 @@ needs to move to bin
 """
 
 import sys
-sys.path.append("../../")
+# sys.path.append("../")
 from pygecko.transport import GeckoCore
 from pygecko.multiprocessing import GeckoProcess
 from pygecko.file_storage import FileJson, FileYaml
