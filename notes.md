@@ -17,3 +17,9 @@ re_img = np.frombuffer(message_image, dtype=np.uint8)
 # Convert back the data to original image shape.
 re_img = np.reshape(re_img, img_shape)
 ```
+
+# log viewer
+
+https://www.npmjs.com/package/frontail
+
+    frontail /var/log/system.log /var/log/wifi.log
