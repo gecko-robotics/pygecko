@@ -37,6 +37,8 @@ from pygecko.transport.zmqclass import Pub, Sub
 import signal
 import psutil
 import os
+# from colorama import Fore, Back, Style
+# from threading import Thread
 
 
 class SignalCatch(object):
@@ -92,47 +94,81 @@ class MsgCounter(object):
     Simple class for keeping track of performance, how many messages per topic
     has it seen for a given starting point in time.
     """
-    topics = {}
-    total_msgs = 0
+    def __init__(self):
+        self.topics = {}
+        self.total_msgs = 0
+        self.datumn = time.time()
+
     def touch(self, topic, bytes=0):
         self.total_msgs += 1
 
-        if topic not in self.topics.keys():
-            # [msg_count, bytes, ]
-            self.topics[topic] = [0, 0]
-            print('>> New topic: {}'.format(topic))
+        # if topic not in self.topics.keys():
+        #     # [msg_count, bytes, ]
+        #     self.topics[topic] = [0, 0]
+        #     print('>> New topic: {}'.format(topic))
 
-        self.topics[topic][0] += 1
-        self.topics[topic][1] += bytes/(1024)  # kilobytes
+        try:
+            self.topics[topic][0] += 1
+            self.topics[topic][1] += bytes/(1024)  # kilobytes
+        except (NameError, KeyError) as e:
+            self.topics[topic] = [1, bytes/(1024)]
 
-    def keys(self):
-        return self.topics.keys()
+    def dataprint(self, delta):
+        print('+', '-'*30, sep='')
+        print('| Topic Performance')
+        for key, val in self.topics.items():
+            count, bytes = val
+            print('| {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(key, count/delta, bytes/delta))
 
-    def __getitem__(self, key):
-        """
-        only get one key, note, it resets the counts
-        """
-        ret = tuple(self.topics[key])
-        self.topics[key] = [0, 0]
-        return ret
+            # reset msg,data count
+            self.topics[key] = [0, 0]
 
-    def get(self):
-        """
-        get an entire copy, note, it resets the entire database of counts
-        """
-        cp = self.topics.copy()
-        for k,v in self.topics.items():
-            self.topics[k] = [0, 0]
-        return cp
+        # reset datumn
+        self.datumn = time.time()
 
 
-# class Performance(object):
-#     def __init__(self):
-#         self.ps.Process(os.getpid())
-#     def get(self):
-#         pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
-#         label = '{}[{}]'.format(p.name, p.pid)
-#         print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+class ProcPerformance(object):
+    def __init__(self):
+        pid = os.getpid()
+        self.core = psutil.Process(pid)
+        self.procs = []
+        self.push(pid)
+
+    def push(self, pid):
+        # = (psutil.Process(pid), name)
+        self.procs = [psutil.Process(pid)]
+
+    def pop(self, pid):
+        self.procs.remove(pid)
+
+    def procprint(self, total_msgs):
+        # pd = self.core.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+        pd = self.core.as_dict(attrs=['connections'])
+        print('+', '='*60, sep='')
+        print('| Total messages seen: {}'.format(total_msgs))
+
+        # network connections
+        print('+', '-'*30, sep='')
+        print('| Network Connections')
+        for con in pd['connections']:
+            # print(con)
+            addr = con.laddr
+            # print(addr)
+            lip, lport = addr
+            addr = con.raddr
+            if addr:
+                rip, rport = addr
+            else:
+                rip, rport = (None, None)
+            print('| {} {}:{} connected to {}:{}'.format(con.status, lip, lport, rip, rport))
+
+        # process cpu and memory consumption
+        print('+', '-'*30, sep='')
+        print('| Processes Performance')
+        for ps in self.procs:
+            pd = ps.as_dict(attrs=['cpu_percent','memory_percent'])
+            label = '{}[{}]'.format(ps.name(), ps.pid)
+            print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
 
 
 class GeckoCore(SignalCatch, GProcess):
@@ -166,10 +202,14 @@ class GeckoCore(SignalCatch, GProcess):
 
     def run(self):
         self.kill_signals()  # have to setup signals in new process
+
         process = psutil.Process(self.ps.pid)
+
+        perf = ProcPerformance()
 
         print(">> Starting up GeckoCore")
 
+        # setup all of the zmq ins/outs and exit if there is an error
         try:
             self.socket_setup()  # have to setup sockets in new process
         except zmq.error.ZMQError as e: # typicall gets called if addr in use
@@ -181,50 +221,55 @@ class GeckoCore(SignalCatch, GProcess):
             print('*'*len(err_msg))
             exit(1)
 
-        # datumn = time.time()
         mc = MsgCounter()
         datumn = time.time()
         while not self.kill:
-            # topic, msg = self.ins.raw_recv()
-
             # non-blocking so we can always check to see if there is a kill
             # signal to handle
             msg = None
             try:
                 topic, msg = self.ins.raw_recv(flags=zmq.NOBLOCK)
             except Exception as e:
-                if self.kill:
-                    return
+                # if self.kill:
+                #     return
                 time.sleep(0.005)
 
             if msg:
                 topic = topic.decode('utf-8')  # FIXME
-                self.outs.raw_pub(topic, msg)  # transmit msg
-                mc.touch(topic, len(msg))      # update message/data counts
-
-            delta = time.time() - datumn
-            if delta > self.print_interval:
-                pd = process.as_dict(attrs=['connections','cpu_percent','memory_percent'])
-                label = '{}[{}]'.format("GeckoCore", process.pid)
-                print('+', '-'*60, sep='')
-                print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
-                print('| Total messages seen: {}'.format(mc.total_msgs))
-                print('+', '-'*30, sep='')
-                for con in pd['connections']:
-                    # print(con)
-                    addr = con.laddr
-                    # print(addr)
-                    lip, lport = addr
-                    addr = con.raddr
-                    if addr:
-                        rip, rport = addr
+                # print(topic)
+                # internal messages for performance
+                if topic == 'core_info':
+                    print('*** core info ***')
+                    pid, name, status = self.pickle.unpack(msg)
+                    print('*** {} {} {} ***'.format(pid, name, status))
+                    if status is True:
+                        perf.push(pid)
+                    elif status is False:
+                        perf.pop(pid)
                     else:
-                        rip, rport = (None, None)
-                    print('| {} {}:{} connected to {}:{}'.format(con.status, lip, lport, rip, rport))
-                print('+', '-'*30, sep='')
-                for k in mc.keys():
-                    count, bytes = mc[k]
-                    print(' {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(k, count/delta, bytes/delta))
+                        print('*** wtf topic ****')
+                else:
+                    self.outs.raw_pub(topic, msg)  # transmit msg
+                    mc.touch(topic, len(msg))      # update message/data counts
 
-                # reset datumn
-                datumn = time.time()
+            delta = time.time() - mc.datumn
+            if delta > self.print_interval:
+                # pd = process.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+                # label = '{}[{}]'.format("GeckoCore", process.pid)
+                # print('+', '-'*60, sep='')
+                # print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+                # print('| Total messages seen: {}'.format(mc.total_msgs))
+                # print('+', '-'*30, sep='')
+                # for con in pd['connections']:
+                #     # print(con)
+                #     addr = con.laddr
+                #     # print(addr)
+                #     lip, lport = addr
+                #     addr = con.raddr
+                #     if addr:
+                #         rip, rport = addr
+                #     else:
+                #         rip, rport = (None, None)
+                #     print('| {} {}:{} connected to {}:{}'.format(con.status, lip, lport, rip, rport))
+                perf.procprint(mc.total_msgs)
+                mc.dataprint(delta)

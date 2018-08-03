@@ -5,17 +5,19 @@ from __future__ import print_function
 import multiprocessing as mp
 import time
 import signal
+import imutils
 
 # fix path for now
 # once gecko is installed you don't need this kludge
-import sys
-sys.path.append("../../")
+# import sys
+# sys.path.append("../../")
 
 from pygecko.transport import Pub, Sub
-from pygecko.transport.zmqclass import SubNB
-from pygecko.transport import zmqTCP, GeckoCore
+# from pygecko.transport.zmqclass import SubNB
+from pygecko.transport import zmqTCP  #, GeckoCore
 from pygecko.multiprocessing import GeckoPy
 from math import sin, cos, pi, sqrt
+import numpy as np
 
 try:
     import cv2
@@ -32,15 +34,15 @@ def chew_up_cpu():
 
 
 def publish(**kwargs):
-    geckopy = GeckoPy()
-    rate = geckopy.Rate(20)
+    geckopy = GeckoPy(**kwargs)
+    rate = geckopy.Rate(1)
 
     topic = kwargs.get('topic', 'test')
 
     p = geckopy.Publisher()
-
+    datumn = time.time()
     while not geckopy.is_shutdown():
-        msg = {'time': time.time(), 'double': 3.14, 'int': 5, 'array': [1, 2, 3, 4, 5]}
+        msg = {'time': time.time() - datumn, 'double': 3.14, 'int': 5, 'array': [1, 2, 3, 4, 5]}
         p.pub(topic, msg)
         # print('>> published msg on topic {}'.format(topic))
 
@@ -54,42 +56,68 @@ def publish(**kwargs):
 
 
 def pcv(**kwargs):
-    geckopy = GeckoPy()
-    rate = geckopy.Rate(30)
+    geckopy = GeckoPy(**kwargs)
+    rate = geckopy.Rate(1)
 
     topic = kwargs.get('topic', 'test')
 
     p = geckopy.Publisher()
 
-    camera = cv2.VideoCapture(0)
-    camera.set(3, 640)
-    camera.set(4, 480)
+    # camera = cv2.VideoCapture(0)
+    from imutils.video import WebcamVideoStream
+    # camera.set(3, 640)
+    # camera.set(4, 480)
+    # camera.set(3, 320)
+    # camera.set(4, 240)
+    camera = WebcamVideoStream(src=0).start()
+
+    datumn = time.time()
 
     while not geckopy.is_shutdown():
-        ok, img = camera.read()
+        # start = time.time()
+        # ok, img = camera.read()
+        ok, img = True, camera.read()
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # img = cv2.resize(img,(640,480))
+        # end = time.time()
+        # print("* camera time: {}".format(end - start))
         if ok:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            shape = img.shape
+            dtype = img.dtype
             img = img.tobytes()
-            msg = {'img': img, 's': time.time()}
+            msg = {'img': img, 'shape': shape, 'dtype': dtype, 'stamp': time.time() - datumn}
             p.pub(topic, msg)  # topic msg
+            # p.pub(topic, {'a': 5})
+        else:
+            print("*** couldn't read image ***")
 
         # sleep
         rate.sleep()
 
-    camera.release()
+    # camera.release()
+    camera.stop()
     print('cv bye ...')
 
 
 def subscribe2(**kwargs):
-    geckopy = GeckoPy()
+    geckopy = GeckoPy(**kwargs)
 
     def f(t, m):
         # print('>> Message[{}]'.format(t))
-        chew_up_cpu()
-        chew_up_cpu()
-        chew_up_cpu()
-        chew_up_cpu()
-        pass
+        if 'img' in m:
+            im = m['img']
+            im = np.frombuffer(im, dtype=m['dtype'])
+            im = im.reshape(m['shape'])
+            geckopy.log('image: {}x{}'.format(*im.shape[:2]))
+            # if im.shape != (480, 640):
+            #     print("*** image shape wrong: {} ***".format(im.shape))
+        else:
+            geckopy.log('msg: {}'.format(m))
+            chew_up_cpu()
+            chew_up_cpu()
+            chew_up_cpu()
+            chew_up_cpu()
 
     topic = kwargs.get('topic', 'test')
     s = geckopy.Subscriber([topic], f)

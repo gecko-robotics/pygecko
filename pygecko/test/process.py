@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import multiprocessing as mp
+from pygecko.transport import zmqTCP
 # import time
 # import signal
 # import os
@@ -13,7 +14,7 @@ class GeckoSimpleProcess(object):
 
     def __del__(self):
         if self.ps:
-            self.join(1)
+            self.join(0.1)
 
     @property
     def name(self):
@@ -34,9 +35,18 @@ class GeckoSimpleProcess(object):
             self.ps.terminate()
 
     def start(self, func, name='simple_process', **kwargs):
-        self.ps = mp.Process(name=name, target=func, **kwargs)
+        kwargs = kwargs['kwargs']  # WTF???
+
+        if 'core_inaddr' not in kwargs:
+            kwargs['core_inaddr'] = in_addr = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
+        if 'core_outaddr' not in kwargs:
+            kwargs['core_outaddr'] = in_addr = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
+
+        # print('ss', kwargs)
+
+        self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()
-        print('>> Started: {}[{}]'.format(self.ps.name, self.ps.pid))
+        print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
 
     def join(self, timeout=None):
         print('>> Stopping {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')

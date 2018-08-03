@@ -16,6 +16,62 @@ from zmq.devices import ProcessProxy
 import time
 import socket as Socket
 import msgpack
+import pickle
+import json
+
+
+# class MsgPack(object):
+#     def pack(self, data):
+#         return msgpack.packb(data, use_bin_type=True, strict_types=True)
+#
+#     def unpack(self, data):
+#         return msgpack.unpackb(data, raw=False)
+#
+#
+# class MsgPackCustom(object):
+#     def __init__(self, packer, unpacker):
+#         self.packer = packer
+#         self.ext_unpack = unpacker
+#
+#     def pack(self, data):
+#         return data = msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.packer)
+#
+#     def unpack(self, data):
+#         return data = msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
+#
+#
+class Pickle(object):
+    def pack(self, data):
+        return pickle.dumps(data)
+    def unpack(self, data):
+        return pickle.loads(data)
+#
+#
+# class Json(object):
+#     def pack(self, data):
+#         """
+#         json doesn't know how to handle namedtuples, so store class id for
+#         unpack
+#         """
+#         if type(data) in known_types:
+#             d = data._asdict()
+#             d['type'] = unpack_types[type(data)]
+#         else:
+#             d = data
+#         return json.dumps(d)
+#
+#     def unpack(self, data):
+#         """
+#         if data is an ordered dictionary AND it has class id, then create the
+#         message using the class id
+#         """
+#         d = json.loads(data)
+#         if type(data) is OrderedDict:
+#             if 'type' in d:
+#                 cls = unpack_types[d['type']]
+#                 d.pop('type', None)
+#                 d = cls(*d.values())
+#         return d
 
 
 class ZMQError(Exception):
@@ -32,6 +88,7 @@ class Base(object):
 
     def __init__(self):
         self.ctx = zmq.Context()
+        self.pickle = Pickle()
 
     def __del__(self):
         self.ctx.term()
@@ -104,22 +161,28 @@ class Pub(Base):
         out: none
         """
         # jmsg = serialize(msg)
-        if self.pack:
-            jmsg = msgpack.packb(msg, default=self.pack, use_bin_type=True, strict_types=True)
-        else:
-            jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
+
+        # if self.pack:
+        #     jmsg = msgpack.packb(msg, default=self.pack, use_bin_type=True, strict_types=True)
+        # else:
+        #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
+
+        jmsg = self.pickle.pack(msg)
+
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
-        done = True
-        while done:
-            # done = self.socket.send_multipart([topic.encode('ascii'), jmsg])
-            done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
-            # done = self.socket.send(jmsg)
+        # done = True
+        # while done:
+        #     # done = self.socket.send_multipart([topic.encode('ascii'), jmsg])
+        #     done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
+        #     # done = self.socket.send(jmsg)
         # print('pub >>', topic.encode('ascii'))
+        self.socket.send_multipart([topic.encode('utf-8'), jmsg])
 
     def raw_pub(self, topic, msg):
-        done = True
-        while done:
-            done = self.socket.send_multipart([topic.encode('utf-8'), msg])
+        # done = True
+        # while done:
+        #     done = self.socket.send_multipart([topic.encode('utf-8'), msg])
+        self.socket.send_multipart([topic.encode('utf-8'), msg])
 
 
 class Sub(Base):
@@ -128,12 +191,13 @@ class Sub(Base):
     """
     unpack = None
 
-    def __init__(self, topics=None, unpack=None):
+    def __init__(self, topics=None, unpack=None, cb_func=None):
         """
         topics: an array of topics, ex ['hello', 'cool messages']
         unpack: a function to deserialize messages if necessary
         """
         Base.__init__(self)
+        self.cb_func = cb_func
         # if type(topics) is list:
         #     pass
         # else:
@@ -163,11 +227,10 @@ class Sub(Base):
 
         except Exception as e:
             error = '[-] Sub Error, {0!s}'.format((str(e)))
-            # print error
             raise ZMQError(error)
 
-        if unpack:
-            self.unpack = unpack
+        # if unpack:
+        #     self.unpack = unpack
 
     def __del__(self):
         if self.topics is None:
@@ -177,6 +240,9 @@ class Sub(Base):
                 self.socket.setsockopt(zmq.UNSUBSCRIBE, t.encode('utf-8'))
         self.socket.close()
 
+    def recv_nb(self):
+        self.recv(flags=zmq.NOBLOCK)
+
     def recv(self, flags=0):
         """
         flags=zmq.NOBLOCK to implement non-blocking
@@ -185,17 +251,21 @@ class Sub(Base):
         msg = None
         try:
             topic, jmsg = self.socket.recv_multipart(flags=flags)
-            if self.unpack:
-                msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
-            else:
-                msg = msgpack.unpackb(jmsg, raw=False)
+            # if self.unpack:
+            #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
+            # else:
+            #     msg = msgpack.unpackb(jmsg, raw=False)
+            msg = self.pickle.unpack(jmsg)
+            if self.cb_func:
+                self.cb_func(topic, msg)
         except zmq.Again as e:
-            # no message has arrived yet
-            print(e)
+            # no message has arrived yet or not connected to server
+            # print(e)
+            time.sleep(0.01)
             pass
         except Exception as e:
             # something else is wrong
-            print(e)
+            # print(e)
             raise
         return topic, msg
 
@@ -203,72 +273,78 @@ class Sub(Base):
         return self.socket.recv_multipart(flags=flags)
 
 
-class SubNB(Sub):
-    """
-    Simple subscriber that read messages on a topic(s).
-
-    This is non-blocking and calls a call backfunction (cb_func) when a message
-    is finally received. The blind non-blocking consumes around 0.5% (max) more
-    cpu percentage than the blocking version. So for low number of node, not
-    a big deal.
-
-    Below
-      subscribe is blocking
-      subscribe2 in non-blocking
-
-    each subscribe type calls chew_up_cpu() 4 times which consumes around
-    3.4% ... anything more than that is attributed to block/non-block
-
-    GeckoCore is the hub and does a lot of data collection, plus passing
-    messages between inputs/outputs
-
-    +------------------------------
-    | Alive processes: 10
-    +------------------------------
-    | subscribe2[23117]............. cpu:   3.7%    mem:   0.06%
-    | subscribe2[23119]............. cpu:   3.7%    mem:   0.05%
-    | subscribe[23121].............. cpu:   3.5%    mem:   0.05%
-    | publish[23115]................ cpu:   0.9%    mem:   0.05%
-    | GeckoCore[23106].............. cpu:   6.2%    mem:   0.05%
-    | publish[23114]................ cpu:   1.0%    mem:   0.05%
-    | subscribe2[23116]............. cpu:   3.6%    mem:   0.06%
-    | subscribe2[23118]............. cpu:   3.9%    mem:   0.05%
-    | subscribe2[23120]............. cpu:   3.7%    mem:   0.05%
-    | subscribe[23122].............. cpu:   3.5%    mem:   0.05%
-    ------------------------------
-    """
-    unpack = None
-
-    def __init__(self, cb_func, topics=None, unpack=None):
-        """
-        topics: an array of topics, ex ['hello', 'cool messages']
-        unpack: a function to deserialize messages if necessary
-        """
-        Sub.__init__(self, topics, unpack)
-
-        self.cb_func = cb_func
-
-    def recv(self):
-        """
-        flags=zmq.NOBLOCK to implement non-blocking
-        """
-        try:
-            topic, jmsg = self.socket.recv_multipart(flags=zmq.NOBLOCK)
-            if self.unpack:
-                msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
-            else:
-                msg = msgpack.unpackb(jmsg, raw=False)
-
-            self.cb_func(topic, msg)
-        except zmq.Again as e:
-            # no message has arrived yet or not connected to server
-            # print(e)
-            pass
-        except Exception as e:
-            # something else is wrong
-            # print(e)
-            raise
-        return
+# class SubNB(Sub):
+#     def __init__(self, cb_func, topics=None, unpack=None):
+#         Sub.__init__(self, topics, unpack,cb_func=cb_func)
+#     def recv(self):
+#         super.recv(flags=zmq.NOBLOCK)
+# class SubNB(Sub):
+#     """
+#     Simple subscriber that read messages on a topic(s).
+#
+#     This is non-blocking and calls a call backfunction (cb_func) when a message
+#     is finally received. The blind non-blocking consumes around 0.5% (max) more
+#     cpu percentage than the blocking version. So for low number of node, not
+#     a big deal.
+#
+#     Below
+#       subscribe is blocking
+#       subscribe2 in non-blocking
+#
+#     each subscribe type calls chew_up_cpu() 4 times which consumes around
+#     3.4% ... anything more than that is attributed to block/non-block
+#
+#     GeckoCore is the hub and does a lot of data collection, plus passing
+#     messages between inputs/outputs
+#
+#     +------------------------------
+#     | Alive processes: 10
+#     +------------------------------
+#     | subscribe2[23117]............. cpu:   3.7%    mem:   0.06%
+#     | subscribe2[23119]............. cpu:   3.7%    mem:   0.05%
+#     | subscribe[23121].............. cpu:   3.5%    mem:   0.05%
+#     | publish[23115]................ cpu:   0.9%    mem:   0.05%
+#     | GeckoCore[23106].............. cpu:   6.2%    mem:   0.05%
+#     | publish[23114]................ cpu:   1.0%    mem:   0.05%
+#     | subscribe2[23116]............. cpu:   3.6%    mem:   0.06%
+#     | subscribe2[23118]............. cpu:   3.9%    mem:   0.05%
+#     | subscribe2[23120]............. cpu:   3.7%    mem:   0.05%
+#     | subscribe[23122].............. cpu:   3.5%    mem:   0.05%
+#     ------------------------------
+#     """
+#     unpack = None
+#
+#     def __init__(self, cb_func, topics=None, unpack=None):
+#         """
+#         topics: an array of topics, ex ['hello', 'cool messages']
+#         unpack: a function to deserialize messages if necessary
+#         """
+#         Sub.__init__(self, topics, unpack)
+#
+#         self.cb_func = cb_func
+#
+#     def recv(self):
+#         """
+#         flags=zmq.NOBLOCK to implement non-blocking
+#         """
+#         try:
+#             topic, jmsg = self.socket.recv_multipart(flags=zmq.NOBLOCK)
+#             # if self.unpack:
+#             #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
+#             # else:
+#             #     msg = msgpack.unpackb(jmsg, raw=False)
+#             msg = self.pickle.unpack(jmsg)
+#
+#             self.cb_func(topic, msg)
+#         except zmq.Again as e:
+#             # no message has arrived yet or not connected to server
+#             # print(e)
+#             pass
+#         except Exception as e:
+#             # something else is wrong
+#             # print(e)
+#             raise
+#         return
 
     # def raw_recv(self, flags=0):
     #     return self.socket.recv_multipart(flags=flags)

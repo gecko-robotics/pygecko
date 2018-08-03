@@ -24,26 +24,29 @@ def chew_up_cpu():
 
 
 def publisher(**kwargs):
-    geckopy = GeckoPy()
+    geckopy = GeckoPy(**kwargs)
     rate = geckopy.Rate(2)
 
     p = geckopy.Publisher()
-
+    start = time.time()
     topic = kwargs.get('topic')
+    cnt = 0
     while not geckopy.is_shutdown():
-        msg = {'time': time.time()}
+        msg = {'time': time.time() - start}
         p.pub(topic, msg)  # topic msg
 
-        # print('[{}] published msg'.format(cnt))
+        geckopy.log('[{}] published msg'.format(cnt))
+        cnt += 1
         rate.sleep()
     print('pub bye ...')
 
 
 def subscriber(**kwargs):
-    geckopy = GeckoPy()
+    geckopy = GeckoPy(**kwargs)
 
     def f(topic, msg):
         # print("recv[{}]: {}".format(topic, msg))
+        geckopy.log(msg)
         chew_up_cpu()
         chew_up_cpu()
         chew_up_cpu()
@@ -52,20 +55,18 @@ def subscriber(**kwargs):
     topic = kwargs.get('topic')
     s = geckopy.Subscriber([topic], f)
 
-    geckopy.spin(10)
+    geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
 
 
 if __name__ == '__main__':
     # normally you wouldn't run this here, but is running else where
     # this is just for testing
-    core = GeckoCore()
-    core.start()
+    # core = GeckoCore()
+    # core.start()
 
-    # keep track of the processes we create
-    procs = []
-
-    for topic in ['ryan', 'mike', 'sammie', 'scott']:
+    # for topic in ['ryan', 'mike', 'sammie', 'scott']:
+    for topic in ['ryan']:
         # info to pass to processes
         args = {
             'topic': topic
@@ -73,11 +74,9 @@ if __name__ == '__main__':
 
         p = GeckoSimpleProcess()
         p.start(func=publisher, name='publisher', kwargs=args)
-        procs.append(p)
 
-        p = GeckoSimpleProcess()
-        p.start(func=subscriber, name='subscriber', kwargs=args)
-        procs.append(p)
+        s = GeckoSimpleProcess()
+        s.start(func=subscriber, name='subscriber', kwargs=args)
 
 
     while True:
@@ -86,10 +85,3 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             print('main process got ctrl-c')
             break
-
-    # shutdown the processes
-    for p in procs:
-        p.join(0.1)
-
-    # shut down the core
-    core.join(0.1)
