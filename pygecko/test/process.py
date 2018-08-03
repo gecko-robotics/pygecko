@@ -1,14 +1,17 @@
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2018 Kevin Walchko
+# see LICENSE for full details
+##############################################
 from __future__ import print_function
-
 import multiprocessing as mp
 from pygecko.transport import zmqTCP
-# import time
-# import signal
-# import os
+
 
 class GeckoSimpleProcess(object):
     """
-    A simple class to help processes start/stop easily
+    A simple class to help processes start/stop easily. It is main intended for
+    testing and some simple things.
     """
     ps = None
 
@@ -38,9 +41,9 @@ class GeckoSimpleProcess(object):
         kwargs = kwargs['kwargs']  # WTF???
 
         if 'core_inaddr' not in kwargs:
-            kwargs['core_inaddr'] = in_addr = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
+            kwargs['core_inaddr'] = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
         if 'core_outaddr' not in kwargs:
-            kwargs['core_outaddr'] = in_addr = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
+            kwargs['core_outaddr'] = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
 
         # print('ss', kwargs)
 
@@ -49,7 +52,7 @@ class GeckoSimpleProcess(object):
         print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
 
     def join(self, timeout=None):
-        print('>> Stopping {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')
+        print('>> Stopping Simple Process {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')
         if self.ps:
             self.ps.join(timeout)
             if self.ps.is_alive():

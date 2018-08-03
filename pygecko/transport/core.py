@@ -33,7 +33,8 @@ import multiprocessing as mp
 import time
 # import socket as Socket
 from pygecko.transport.helpers import zmqTCP, zmqUDS
-from pygecko.transport.zmqclass import Pub, Sub
+from pygecko.transport.zmq_sub_pub import Pub, Sub
+from pygecko.transport.zmq_req_rep import Rep
 import signal
 import psutil
 import os
@@ -133,15 +134,21 @@ class ProcPerformance(object):
     def __init__(self):
         pid = os.getpid()
         self.core = psutil.Process(pid)
-        self.procs = []
-        self.push(pid)
+        self.procs = {}
+        self.push(pid, "GeckoCore")
 
-    def push(self, pid):
+    def push(self, pid, name):
         # = (psutil.Process(pid), name)
-        self.procs = [psutil.Process(pid)]
+        # self.procs = [psutil.Process(pid)]
+        # self.procs.append(psutil.Process(pid))
+        self.procs[pid] = (psutil.Process(pid), name,)
+        print('*** push: {}[{}] ***'.format(name, pid))
 
     def pop(self, pid):
-        self.procs.remove(pid)
+        try:
+            self.procs.pop(pid)
+        except Exception as e:
+            print('*** pop: {} ***'.format(e))
 
     def procprint(self, total_msgs):
         # pd = self.core.as_dict(attrs=['connections','cpu_percent','memory_percent'])
@@ -167,10 +174,31 @@ class ProcPerformance(object):
         # process cpu and memory consumption
         print('+', '-'*30, sep='')
         print('| Processes Performance')
-        for ps in self.procs:
-            pd = ps.as_dict(attrs=['cpu_percent','memory_percent'])
-            label = '{}[{}]'.format(ps.name(), ps.pid)
-            print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+
+        procs = tuple(self.procs.values())
+        for ps, psname in procs:
+            try:
+                if ps.is_running():
+                    # faster or better?
+                    # p.cpu_percent(interval=None)
+                    # p.memory_percent(memtype="rss")
+                    pd = ps.as_dict(attrs=['cpu_percent','memory_percent'])
+                    # cpu = ps.cpu_percent()
+                    # cpu = cpu if cpu else -1
+                    # mem = ps.memory_percent()
+                    # mem = mem if mem else -1
+                    label = '{}[{}]'.format(psname, ps.pid)
+                    print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+                    # print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, cpu, mem))
+                else:
+                    print('*** remove {} ***'.format(ps.pid))
+                    self.pop(ps.pid)
+            except Exception:
+                self.pop(ps.pid)
+
+
+# class Service(object):
+#     def setup(self, cb_func):
 
 
 class GeckoCore(SignalCatch, GProcess):
@@ -204,6 +232,27 @@ class GeckoCore(SignalCatch, GProcess):
         self.outs = Pub()
         self.outs.bind(self.out_addr)
 
+    def handle_reply(self, msg):
+        """
+        MSG_HANDLED
+        MSG_NOTHANDLED
+        NO_MSG
+        MSG_INVALID
+        MSG_GOOD
+        """
+        ans = True
+        # print("*** request!! ***")
+        if 'proc_info' in msg:
+            pid, name, status = msg['proc_info']
+            if status:
+                self.perf.push(pid, name)
+            else:
+                self.perf.pop(pid)
+        else:
+            print('*** core wtf: bad msg: {} ****'.format(msg))
+            # print(msg)
+        return ans
+
     def run(self):
         """
         """
@@ -211,9 +260,12 @@ class GeckoCore(SignalCatch, GProcess):
 
         process = psutil.Process(self.ps.pid)
 
-        perf = ProcPerformance()
+        self.perf = ProcPerformance()
 
         print(">> Starting up GeckoCore")
+
+        reply = Rep()
+        reply.bind(zmqTCP('localhost', 10000))
 
         # setup all of the zmq ins/outs and exit if there is an error
         try:
@@ -232,6 +284,10 @@ class GeckoCore(SignalCatch, GProcess):
         while not self.kill:
             # non-blocking so we can always check to see if there is a kill
             # signal to handle
+            ok = reply.listen_nb(self.handle_reply)
+            if ok:
+                print("*** handled Rep message ***")
+
             msg = None
             try:
                 topic, msg = self.ins.raw_recv(flags=zmq.NOBLOCK)
@@ -242,40 +298,12 @@ class GeckoCore(SignalCatch, GProcess):
 
             if msg:
                 topic = topic.decode('utf-8')  # FIXME
-                # print(topic)
-                # internal messages for performance
-                if topic == 'core_info':
-                    print('*** core info ***')
-                    pid, name, status = self.pickle.unpack(msg)
-                    print('*** {} {} {} ***'.format(pid, name, status))
-                    if status is True:
-                        perf.push(pid)
-                    elif status is False:
-                        perf.pop(pid)
-                    else:
-                        print('*** wtf topic ****')
-                else:
-                    self.outs.raw_pub(topic, msg)  # transmit msg
-                    mc.touch(topic, len(msg))      # update message/data counts
+                self.outs.raw_pub(topic, msg)  # transmit msg
+                mc.touch(topic, len(msg))      # update message/data counts
 
             delta = time.time() - mc.datumn
             if delta > self.print_interval:
-                # pd = process.as_dict(attrs=['connections','cpu_percent','memory_percent'])
-                # label = '{}[{}]'.format("GeckoCore", process.pid)
-                # print('+', '-'*60, sep='')
-                # print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
-                # print('| Total messages seen: {}'.format(mc.total_msgs))
-                # print('+', '-'*30, sep='')
-                # for con in pd['connections']:
-                #     # print(con)
-                #     addr = con.laddr
-                #     # print(addr)
-                #     lip, lport = addr
-                #     addr = con.raddr
-                #     if addr:
-                #         rip, rport = addr
-                #     else:
-                #         rip, rport = (None, None)
-                #     print('| {} {}:{} connected to {}:{}'.format(con.status, lip, lport, rip, rport))
-                perf.procprint(mc.total_msgs)
+                self.perf.procprint(mc.total_msgs)
                 mc.dataprint(delta)
+
+        print("** left main core loop ***")

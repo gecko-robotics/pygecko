@@ -1,6 +1,11 @@
-
-from pygecko.transport.zmqclass import ZMQError
-from pygecko.transport.zmqclass import Pub, Sub  #, SubNB
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2018 Kevin Walchko
+# see LICENSE for full details
+##############################################
+from pygecko.transport.zmq_base import ZMQError
+from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
+from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.core import SignalCatch # capture signals in processes
 import signal
@@ -96,24 +101,34 @@ class GeckoPy(SignalCatch):
     def get_time(self):
         return time.time()
 
-    def notify_core(self, status, addr=zmqTCP('localhost', 9998)):
+    def notify_core(self, status, addr=None):
         """
-        this doen't work for some reason!!!!
+        Pass info to geckocore:
+            {'proc_info': (pid, name, status)}
+
+            psutil returns name as python for everything. It doesn't know about
+            the multiprocessing.Process.name
+
+            status:
+                True: proc up and running
+                False: proc is dead
         """
-        print("********** wtf *************")
+        # print("********** wtf *************")
 
-        # p = Pub()
-        # p = self.Publisher(addr, queue_size=1)
-        p = self.Publisher(addr)
+        request = Req()
+        request.connect(zmqTCP('localhost', 10000))
 
-        # p.connect(addr)
-        for i in range(50):
-            print("{},".format(i), end="")
-            p.pub('core_info', (self.pid, self.name, status))
-        time.sleep(0.001)
-        print('')
-        print("**** notify core:", status)
-        time.sleep(5)
+        ans = None
+        msg = {'proc_info': (self.pid, self.name, status,)}
+
+        while not ans:
+            ans = request.get(msg)
+            print("*** {} : {} ***".format(msg, ans))
+            time.sleep(0.01)
+
+        print("**** notify core:", ans)
+        request.close()
+        # time.sleep(5)
 
     # def Publisher(self, uds_file=None, host='localhost', queue_size=10, bind=False):
     def Publisher(self, addr=zmqTCP('localhost', 9998), queue_size=10, bind=False):

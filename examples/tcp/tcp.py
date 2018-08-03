@@ -64,20 +64,21 @@ if __name__ == '__main__':
     # this is just for testing
     # core = GeckoCore()
     # core.start()
-
-    # for topic in ['ryan', 'mike', 'sammie', 'scott']:
-    for topic in ['ryan']:
+    procs = []
+    for topic in ['ryan', 'mike', 'sammie', 'scott']:
+    # for topic in ['ryan']:
         # info to pass to processes
         args = {
             'topic': topic
         }
 
         p = GeckoSimpleProcess()
-        p.start(func=publisher, name='publisher', kwargs=args)
+        p.start(func=publisher, name='publisher {}'.format(topic), kwargs=args)
+        procs.append(p)
 
         s = GeckoSimpleProcess()
-        s.start(func=subscriber, name='subscriber', kwargs=args)
-
+        s.start(func=subscriber, name='subscriber {}'.format(topic), kwargs=args)
+        procs.append(s)
 
     while True:
         try:
