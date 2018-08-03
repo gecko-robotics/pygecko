@@ -6,74 +6,45 @@ needs to move to bin
 """
 
 import sys
-# sys.path.append("../")
-# from pygecko.transport import GeckoCore
-# from pygecko.multiprocessing import GeckoProcess
-from pygecko.multiprocessing.gecko import Launcher
-from pygecko.file_storage import FileJson, FileYaml
-# import multiprocessing as mp
-# import time
-# import logging
-# import logging.config
-# import logging.handlers
-# import psutil as psu
+import argparse
+from pygecko.multiprocessing import GeckoLauncher
+from pygecko.file_storage import FileYaml
+from pygecko.file_storage import FileJson
 
 # https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
 
-usage = """------------------------------------------------
-Usage:
-  geckolaunch launch_file.json
-
-launch_file.json: should be a valid json file detailing where and what
-gecko processes to launch.
-"""
-
-# class Launcher(GeckoProcess):
-#     def __init__(self, ps):
-#         GeckoProcess.__init__(self, ps)
-#
-#     def loop(self):
-#
-#         self.start()
-#
-#         try:
-#             alive = mp.active_children()
-#             palive = [psu.Process(p.pid) for p in alive]
-#
-#             while self.event.is_set():
-#                 time.sleep(2)
-#                 # print('+', '-'*30, sep='')
-#                 # print('| Alive processes:', len(alive))
-#                 # print('+', '-'*30, sep='')
-#                 # for ps, p in zip(palive, alive):
-#                 #     pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
-#                 #     label = '{}[{}]'.format(p.name, p.pid)
-#                 #     print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
-#
-#         except (KeyboardInterrupt, SystemExit) as e:
-#             if KeyboardInterrupt == type(e):
-#                 err = 'ctrl-C'
-#             elif SystemExit == type(e):
-#                 err = 'exit'
-#             print('\n>> Received {}\n'.format(err))
-#
-#             # set the kill flag
-#             self.event.clear()
-#             time.sleep(0.1)
-#
-#         finally:
-#             self.end()
-
+def handleArgs():
+    parser = argparse.ArgumentParser(description='Launches multiple programs')
+    parser.add_argument('file', help='launch file')
+    parser.add_argument('-f', '--format', help='format: json or yaml, default is json', default='json')
+    args = vars(parser.parse_args())
+    return args
 
 if __name__ == '__main__':
+    args = handleArgs()
 
-    if len(sys.argv) != 2:
-        print("Error")
-        print(usage)
+    fname = args['file']
+    ext = fname.split('.')[-1]
+
+    if args['format'] == 'json':
+        if ext != 'json':
+            print("Expected a json file: {}".format(fname))
+            exit(1)
+        reader = FileJson()
+        
+    elif args['format'] == 'yaml':
+        if ext != 'yaml':
+            print("Expected a yaml file: {}".format(fname))
+            exit(1)
+        reader = FileYaml()
+
+    try:
+        ps = reader.read(fname)
+    except Exception as e:
+        print(e)
         exit(1)
 
-    reader = FileJson()
-    ps = reader.read(sys.argv[1])
+    print(ps)
 
-    g = Launcher(ps)
+    g = GeckoLauncher(ps)
     g.loop()

@@ -128,6 +128,8 @@ class MsgCounter(object):
 
 
 class ProcPerformance(object):
+    """
+    """
     def __init__(self):
         pid = os.getpid()
         self.core = psutil.Process(pid)
@@ -190,7 +192,9 @@ class GeckoCore(SignalCatch, GProcess):
         self.print_interval = 3  # seconds
 
     def socket_setup(self):
-
+        """
+        Setup sockets
+        """
         print(">> Core inputs {}".format(self.in_addr))
         print(">> Core Outputs {}".format(self.out_addr))
 
@@ -201,6 +205,8 @@ class GeckoCore(SignalCatch, GProcess):
         self.outs.bind(self.out_addr)
 
     def run(self):
+        """
+        """
         self.kill_signals()  # have to setup signals in new process
 
         process = psutil.Process(self.ps.pid)

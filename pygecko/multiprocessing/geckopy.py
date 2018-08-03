@@ -28,6 +28,9 @@ import multiprocessing as mp
 
 
 class GeckoRate(object):
+    """
+    Uses sleep to keep a desired rate.
+    """
     def __init__(self, hertz):
         self.last_time = time.time()
         self.dt = 1/hertz
@@ -41,7 +44,6 @@ class GeckoRate(object):
         """
         now = time.time()
         diff = now - self.last_time
-        # new_sleep = diff if diff < self.dt else 0
         if diff < self.dt:
             new_sleep = self.dt - diff
             time.sleep(new_sleep)
@@ -69,6 +71,7 @@ class GeckoPy(SignalCatch):
 
         # print(self.name, 'kwargs:\n{}'.format(kwargs))
 
+        # don't we always have this???
         self.core_outaddr = kwargs.get('core_outaddr', None)
         self.core_inaddr = kwargs.get('core_inaddr', None)
         if self.core_inaddr:
@@ -114,13 +117,9 @@ class GeckoPy(SignalCatch):
 
     # def Publisher(self, uds_file=None, host='localhost', queue_size=10, bind=False):
     def Publisher(self, addr=zmqTCP('localhost', 9998), queue_size=10, bind=False):
-
         p = Pub()
-
-        # if uds_file:
-        #     addr = zmqUDS(uds_file)
-        # else:
-        #     addr = zmqTCP(host, 9998)
+        if self.core_inaddr:
+            addr = self.core_inaddr
 
         if bind:
             p.bind(addr, queue_size=queue_size)
@@ -129,38 +128,21 @@ class GeckoPy(SignalCatch):
 
         return p
 
-    # def PublisherBind(self, uds_file=None, host='localhost', queue_size=10):
-    #     """
-    #     value?
-    #     """
-    #     p = Pub()
-    #
-    #     if uds_file:
-    #         addr = zmqUDS(uds_file)
-    #     else:
-    #         addr = zmqTCP(host, 9998)
-    #
-    #     # p.connect(addr, queue_size=queue_size)
-    #     p.bind(addr, queue_size=queue_size)
-    #     return p
-
     # def Subscriber(self, topics, cb, host='localhost', uds_file=None):
-    def Subscriber(self, topics, cb, addr=zmqTCP('localhost', 9999)):
-        s = Sub(cb_func=cb, topics=topics)
-
-        # if uds_file:
-        #     addr = zmqUDS(uds_file)
-        # else:
-        #     addr = zmqTCP(host, 9999)
+    def Subscriber(self, topics, cb_func, addr=zmqTCP('localhost', 9999)):
+        s = Sub(cb_func=cb_func, topics=topics)
+        if self.core_outaddr:
+            addr = self.core_outaddr
 
         s.connect(addr)
         self.subs.append(s)
 
-    # def signal_handler(self, signalnum, stackframe):
-    #     self.kill = True
-    #     # print('ignore ctrl-c signal:', signalnum)
-    #     # print('GeckoPy got ctrl-c:', signalnum)
-    #     # print('kill =', self.kill)
+    def ServiceProxy(self, topic):
+        return None
+
+    def Service(self, topic, cb_func):
+        s = Srv(topic, cb_func)
+        s.connect(addr)
 
     def on_shutdown(self, hook):
         """
@@ -175,6 +157,9 @@ class GeckoPy(SignalCatch):
         self.hooks.append(hook)
 
     def spin(self, hertz=100):
+        """
+
+        """
         rate = self.Rate(1.2*hertz)
         while not self.kill:
             for sub in self.subs:

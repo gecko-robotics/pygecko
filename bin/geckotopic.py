@@ -46,7 +46,7 @@ def handleArgs():
 
 
 def publisher(**kwargs):
-    geckopy = GeckoPy()
+    geckopy = GeckoPy(**kwargs)
 
     p = geckopy.Publisher()
 

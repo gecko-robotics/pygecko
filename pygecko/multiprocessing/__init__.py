@@ -1,2 +1,2 @@
-from pygecko.multiprocessing.gecko import GeckoProcess
+from pygecko.multiprocessing.launch import GeckoLauncher
 from pygecko.multiprocessing.geckopy import GeckoPy

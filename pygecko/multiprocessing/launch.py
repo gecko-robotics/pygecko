@@ -70,7 +70,7 @@ class GeckoLog(SignalCatch):
                 print(Style.BRIGHT + Back.WHITE + color + '{}[{}]:'.format(name, pid) + Style.RESET_ALL + msg)
 
 
-class GeckoProcess(object):
+class GeckoFactory(object):
     """
     Base class that handles setup/teardown processes
 
@@ -106,7 +106,15 @@ class GeckoProcess(object):
         self.event = mp.Event()
         self.timeout = to
 
-    def start(self):
+    def start_logger(self):
+        # setup logging
+        self.gecko_log = GeckoLog()
+        self.queue = mp.Queue()
+        self.t = mp.Process(target=self.gecko_log.run, name="GeckoLog", args=(self.event, self.queue,))
+        # self.t.daemon = True
+        self.t.start()
+
+    def launch(self):
         """
         have process ignore ctrl-c (sigint) by setting kwargs['signal'] = True
 
@@ -123,17 +131,19 @@ class GeckoProcess(object):
         """
         self.event.set()
 
-        # setup logging
-        self.gecko_log = GeckoLog()
-        self.queue = mp.Queue()
-        self.t = mp.Process(target=self.gecko_log.run, name="GeckoLog", args=(self.event, self.queue,))
-        # self.t.daemon = True
-        self.t.start()
+        self.start_logger()
+
+        # # setup logging
+        # self.gecko_log = GeckoLog()
+        # self.queue = mp.Queue()
+        # self.t = mp.Process(target=self.gecko_log.run, name="GeckoLog", args=(self.event, self.queue,))
+        # # self.t.daemon = True
+        # self.t.start()
 
         # list of process to shutdown when done
         plist = []
 
-        # get GeckoCore addresses
+        # get GeckoCore addresses, either TCP or UDS
         if 'geckocore' in self.ps:
             kind = self.ps['geckocore']['type']
             if kind == 'tcp':
@@ -142,7 +152,11 @@ class GeckoProcess(object):
                 h, p = self.ps['geckocore']['out']
                 out_addr = zmqTCP(h, p)
             elif kind == 'uds':
-                raise NotImplementedError(kind)
+                f = self.ps['geckocore']['in']
+                in_addr = zmqUDS(f)
+                f = self.ps['geckocore']['out']
+                out_addr = zmqUDS(f)
+                # raise NotImplementedError(kind)
         else:
             in_addr = zmqTCP('localhost', 9998)
             out_addr = zmqTCP('localhost', 9999)
@@ -204,13 +218,13 @@ class GeckoProcess(object):
         self.plist = []
 
 
-class Launcher(GeckoProcess):
+class GeckoLauncher(GeckoFactory):
     def __init__(self, ps):
         GeckoProcess.__init__(self, ps)
 
     def loop(self):
 
-        self.start()
+        self.launch()
 
         try:
             # alive = mp.active_children()

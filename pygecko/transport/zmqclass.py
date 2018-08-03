@@ -245,7 +245,7 @@ class Sub(Base):
 
     def recv(self, flags=0):
         """
-        flags=zmq.NOBLOCK to implement non-blocking
+        flags=zmq.NOBLOCK to implement non-blocking or zmq.DONTWAIT
         """
         topic = None
         msg = None
@@ -385,51 +385,51 @@ class Sub(Base):
     #     return topic, msg
 
 
-# class ServiceProvider(Base):
-#     """
-#     Provides a service
-#     """
-#     def __init__(self, bind_to):
-#         Base.__init__(self)
-#         self.socket = self.ctx.socket(zmq.REP)
-#         # tcp = 'tcp://' + bind_to[0] + ':' + str(bind_to[1])
-#         tcp = self.getAddress(bind_to)
-#         self.socket.bind(tcp)
-#
-#     def __del__(self):
-#         self.socket.close()
-#         self._stop()
-#
-#     def listen(self, callback):
-#         # print 'listen'
-#         while True:
-#             jmsg = self.socket.recv()
-#             msg = json.loads(jmsg)
-#
-#             ans = callback(msg)
-#
-#             jmsg = json.dumps(ans)
-#             self.socket.send(jmsg)
-#
-#
-# class ServiceClient(Base):
-#     """
-#     Client socket to get a response back from a service provider
-#     """
-#     def __init__(self, bind_to):
-#         Base.__init__(self)
-#         self.socket = self.ctx.socket(zmq.REQ)
-#         # tcp = 'tcp://' + bind_to[0] + ':' + str(bind_to[1])
-#         tcp = self.getAddress(bind_to)
-#         self.socket.connect(tcp)
-#
-#     def __del__(self):
-#         self.socket.close()
-#         self._stop()
-#
-#     def get(self, msg):
-#         jmsg = json.dumps(msg)
-#         self.socket.send(jmsg)
-#         jmsg = self.socket.recv()
-#         msg = json.loads(jmsg)
-#         return msg
+class ServiceProvider(Base):
+    """
+    Provides a service
+    """
+    def __init__(self, bind_to):
+        Base.__init__(self)
+        self.socket = self.ctx.socket(zmq.REP)
+        # tcp = 'tcp://' + bind_to[0] + ':' + str(bind_to[1])
+        # tcp = self.getAddress(bind_to)
+        # self.socket.bind(tcp)
+
+    def __del__(self):
+        self.socket.close()
+        # self._stop()
+
+    def listen(self, callback):
+        # print 'listen'
+        while True:
+            jmsg = self.socket.recv()
+            msg = json.loads(jmsg)
+
+            ans = callback(msg)
+
+            jmsg = json.dumps(ans)
+            self.socket.send(jmsg)
+
+
+class ServiceClient(Base):
+    """
+    Client socket to get a response back from a service provider
+    """
+    def __init__(self, bind_to):
+        Base.__init__(self)
+        self.socket = self.ctx.socket(zmq.REQ)
+        # tcp = 'tcp://' + bind_to[0] + ':' + str(bind_to[1])
+        # tcp = self.getAddress(bind_to)
+        # self.socket.connect(tcp)
+
+    def __del__(self):
+        self.socket.close()
+        # self._stop()
+
+    def get(self, msg):
+        jmsg = json.dumps(msg)
+        self.socket.send(jmsg)
+        jmsg = self.socket.recv()
+        msg = json.loads(jmsg)
+        return msg
