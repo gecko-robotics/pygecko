@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 
 from __future__ import print_function
 
 # fix path for now, once gecko is installed you don't need this
-import sys
-sys.path.append("../../")
+# import sys
+# sys.path.append("../../")
 
 # from pygecko.transport import Pub, Sub
-from pygecko.transport import zmqTCP, GeckoCore
-from pygecko.multiprocessing import GeckoPy
+from pygecko.transport import zmqTCP
+from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
 
 from math import sin, cos, pi, sqrt
@@ -23,9 +24,16 @@ def chew_up_cpu():
         sqrt(m**9)
 
 
+def pub_bye():
+    print("-"*30)
+    print(" Publisher shutting down ...")
+    print("-"*30)
+
+
 def publisher(**kwargs):
-    geckopy = GeckoPy(**kwargs)
+    geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
+    geckopy.on_shutdown(sub_bye)
 
     p = geckopy.Publisher()
     start = time.time()
@@ -41,16 +49,23 @@ def publisher(**kwargs):
     print('pub bye ...')
 
 
-def subscriber(**kwargs):
-    geckopy = GeckoPy(**kwargs)
 
-    def f(topic, msg):
-        # print("recv[{}]: {}".format(topic, msg))
-        geckopy.log(msg)
-        chew_up_cpu()
-        chew_up_cpu()
-        chew_up_cpu()
-        chew_up_cpu()
+def f(topic, msg):
+    # print("recv[{}]: {}".format(topic, msg))
+    geckopy.log(msg)
+    chew_up_cpu()
+    chew_up_cpu()
+    chew_up_cpu()
+    chew_up_cpu()
+
+def sub_bye():
+    print("*"*30)
+    print(" Subscriber shutting down ...")
+    print("*"*30)
+
+def subscriber(**kwargs):
+    geckopy.init_node(**kwargs)
+    geckopy.on_shutdown(sub_bye)
 
     topic = kwargs.get('topic')
     s = geckopy.Subscriber([topic], f)
@@ -66,7 +81,6 @@ if __name__ == '__main__':
     # core.start()
     procs = []
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
-    # for topic in ['ryan']:
         # info to pass to processes
         args = {
             'topic': topic

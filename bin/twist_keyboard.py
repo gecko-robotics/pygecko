@@ -13,7 +13,7 @@ import tty
 import termios
 # from pygecko import ZmqClass as Zmq
 from pygecko.transport import zmqTCP, GeckoCore
-from pygecko.multiprocessing import GeckoPy
+from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
 import time
 
@@ -38,7 +38,7 @@ def limit_min(x):
 
 
 def publisher(**kwargs):
-    geckopy = GeckoPy(**kwargs)
+    geckopy.init_node(**kwargs)
     rate = geckopy.Rate(10)
 
     p = geckopy.Publisher()

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 
 
 from __future__ import print_function
 
 # fix path for now
-import sys
-sys.path.append("../../")
+# import sys
+# sys.path.append("../../")
 
 # from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP, GeckoCore, zmqUDS
-from pygecko.multiprocessing import GeckoPy
+from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
 
 import time
@@ -19,16 +20,16 @@ import os
 
 
 def publish(**kwargs):
-    geckopy = GeckoPy()
+    geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
 
     print('pub', kwargs)
 
     topic = kwargs.get('topic', 'test')
-    fname = kwargs.get('pub_uds', None)
-    print('fname', fname)
+    addr = kwargs.get('pub_uds', None)
+    print('publish addr:', addr)
 
-    p = geckopy.Publisher(uds_file=fname)
+    p = geckopy.Publisher(addr=addr)
 
     while not geckopy.is_shutdown():
         msg = {'s': time.time()}
@@ -36,30 +37,32 @@ def publish(**kwargs):
 
         rate.sleep()
 
-    print('pub bye ...')
+    geckopy.log('pub bye ...')
 
 
 def subscribe(**kwargs):
-    geckopy = GeckoPy()
+    geckopy.init_node(**kwargs)
 
     def f(t, m):
-        print('>> Message[{}]'.format(t))
+        geckopy.log('>> Message[{}]'.format(t))
 
     topic = kwargs.get('topic', 'test')
-    fname = kwargs.get('sub_uds')
+    addr = kwargs.get('sub_uds', None)
+    print('subscriber addr:', addr)
 
-    s = geckopy.Subscriber([topic], f, uds_file=fname)
+    s = geckopy.Subscriber([topic], f, addr=addr)
     geckopy.spin(20)
-    print('sub bye ...')
+    geckopy.log('sub bye ...')
 
 
 if __name__ == '__main__':
     # info to pass to processes
     args = {
-        'topic': 'hi',
-        'sub_uds': '/tmp/uds_ofile',
-        'pub_uds': '/tmp/uds_ifile',
+        'topic': 'hi'
     }
+
+    args['pub_uds'] = zmqUDS('/tmp/uds_ifile')
+    args['sub_uds'] = zmqUDS('/tmp/uds_ofile')
 
     # this is sort of like crossing RX/TX lines here
     #        +---------+

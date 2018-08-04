@@ -34,12 +34,20 @@ import time
 # import socket as Socket
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
-from pygecko.transport.zmq_req_rep import Rep
-import signal
+from pygecko.transport.zmq_req_rep import Rep, Req
+# from pygecko.multiprocessing.geckopy import Rate
+# from pygecko.transport import zmqTCP, zmqUDS
+# from pygecko.transport import Pub, Sub
+# from pygecko.transport import Rep, Req
+from pygecko.multiprocessing import geckopy
+# from pygecko.multiprocessing import SignalCatch
+# import signal
 import psutil
 import os
 # from colorama import Fore, Back, Style
 # from threading import Thread
+
+import signal
 
 
 class SignalCatch(object):
@@ -53,9 +61,31 @@ class SignalCatch(object):
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
-    def exit_gracefully(self,signum, frame):
+    def exit_gracefully(self, signum, frame):
+        """
+        When handler gets called, it sets the self.kill to True
+        """
         self.kill = True
         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
+
+
+
+
+#
+# class SignalCatch(object):
+#     """
+#     Catches SIGINT and SIGTERM signals and sets kill = True
+#
+#     https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
+#     """
+#     kill = False
+#     def kill_signals(self):
+#         signal.signal(signal.SIGINT, self.exit_gracefully)
+#         signal.signal(signal.SIGTERM, self.exit_gracefully)
+#
+#     def exit_gracefully(self,signum, frame):
+#         self.kill = True
+#         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
 
 
 class GProcess(object):
@@ -119,7 +149,9 @@ class MsgCounter(object):
         print('| Topic Performance')
         for key, val in self.topics.items():
             count, bytes = val
-            print('| {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(key, count/delta, bytes/delta))
+            # the topic names (keys) should be binary strings, so need to
+            # convert into normal strings
+            print('| {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(key.decode('utf-8'), count/delta, bytes/delta))
 
             # reset msg,data count
             self.topics[key] = [0, 0]
@@ -217,7 +249,7 @@ class GeckoCore(SignalCatch, GProcess):
 
     def socket_setup(self):
         """
-        Setup sockets
+        Setup sockets inside the new process
         """
         print(">> Core inputs {}".format(self.in_addr))
         print(">> Core Outputs {}".format(self.out_addr))
@@ -271,14 +303,14 @@ class GeckoCore(SignalCatch, GProcess):
             print('*'*len(err_msg))
             exit(1)
 
+        rate = geckopy.Rate(100)
+
         mc = MsgCounter()
         datumn = time.time()
         while not self.kill:
             # non-blocking so we can always check to see if there is a kill
             # signal to handle
-            ok = reply.listen_nb(self.handle_reply)
-            if ok:
-                print("*** handled Rep message ***")
+            reply.listen_nb(self.handle_reply)
 
             msg = None
             try:
@@ -286,10 +318,11 @@ class GeckoCore(SignalCatch, GProcess):
             except Exception as e:
                 # if self.kill:
                 #     return
-                time.sleep(0.005)
+                # time.sleep(0.005)
+                pass
 
             if msg:
-                topic = topic.decode('utf-8')  # FIXME
+                # topic = topic.decode('utf-8')  # FIXME
                 self.outs.raw_pub(topic, msg)  # transmit msg
                 mc.touch(topic, len(msg))      # update message/data counts
 
@@ -297,5 +330,7 @@ class GeckoCore(SignalCatch, GProcess):
             if delta > self.print_interval:
                 self.perf.procprint(mc.total_msgs)
                 mc.dataprint(delta)
+
+            rate.sleep()
 
         print("** left main core loop ***")

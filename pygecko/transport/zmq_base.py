@@ -11,10 +11,10 @@
 from __future__ import print_function
 from __future__ import division
 import zmq
-# from zmq.devices import ProcessProxy
 import time
 import socket as Socket
 from pygecko.transport.protocols import Pickle
+# from pygecko.transport.protocols import MsgPack
 
 class ZMQError(Exception):
     pass

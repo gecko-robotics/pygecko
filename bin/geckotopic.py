@@ -11,7 +11,7 @@ import argparse
 import time
 # from pygecko import TopicSub
 from pygecko.transport import zmqTCP, GeckoCore
-from pygecko.multiprocessing import GeckoPy
+from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
 
 try:
@@ -46,7 +46,7 @@ def handleArgs():
 
 
 def publisher(**kwargs):
-    geckopy = GeckoPy(**kwargs)
+    geckopy.init_node(**kwargs)
 
     p = geckopy.Publisher()
 

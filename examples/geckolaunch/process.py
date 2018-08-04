@@ -15,7 +15,7 @@ import imutils
 from pygecko.transport import Pub, Sub
 # from pygecko.transport.zmqclass import SubNB
 from pygecko.transport import zmqTCP  #, GeckoCore
-from pygecko.multiprocessing import GeckoPy
+from pygecko.multiprocessing import geckopy
 from math import sin, cos, pi, sqrt
 import numpy as np
 
@@ -34,7 +34,7 @@ def chew_up_cpu():
 
 
 def publish(**kwargs):
-    geckopy = GeckoPy(**kwargs)
+    geckopy.init_node(**kwargs)
     rate = geckopy.Rate(1)
 
     topic = kwargs.get('topic', 'test')
@@ -56,8 +56,8 @@ def publish(**kwargs):
 
 
 def pcv(**kwargs):
-    geckopy = GeckoPy(**kwargs)
-    rate = geckopy.Rate(1)
+    geckopy.init_node(**kwargs)
+    rate = geckopy.Rate(10)
 
     topic = kwargs.get('topic', 'test')
 
@@ -101,7 +101,7 @@ def pcv(**kwargs):
 
 
 def subscribe2(**kwargs):
-    geckopy = GeckoPy(**kwargs)
+    geckopy.init_node(**kwargs)
 
     def f(t, m):
         # print('>> Message[{}]'.format(t))
