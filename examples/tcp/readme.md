@@ -1,5 +1,13 @@
 # TCP/IP
 
+# Before Start
+
+You need to run a geckocore before you start this:
+
+    `geckocore.py`
+
+# Description
+
 This uses TCP to move messages between processes.
 
 - `GeckoPy`: Useful functions to setup a function as a process and make things
@@ -13,8 +21,9 @@ easier
     - `GeckoPy.Publisher()`: creates a publisher that allows you to publish
     messages to a topic
 
-## Uncommon
+This does not use `geckolauncher.py`, but just starts a bunch of processes
+that call `GeckoPy`.
 
-For simplicity, we create a `GeckoCore` process to route messages between
-processes in this program. Typically, you would run `geckocore` from the
-command line in a separate window.
+# Running
+
+Open two windows, in one, run `geckocore.py` and the other run `tcp.py`.
