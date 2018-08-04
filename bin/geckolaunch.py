@@ -31,9 +31,9 @@ if __name__ == '__main__':
             print("Expected a json file: {}".format(fname))
             exit(1)
         reader = FileJson()
-        
+
     elif args['format'] == 'yaml':
-        if ext != 'yaml':
+        if ext not in ['yaml','yml']:
             print("Expected a yaml file: {}".format(fname))
             exit(1)
         reader = FileYaml()

@@ -9,9 +9,6 @@ import multiprocessing as mp
 import os
 import sys
 import platform
-# import logging
-# import logging.config
-# import logging.handlers
 from colorama import Fore, Back, Style
 from threading import Thread
 from pygecko.transport.core import SignalCatch

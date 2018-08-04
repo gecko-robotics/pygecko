@@ -197,10 +197,6 @@ class ProcPerformance(object):
                 self.pop(ps.pid)
 
 
-# class Service(object):
-#     def setup(self, cb_func):
-
-
 class GeckoCore(SignalCatch, GProcess):
     """
     This is the main hub through which all messages travel. All though this is
@@ -234,11 +230,7 @@ class GeckoCore(SignalCatch, GProcess):
 
     def handle_reply(self, msg):
         """
-        MSG_HANDLED
-        MSG_NOTHANDLED
-        NO_MSG
-        MSG_INVALID
-        MSG_GOOD
+
         """
         ans = True
         # print("*** request!! ***")

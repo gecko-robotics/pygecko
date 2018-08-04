@@ -11,9 +11,7 @@
 from __future__ import print_function
 from __future__ import division
 import zmq
-# from zmq.devices import ProcessProxy
 import time
-# import socket as Socket
 from pygecko.transport.zmq_base import Base
 
 
@@ -29,8 +27,6 @@ class Rep(Base):
         """
         wtf! I need this or it hangs
         """
-        # print("*** rep out sucka!!! ***")
-        # pass
         self.close()
 
     def listen_nb(self, callback):
@@ -76,7 +72,6 @@ class Rep(Base):
         this blocks ... utility?
         """
         while True:
-            # try:
             jmsg = self.socket.recv_multipart()[0]
             msg = self.pickle.unpack(jmsg)
 
@@ -84,12 +79,7 @@ class Rep(Base):
 
             jmsg = self.pickle.pack(msg)
             self.socket.send(jmsg)
-            # except zmq.Again as e:
-            #     # no response yet or server not up and running yet
-            #     time.sleep(0.01)
-            # except Exception as e:
-            #     # something else is wrong
-            #     raise
+            
 
 class Req(Base):
     """
