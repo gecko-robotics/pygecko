@@ -7,7 +7,7 @@ from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP, zmqUDS
-# from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
+from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 # from pygecko.multiprocessing.delay import GeckoRate, Rate
 import signal
 import time
@@ -36,26 +36,26 @@ g_geckopy = None
 
 
 
-import signal
-
-
-class SignalCatch(object):
-    """
-    Catches SIGINT and SIGTERM signals and sets kill = True
-
-    https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
-    """
-    kill = False
-    def kill_signals(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
-
-    def exit_gracefully(self, signum, frame):
-        """
-        When handler gets called, it sets the self.kill to True
-        """
-        self.kill = True
-        # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
+# import signal
+#
+#
+# class SignalCatch(object):
+#     """
+#     Catches SIGINT and SIGTERM signals and sets kill = True
+#
+#     https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
+#     """
+#     kill = False
+#     def kill_signals(self):
+#         signal.signal(signal.SIGINT, self.exit_gracefully)
+#         signal.signal(signal.SIGTERM, self.exit_gracefully)
+#
+#     def exit_gracefully(self, signum, frame):
+#         """
+#         When handler gets called, it sets the self.kill to True
+#         """
+#         self.kill = True
+#         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
 
 class Throttle(object):
     pass
@@ -93,10 +93,15 @@ class Rate(GeckoRate):
 
 class GeckoPy(SignalCatch):
     """
-    This class setups a function in a new process. It also provides some useful
-    functions for other things.
+    This class setups a function in a new process.
     """
     def __init__(self, **kwargs):
+        """
+        kwargs: can have a lot of things in it. Some common keys are:
+            core_outaddr: tcp or uds address of geckocore outputs
+            core_inaddr: tcp or uds address of geckocore inputs
+            queue: multiprocessing.Queue for log messages
+        """
         # print('pygecko', kwargs)
         # signal.signal(signal.SIGINT, self.signal_handler)
         # self.kill = False
@@ -109,9 +114,13 @@ class GeckoPy(SignalCatch):
 
         # print(self.name, 'kwargs:\n{}'.format(kwargs))
 
-        # don't we always have this???
-        self.core_outaddr = kwargs.get('core_outaddr', None)
-        self.core_inaddr = kwargs.get('core_inaddr', None)
+        # sets default
+        self.core_outaddr = kwargs.get(
+            'core_outaddr',
+            zmqTCP('localhost', 9999))
+        self.core_inaddr = kwargs.get(
+            'core_inaddr',
+            zmqTCP('localhost', 9998))
         if self.core_inaddr:
             self.notify_core(True, self.core_inaddr)
 
@@ -140,24 +149,31 @@ class GeckoPy(SignalCatch):
         ans = None
         msg = {'proc_info': (self.pid, self.name, status,)}
 
+        # this will block and wait for geckocore to respond
         while not ans:
             ans = request.get(msg)
-            print("*** {} : {} ***".format(msg, ans))
-            time.sleep(0.01)
+            # print("*** {} : {} ***".format(msg, ans))
+            # time.sleep(0.01)
 
-        print("**** notify core:", ans)
+        # print("**** notify core:", ans)
         request.close()
         # time.sleep(5)
 
 
 def init_node(**kwargs):
+    """
+    Initializes the node and sets up some global variables.
+    """
     # this gets created inside a new process, so it should be ok
     global g_geckopy
     g_geckopy = GeckoPy(**kwargs)
-    print("M>> {}".format(g_geckopy))
+    # print("M>> {}".format(g_geckopy))
 
 
 def log(msg):
+    """
+    Prints a message to the log.
+    """
     global g_geckopy
     if g_geckopy.queue:
         g_geckopy.queue.put((g_geckopy.pid, g_geckopy.name, msg,))
@@ -166,15 +182,25 @@ def log(msg):
 
 
 def is_shutdown():
+    """
+    Returns true if it is time to shutdown.
+    """
     global g_geckopy
     return g_geckopy.kill
 
 
 # def Publisher(self, uds_file=None, host='localhost', queue_size=10, bind=False):
-def Publisher(addr=zmqTCP('localhost', 9998), queue_size=10, bind=False):
+def Publisher(addr=None, queue_size=5, bind=False):
+    """
+    addr: either a valid tcp or uds address. If nothing is passed in, then
+          it is set to what geckopy defaults to
+    queue_size: how many messages to queue up, default is 5
+    bind: by default this connects to geckocore, but you can also have it bind
+          to a different port
+    """
     global g_geckopy
     p = Pub()
-    if g_geckopy.core_inaddr:
+    if addr is None:
         addr = g_geckopy.core_inaddr
 
     if bind:
@@ -186,13 +212,24 @@ def Publisher(addr=zmqTCP('localhost', 9998), queue_size=10, bind=False):
 
 
 # def Subscriber(self, topics, cb, host='localhost', uds_file=None):
-def Subscriber(topics, cb_func, addr=zmqTCP('localhost', 9999)):
+def Subscriber(topics, cb_func, addr=None, bind=False):
+    """
+    addr: either a valid tcp or uds address. If nothing is passed in, then
+          it is set to what geckopy defaults to
+    queue_size: how many messages to queue up, default is 5
+    bind: by default this connects to geckocore, but you can also have it bind
+          to a different port
+    """
     global g_geckopy
     s = Sub(cb_func=cb_func, topics=topics)
-    if g_geckopy.core_outaddr:
+    if addr is None:
         addr = g_geckopy.core_outaddr
 
-    s.connect(addr)
+    if bind:
+        s.bind(addr)
+    else:
+        s.connect(addr)
+
     g_geckopy.subs.append(s)
 
 
@@ -210,12 +247,13 @@ def on_shutdown(hook):
     g_geckopy.hooks.append(hook)
 
 
-def spin(hertz=100):
+def spin(hertz=50):
     """
-
+    This will continue to loop at the given hertz until is_shutdown() returns
+    True.
     """
     global g_geckopy
-    rate = Rate(1.2*hertz)
+    rate = Rate(hertz)
     while not g_geckopy.kill:
         for sub in g_geckopy.subs:
             sub.recv_nb()

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-
-#
-#
-# copyright Kevin Walchko
-#
+# -*- coding: utf-8 -*-
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2014 Kevin Walchko
+# see LICENSE for full details
+##############################################
 # Basically a rostopic
 
 from __future__ import print_function

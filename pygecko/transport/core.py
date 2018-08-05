@@ -35,57 +35,12 @@ import time
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
-# from pygecko.multiprocessing.geckopy import Rate
-# from pygecko.transport import zmqTCP, zmqUDS
-# from pygecko.transport import Pub, Sub
-# from pygecko.transport import Rep, Req
-from pygecko.multiprocessing import geckopy
-# from pygecko.multiprocessing import SignalCatch
-# import signal
+from pygecko.multiprocessing.geckopy import Rate
+from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
 import psutil
 import os
 # from colorama import Fore, Back, Style
 # from threading import Thread
-
-import signal
-
-
-class SignalCatch(object):
-    """
-    Catches SIGINT and SIGTERM signals and sets kill = True
-
-    https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
-    """
-    kill = False
-    def kill_signals(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
-
-    def exit_gracefully(self, signum, frame):
-        """
-        When handler gets called, it sets the self.kill to True
-        """
-        self.kill = True
-        # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
-
-
-
-
-#
-# class SignalCatch(object):
-#     """
-#     Catches SIGINT and SIGTERM signals and sets kill = True
-#
-#     https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
-#     """
-#     kill = False
-#     def kill_signals(self):
-#         signal.signal(signal.SIGINT, self.exit_gracefully)
-#         signal.signal(signal.SIGTERM, self.exit_gracefully)
-#
-#     def exit_gracefully(self,signum, frame):
-#         self.kill = True
-#         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
 
 
 class GProcess(object):
@@ -303,7 +258,7 @@ class GeckoCore(SignalCatch, GProcess):
             print('*'*len(err_msg))
             exit(1)
 
-        rate = geckopy.Rate(100)
+        rate = Rate(100)
 
         mc = MsgCounter()
         datumn = time.time()

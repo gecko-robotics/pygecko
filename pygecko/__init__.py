@@ -8,6 +8,10 @@ from pygecko.file_storage import FileStorageError
 from pygecko.file_storage import FileJson
 from pygecko.file_storage import FileYaml
 
+# messages are all namedtuples
+from pygecko.messages import Vector, Quaternion, Pose, Twist, Wrench, Joystick
+from pygecko.messages import IMU, Lidar, PoseStamped, Image
+
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"

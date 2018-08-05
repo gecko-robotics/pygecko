@@ -17,11 +17,11 @@ from math import sin, cos, pi, sqrt
 import time
 
 
-def chew_up_cpu():
+def chew_up_cpu(interval):
     # chew up some cpu
-    for i in range(90):
-        m = sin(i*pi/180)*cos(i*pi/180)*sin(i*pi/180)*cos(i*pi/180)*sin(i*pi/180)*cos(i*pi/180)
-        sqrt(m**9)
+    start = time.time()
+    while (time.time() - start) < interval:
+        5*5
 
 
 def pub_bye():
@@ -53,10 +53,7 @@ def publisher(**kwargs):
 def f(topic, msg):
     # print("recv[{}]: {}".format(topic, msg))
     geckopy.log(msg)
-    chew_up_cpu()
-    chew_up_cpu()
-    chew_up_cpu()
-    chew_up_cpu()
+    chew_up_cpu(.1)
 
 def sub_bye():
     print("*"*30)
