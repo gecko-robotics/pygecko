@@ -13,7 +13,10 @@ from __future__ import print_function
 from __future__ import division
 import msgpack
 import pickle
-# import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 
 class MsgPack(object):

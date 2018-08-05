@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2014 Kevin Walchko
+# see LICENSE for full details
+##############################################
 
 """
 So this is sort of a copy of roslaunch
@@ -23,8 +29,9 @@ def handleArgs():
 if __name__ == '__main__':
     args = handleArgs()
 
+    # get extension to determine if it is a yaml or json file
     fname = args['file']
-    ext = fname.split('.')[-1]
+    ext = fname.split('.')[-1]  # there could be . in the filename, so grab end
 
     if args['format'] == 'json':
         if ext != 'json':
@@ -44,7 +51,7 @@ if __name__ == '__main__':
         print(e)
         exit(1)
 
-    print(ps)
+    # print(ps)
 
     g = GeckoLauncher(ps)
     g.loop()

@@ -12,7 +12,7 @@
 from __future__ import print_function
 from __future__ import division
 import zmq
-from zmq.devices import ProcessProxy
+# from zmq.devices import ProcessProxy
 import time
 import socket as Socket
 # import msgpack
@@ -75,7 +75,8 @@ class Pub(Base):
         # done = True
         # while done:
         #     done = self.socket.send_multipart([topic.encode('utf-8'), msg])
-        self.socket.send_multipart([topic.encode('utf-8'), msg])
+        # topic = topic.encode('utf-8')  # FIXME
+        self.socket.send_multipart([topic, msg])
 
 
 class Sub(Base):

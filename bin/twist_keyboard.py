@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-
-#
-# by Kevin J. Walchko 6 Aug 2016
-#
-
+# -*- coding: utf-8 -*-
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2014 Kevin Walchko
+# see LICENSE for full details
+##############################################
 
 from __future__ import print_function
 from __future__ import division
@@ -11,9 +12,8 @@ import argparse
 import sys
 import tty
 import termios
-# from pygecko import ZmqClass as Zmq
-from pygecko.transport import zmqTCP, GeckoCore
-from pygecko.multiprocessing import GeckoPy
+from pygecko.transport import zmqTCP, zmqUDS
+from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
 import time
 
@@ -38,7 +38,7 @@ def limit_min(x):
 
 
 def publisher(**kwargs):
-    geckopy = GeckoPy(**kwargs)
+    geckopy.init_node(**kwargs)
     rate = geckopy.Rate(10)
 
     p = geckopy.Publisher()

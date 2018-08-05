@@ -11,10 +11,10 @@
 from __future__ import print_function
 from __future__ import division
 import zmq
-# from zmq.devices import ProcessProxy
 import time
 import socket as Socket
 from pygecko.transport.protocols import Pickle
+# from pygecko.transport.protocols import MsgPack
 
 class ZMQError(Exception):
     pass
@@ -45,7 +45,7 @@ class Base(object):
     def close(self):
         self.socket.close()
         self.ctx.term()
-        print('[<] shutting down {}'.format(type(self).__name__))
+        # print('[<] shutting down {}'.format(type(self).__name__))
 
     def bind(self, addr, hwm=None, queue_size=10):
         """
@@ -58,7 +58,7 @@ class Base(object):
           queue_size is the same as hwm
         out: none
         """
-        print(type(self).__name__, 'bind to {}'.format(addr))
+        # print(type(self).__name__, 'bind to {}'.format(addr))
         self.socket.bind(addr)
         if hwm:
             self.socket.set_hwm(hwm)
@@ -73,7 +73,7 @@ class Base(object):
         in: addr as tcp or uds, hwm (high water mark) a int that limits buffer length
         out: none
         """
-        print(type(self).__name__, 'connect to {}'.format(addr))
+        # print(type(self).__name__, 'connect to {}'.format(addr))
         self.socket.connect(addr)
         if hwm:
             self.socket.set_hwm(hwm)
