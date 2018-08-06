@@ -31,14 +31,15 @@ class GeckoService(object):
         self.in_addr = i
         self.out_addr = o
         self.info_addr = f
+        self.ip = None
 
     def as_tuple(self):
         return (self.in_addr, self.out_addr, self.info_addr,)
 
     def __repr__(self):
         """For printing"""
-        s = "{}\n  in: {}\n  out: {}\n  info: {}"
-        return s.format(self.serviceName, self.in_addr, self.out_addr, self.info_addr)
+        s = "{} [{}]\n  in: {}\n  out: {}\n  info: {}"
+        return s.format(self.serviceName, self.ip, self.in_addr, self.out_addr, self.info_addr)
 
 
 
@@ -73,10 +74,14 @@ class serviceFinder(object):
         servicesFound = []
         while True:
             try:
+                # data = returned message info
+                # server = ip:port, which is x.x.x.x:9990
                 data, server = self.sock.recvfrom(1024)
+                # print(server)
                 data = self.handler.loads(data)
                 if len(data) == 3:
                     s = GeckoService(*data)
+                    s.ip = server[0]
                     servicesFound.append(s)
                     break
             except socket.timeout:
