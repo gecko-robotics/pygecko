@@ -9,32 +9,34 @@ import pickle
 from collections import namedtuple
 
 
+class Ascii(object):
+    """Simple ASCII format"""
+    def dumps(self, data):
+        return "|".join(data).encode('utf-8')
+    def loads(self, msg):
+        return msg.decode('utf-8').split("|")
+
+
+class Pickle(object):
+    """Use pickle to transport message"""
+    def dumps(self, data):
+        return pickle.dumps(data)
+    def loads(self, msg):
+        return pickle.loads(msg)
+
+
 class GeckoService(object):
-    # """Stores variables for a service"""
-    # def __init__(self, serviceName, servicePort, serviceIP=""):
     def __init__(self, i, o, f):
-        # self.serviceName = serviceName
-        # self.servicePort = servicePort
-        # self.serviceIP = serviceIP
         self.serviceName = "GeckoCore"
         self.in_addr = i
         self.out_addr = o
         self.info_addr = f
 
-    def pack(self):
-        # ourServicePort = self.services[serviceName].servicePort
-        # msg = "|".join(("service", str(ourServicePort)))
-        # msg.encode('utf-8')
-        return pickle.dumps((self.in_addr,self.out_addr,self.info_addr,))
-
-    def unpack(self, msg):
-        return pickle.loads(msg)
+    def as_tuple(self):
+        return (self.in_addr, self.out_addr, self.info_addr,)
 
     def __repr__(self):
         """For printing"""
-        # return "%s %s:%s" % (self.serviceName,
-        #         str(self.serviceIP),
-        #         self.servicePort)
         s = "{}\n  in: {}\n  out: {}\n  info: {}"
         return s.format(self.serviceName, self.in_addr, self.out_addr, self.info_addr)
 
@@ -43,7 +45,7 @@ class GeckoService(object):
 
 class serviceFinder(object):
     """Find Services using the magic of multicast"""
-    def __init__(self, ip, port, ttl=10):
+    def __init__(self, ip, port, ttl=10, handler=Pickle):
         self.group = (ip, port)
         self.sock = socket.socket(
                 socket.AF_INET,
@@ -56,6 +58,7 @@ class serviceFinder(object):
                 socket.SOL_IP,
                 socket.IP_MULTICAST_LOOP,
                 1)
+        self.handler = handler()
 
     def search(self, serviceName, pid, processname):
         """
@@ -64,13 +67,14 @@ class serviceFinder(object):
         """
         # print("Searching for service '%s'" % serviceName)
         self.sock.settimeout(5)
-        msg = "|".join(("findservice", serviceName, str(pid), processname))
-        self.sock.sendto(msg.encode('utf-8'), self.group)
+        # msg = "|".join(("findservice", serviceName, str(pid), processname)).encode('utf-8')
+        msg = self.handler.dumps(("findservice", serviceName, str(pid), processname,))
+        self.sock.sendto(msg, self.group)
         servicesFound = []
         while True:
             try:
                 data, server = self.sock.recvfrom(1024)
-                data = pickle.loads(data)
+                data = self.handler.loads(data)
                 if len(data) == 3:
                     s = GeckoService(*data)
                     servicesFound.append(s)
@@ -83,7 +87,7 @@ class serviceFinder(object):
 class serviceProvider(object):
     """A simple multicast listener which responds to
     requests for services it has"""
-    def __init__(self, group, port):
+    def __init__(self, group, port, handler=Pickle):
         self.serverAddr = ('0.0.0.0', port)
         self.sock = socket.socket(
                 socket.AF_INET,
@@ -99,6 +103,7 @@ class serviceProvider(object):
         self.services = {}
         self.exit = False
         self.ended = threading.Event()
+        self.handler = handler()
 
         self.listener = threading.Thread(target=self.listenerThread)
 
@@ -125,8 +130,9 @@ class serviceProvider(object):
                     data, address = self.sock.recvfrom(1024)
                 except:
                     continue
-                data = data.decode('utf-8').split("|")
+                # data = data.decode('utf-8').split("|")
                 # data = pickle.loads(data)
+                data = self.handler.loads(data)
                 print(data)
 
                 if len(data) == 4:
@@ -137,7 +143,8 @@ class serviceProvider(object):
                     print('{}[{}]'.format(process_name, pid))
                     if cmd == "findservice":
                         if serviceName in self.services:
-                            msg = self.services[serviceName].pack()
+                            msg = self.services[serviceName].as_tuple()
+                            msg = self.handler.dumps(msg)
                             self.sock.sendto(msg, address)
 
         self.ended.set()
@@ -183,13 +190,6 @@ def main():
         finder = serviceFinder(mcast_addr, mcast_port)
         resp = finder.search(sys.argv[2],11311,"func")
         print(resp)
-
-    # elif sys.argv[1] == 'process':
-    #     if len(sys.argv) != 4:
-    #         print("usage: hxsd process [pid] [name]")
-    #         exit()
-    #     finder = serviceFinder(mcast_addr, mcast_port)
-    #     finder.process(11238, "bigtest")
 
 if __name__ == "__main__":
     main()
