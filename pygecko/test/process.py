@@ -45,8 +45,6 @@ class GeckoSimpleProcess(object):
         if 'core_outaddr' not in kwargs:
             kwargs['core_outaddr'] = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
 
-        # print('ss', kwargs)
-
         self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()
         print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
