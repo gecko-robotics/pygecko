@@ -44,7 +44,7 @@ class GeckoService(object):
 
 
 
-class serviceFinder(object):
+class ServiceFinder(object):
     """Find Services using the magic of multicast"""
     def __init__(self, ip, port, ttl=10, handler=Pickle):
         self.group = (ip, port)
@@ -88,7 +88,7 @@ class serviceFinder(object):
         return servicesFound
 
 
-class serviceProvider(object):
+class ServiceProvider(object):
     """A simple multicast listener which responds to
     requests for services it has"""
     def __init__(self, group, port, handler=Pickle):
