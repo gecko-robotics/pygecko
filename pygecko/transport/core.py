@@ -41,6 +41,7 @@ import psutil
 import os
 # from colorama import Fore, Back, Style
 # from threading import Thread
+import pickle
 
 
 class GProcess(object):
@@ -129,13 +130,14 @@ class ProcPerformance(object):
         # self.procs = [psutil.Process(pid)]
         # self.procs.append(psutil.Process(pid))
         self.procs[pid] = (psutil.Process(pid), name,)
-        print('*** push: {}[{}] ***'.format(name, pid))
+        # print('*** push: {}[{}] ***'.format(name, pid))
 
     def pop(self, pid):
         try:
             self.procs.pop(pid)
         except Exception as e:
-            print('*** pop: {} ***'.format(e))
+            # print('*** pop: {} ***'.format(e))
+            pass
 
     def procprint(self, total_msgs):
         # pd = self.core.as_dict(attrs=['connections','cpu_percent','memory_percent'])
@@ -178,7 +180,7 @@ class ProcPerformance(object):
                     print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
                     # print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, cpu, mem))
                 else:
-                    print('*** remove {} ***'.format(ps.pid))
+                    # print('*** remove {} ***'.format(ps.pid))
                     self.pop(ps.pid)
             except Exception:
                 self.pop(ps.pid)
@@ -243,8 +245,8 @@ class GeckoCore(SignalCatch, GProcess):
 
         print(">> Starting up GeckoCore")
 
-        reply = Rep()
-        reply.bind(zmqTCP('localhost', 10000))
+        # reply = Rep()
+        # reply.bind(zmqTCP('localhost', 10000))
 
         # setup all of the zmq ins/outs and exit if there is an error
         try:
@@ -265,7 +267,7 @@ class GeckoCore(SignalCatch, GProcess):
         while not self.kill:
             # non-blocking so we can always check to see if there is a kill
             # signal to handle
-            reply.listen_nb(self.handle_reply)
+            # reply.listen_nb(self.handle_reply)
 
             msg = None
             try:
@@ -277,6 +279,11 @@ class GeckoCore(SignalCatch, GProcess):
                 pass
 
             if msg:
+                # print(topic)
+                # if topic.decode('utf-8') == 'core_info':
+                if topic == b'core_info':
+                    # print('*** found info ***')
+                    self.handle_reply(pickle.loads(msg))
                 # topic = topic.decode('utf-8')  # FIXME
                 self.outs.raw_pub(topic, msg)  # transmit msg
                 mc.touch(topic, len(msg))      # update message/data counts
