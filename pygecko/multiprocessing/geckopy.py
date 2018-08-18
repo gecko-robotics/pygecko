@@ -58,12 +58,15 @@ g_geckopy = None
 #         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
 
 class Throttle(object):
+    """
+    value?
+    """
     pass
 
 
-class GeckoRate(object):
+class Rate(object):
     """
-    Uses sleep to keep a desired rate.
+    Uses sleep to keep a desired message/sample rate.
     """
     def __init__(self, hertz):
         self.last_time = time.time()
@@ -87,8 +90,8 @@ class GeckoRate(object):
         self.last_time = time.time()
 
 
-class Rate(GeckoRate):
-    pass
+# class Rate(GeckoRate):
+#     pass
 
 
 class GeckoPy(SignalCatch):
