@@ -284,6 +284,7 @@ class GeckoCore(SignalCatch, GProcess):
                 if topic == b'core_info':
                     # print('*** found info ***')
                     self.handle_reply(pickle.loads(msg))
+                    continue
                 # topic = topic.decode('utf-8')  # FIXME
                 self.outs.raw_pub(topic, msg)  # transmit msg
                 mc.touch(topic, len(msg))      # update message/data counts
