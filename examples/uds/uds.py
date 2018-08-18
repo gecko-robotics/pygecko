@@ -89,6 +89,6 @@ if __name__ == '__main__':
             print('main process got ctrl-c')
             break
 
-    s.join(0.1)
-    p.join(0.1)
-    core.join(0.1)
+    # s.join(0.1)
+    # p.join(0.1)
+    # core.join(0.1)

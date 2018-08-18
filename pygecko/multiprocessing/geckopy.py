@@ -118,9 +118,11 @@ class GeckoPy(SignalCatch):
         self.core_outaddr = kwargs.get(
             'core_outaddr',
             zmqTCP('localhost', 9999))
+
         self.core_inaddr = kwargs.get(
             'core_inaddr',
             zmqTCP('localhost', 9998))
+
         if self.core_inaddr:
             self.notify_core(True, self.core_inaddr)
 
@@ -129,7 +131,7 @@ class GeckoPy(SignalCatch):
             for h in self.hooks:
                 h()
 
-    def notify_core(self, status, addr=None):
+    def notify_core(self, status, addr=None, retry=3):
         """
         Pass info to geckocore:
             {'proc_info': (pid, name, status)}
@@ -143,21 +145,30 @@ class GeckoPy(SignalCatch):
         """
         # print("********** wtf *************")
 
-        request = Req()
-        request.connect(zmqTCP('localhost', 10000))
+        # request = Req()
+        # request.connect(zmqTCP('localhost', 10000))
 
-        ans = None
+        # ans = None
         msg = {'proc_info': (self.pid, self.name, status,)}
+        # print(msg)
 
-        # this will block and wait for geckocore to respond
-        while not ans:
-            ans = request.get(msg)
-            # print("*** {} : {} ***".format(msg, ans))
-            # time.sleep(0.01)
-
-        # print("**** notify core:", ans)
-        request.close()
-        # time.sleep(5)
+        # add a Sub() and get an ok from core???
+        p = Pub()
+        p.connect(zmqTCP('localhost', 9998), queue_size=1)
+        for _ in range(retry):
+            p.pub('core_info', msg)
+            time.sleep(0.1)
+        # return
+        #
+        # # this will block and wait for geckocore to respond
+        # while not ans:
+        #     ans = request.get(msg)
+        #     # print("*** {} : {} ***".format(msg, ans))
+        #     # time.sleep(0.01)
+        #
+        # # print("**** notify core:", ans)
+        # request.close()
+        # # time.sleep(5)
 
 
 def init_node(**kwargs):

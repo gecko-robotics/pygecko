@@ -38,14 +38,15 @@ class GeckoSimpleProcess(object):
             self.ps.terminate()
 
     def start(self, func, name='simple_process', **kwargs):
-        kwargs = kwargs['kwargs']  # WTF???
+        if kwargs:
+            kwargs = kwargs['kwargs']  # WTF???
+        else:
+            kwargs = {}
 
         if 'core_inaddr' not in kwargs:
             kwargs['core_inaddr'] = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
         if 'core_outaddr' not in kwargs:
             kwargs['core_outaddr'] = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
-
-        # print('ss', kwargs)
 
         self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()

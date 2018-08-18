@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# This really does a whole lot of nothing ... just launches some processes
+# and passes some messages around. Make sure you run geckocore.py too.
 
 from __future__ import print_function
 import multiprocessing as mp
 import time
-import signal
-import imutils
+
+try:
+    import imutils
+except ImportError as e:
+    print(e)
+    print('Please install imutils')
+    exit(1)
 
 # fix path for now
 # once gecko is installed you don't need this kludge
@@ -13,7 +20,6 @@ import imutils
 # sys.path.append("../../")
 
 from pygecko.transport import Pub, Sub
-# from pygecko.transport.zmqclass import SubNB
 from pygecko.transport import zmqTCP  #, GeckoCore
 from pygecko.multiprocessing import geckopy
 from math import sin, cos, pi, sqrt
@@ -100,7 +106,7 @@ def subscribe2(**kwargs):
             chew_up_cpu(.2)
 
     topic = kwargs.get('topic', 'test')
-    s = geckopy.Subscriber([topic], f)
+    s = geckopy.Subscriber([topic], f)  # array of topics to subscribe to
     geckopy.spin(20)
 
 

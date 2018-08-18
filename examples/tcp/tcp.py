@@ -8,7 +8,6 @@ from __future__ import print_function
 # import sys
 # sys.path.append("../../")
 
-# from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
@@ -76,7 +75,17 @@ if __name__ == '__main__':
     # this is just for testing
     # core = GeckoCore()
     # core.start()
+
+    # although I don't do anything with procs, because I reuse the variables
+    # p and s below, they will kill the processes when new process are created
+    # using those names. Appending them to procs allows me to keep them alive
+    # until the program ends
     procs = []
+
+    # p = GeckoSimpleProcess()
+    # p.start(func=publisher, name='publisher {}'.format('core_info'), kwargs={'topic': 'core_info'})
+    # procs.append(p)
+
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
         # info to pass to processes
         args = {
