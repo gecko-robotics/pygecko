@@ -65,7 +65,7 @@ Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any 
 ## `geckolaunch.py`
 
 This launches a bunch of process at once and keeps track of CPU and memory
-consumption. Command `geckolaunch.py launch.json`, would produce the 
+consumption. Command `geckolaunch.py launch.json`, would produce the
 following:
 
 ```bash
@@ -103,7 +103,7 @@ A launch file is just a simple json file where each line takes the form:
 }
 ```
 
-Here we have a bunch of functions (`publish`,  `subscribe2`, and `pcv`) located in a 
+Here we have a bunch of functions (`publish`,  `subscribe2`, and `pcv`) located in a
 python file called `process.py` (note, the `.py` file extension is assumed because
 `pygecko` uses `import` to load these functions. There is no reason eveything has
 to be located in one file, I was just lazy when I wrote this example and did
@@ -122,7 +122,6 @@ pub/sub processes easy.
 
 These are ideas I really have not flushed out yet
 
-- ros-like services: requst <--> reply
 - serial-to-tcp to collect data
 - python/c example to use unix domain sockets
 - webserver displaying info
