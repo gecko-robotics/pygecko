@@ -60,9 +60,34 @@ class Source(Publisher):
 #        Publisher.__init__(self,addr=None, queue_size=5)
 
 
-class Sink(object):
+
+"""
+from gecko import geckopy
+
+class RobotCommand(Sink):
+    def __init__(self):
+        self.robot = Robot()
+        
+    def callback(self, topic, msg):
+        if topic == b'cmd':
+            geckopy.log("{}: {}".format(topic,msg))
+            robot.command(msg)
+
+
+def function(**kwargs):
+    geckopy.init_node(**kwargs)
+    
+    rc = RobotCommand()
+    geckopy.spin()
+
+"""
+
+
+
+class Subscriber(object):
     def __init__(self, topics, addr):
         # create subscriber and push into geckopy.subs loop
+        # gecko
         geckopy.Subscriber(topics, self.callback, addr, False)
         # conntect
         # setup self.callback
@@ -72,6 +97,10 @@ class Sink(object):
         this gets called once each time a message arrives
         """
         pass
+
+    
+class Sink(Subscriber):
+    pass
 
 
 class Rep(object):
