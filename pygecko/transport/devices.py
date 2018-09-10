@@ -8,6 +8,25 @@ from pygecko.transport.zmq_req_rep import Req
 
 
 """
+from gecko import geckopy
+
+class Test(Source):
+    def __init__(self):
+        self.imu = IMU()
+        
+    def run(self):
+        a,g,m = self.imu.read()
+        msg = IMU(a,g,m)
+        self.pub.pub('test', msg)
+        geckopy.log('sent msg')
+
+
+def function(**kwargs):
+    geckopy.init_node(**kwargs)
+    
+    t = Test()
+    t.spin(10)  # 10 Hz
+
 """
 
 
