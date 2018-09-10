@@ -290,8 +290,9 @@ def init_node(**kwargs):
     """
     # this gets created inside a new process, so it should be ok
     global g_geckopy
-    g_geckopy = GeckoPy(**kwargs)
-    # print("M>> {}".format(g_geckopy))
+    if g_geckopy is None:
+        g_geckopy = GeckoPy(**kwargs)
+        print("Created geckopy >> {}".format(g_geckopy))
 
 
 def log(msg):
