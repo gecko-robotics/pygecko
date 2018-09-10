@@ -57,11 +57,121 @@ g_geckopy = None
 #         self.kill = True
 #         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
 
-class Throttle(object):
+class Filter(object):
+    """
+    Relay?
+    value?
+
+    def func(t, m):
+        print(t,m)
+
+    f = Filter('imu', func)
+    """
+    def __init__(self, in_topics, func, in_addr=None, out_addr=None):
+        global g_geckopy
+        if in_addr is None:
+            in_addr = g_geckopy.core_outaddr
+        if out_addr is None:
+            out_addr = g_geckopy.core_inaddr
+
+        self.func = func
+
+        # out
+        self.pub = Pub()
+        self.pub.connect(out_addr, queue_size=queue_size)
+
+        # in
+        self.sub = Sub(cb_func=self.handle_msg, topics=in_topics)
+        self.sub.connect(in_addr)
+        g_geckopy.subs.append(self.sub)
+
+    def handle_msg(self, topic, msg):
+        t, m = self.func(topic, msg)
+        self.pub(t, m)
+
+
+class Relay(object):
+    """
+    value?
+
+    def a(t,m,state): return state
+    def b(m): return msg
+
+    r = Relay('imu', geckoTCP('localhost', 10000))
+    r.spin(a,b)
+    """
+    def __init__(self, topics, rep_addr, in_addr=None):
+        global g_geckopy
+
+        if in_addr is None:
+            in_addr = g_geckopy.core_outaddr
+        # out
+        # self.pub = Pub()
+        # self.pub.connect(out_addr, queue_size=queue_size)
+
+        # in
+        self.sub = Sub(cb_func=None, topics=topics)
+        self.sub.connect(in_addr)
+
+        # reply
+        self.rep = Reply()
+        self.rep.bind(rep_addr)
+
+    def spin(self, msg_func, rep_func, hertz=10):
+        global g_geckopy
+        rate = geckopy.Rate(hertz)
+        state = None
+        while not g_geckopy.kill:
+            topic, msg = self.sub.recv_nb()
+            if topic:
+                state = msg_func(topic, msg, state)
+
+            msg = self.rep.listen_nb()
+            if msg:
+                msg = rep_func(msg, state)
+                self.rep.reply(msg)
+
+            rate.sleep()
+
+
+class Sink(object):
     """
     value?
     """
-    pass
+    def __init__(self, func, in_topics, addr=None):
+        global g_geckopy
+
+        if addr is None:
+            addr = g_geckopy.core_outaddr
+
+        # in
+        self.sub = Sub(cb_func=func, topics=in_topics)
+        self.sub.connect(addr)
+        g_geckopy.subs.append(self.sub)
+
+
+
+class Source(object):
+    def __init__(self, addr=None):
+        global g_geckopy
+
+        self.pub = Pub()
+        if addr is None:
+            addr = g_geckopy.core_inaddr
+
+        # if bind:
+        #     p.bind(addr, queue_size=queue_size)
+        # else:
+        self.pub.connect(addr, queue_size=queue_size)
+
+    def spin(self, func, topic, hertz):
+        global g_geckopy
+        rate = geckopy.Rate(hertz)
+        while not g_geckopy.kill:
+            msg = func()
+            self.pub(topic, msg)
+            rate.sleep()
+
 
 
 class Rate(object):

@@ -49,6 +49,16 @@ def test_yaml():
     file_func(FileYaml, 'test.yml')
 
 
+def test_rate():
+    rate = geckopy.Rate(10)
+    start = time.time()
+    for _ in range(10):
+        rate.sleep()
+    stop = time.time()
+    # print(stop - start)
+    assert (stop - start) + 0.05 > 1.0
+
+
 # tcp setup
 tcp_pub = zmqTCP('localhost', 9998)
 tcp_sub = zmqTCP('localhost', 9999)

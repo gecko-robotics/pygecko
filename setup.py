@@ -42,7 +42,7 @@ setup(
         'msgpack',        # efficient message serialization through zmq
         'pyzmq',          # connecting to different processes and computers
         # 'bjoern',         # http server, multiple connections
-        'the_collector',  # saving data
+        # 'the_collector',  # saving data
         'build_utils'     # installing and building the library
     ],
     url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),
