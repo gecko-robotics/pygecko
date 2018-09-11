@@ -123,10 +123,10 @@ See the examples, but this acts like a `rospy` and helps make writing
 pub/sub processes easy. See the `/examples` folder to see it in action.
 
 - **init_node:** this sets up the the process for communications with `geckocore`
-- **log:** prints log messages
+- **log*:** prints log messages
     ```python
-    from pygecko import geckopy, Log
-    geckopy.loginfo('this is a info message')
+    from pygecko import geckopy
+    geckopy.loginfo('this is a info message')  # just send a string
     geckopy.logwarn('this is a warning message')
     geckopy.logerror('this is a error message')
     geckopy.logdebug('this is a debug message')
