@@ -9,20 +9,22 @@ on macOS and various linux systems
 - Uses [Zero MQ](http://http://zeromq.org/) as the inter-process communication
 (uses both TCP and UDS) instead of RPC-XML
     - looked at Google's protobuf, but was more complex than I needed
-    - using [`msgpack`](https://msgpack.org/index.html) to serialize data
+    - looked at [`msgpack`](https://msgpack.org/index.html) to serialize data but it was slower for `namedtuples`
+    - right now using `pickle` to serialize data
     - instead of `roscore` use `geckocore.py` as the message hub
-        - produce performance data (see below)
-    - instead of `roslaunch` use `geckolaunch.py`
         - produces performance data (see below)
-- Uses [`the_collector`](https://github.com/MomsFriendlyRobotCompany/the_collector)
-to save/retrieve data to a file
+    - instead of `roslaunch` use `geckolaunch.py`
 - `simplejson`/`pyyaml` - config and launch files
 - All of this runs on [Raspberry Pi 3](http://www.raspberrypi.org)
+    - Also runs on macOS (UNIX) and Windows
 
 # Architecture
 
 ![](pics/multiprocess.png)
 
+- GeckoCore is a main message hub and calculates statistics for data through put and node cpu/memory usage
+    - Actually, when gecko processes start up, they tell geckocore their pid numbers so it can track usage using `psutil` library
+    - Obviously this only works on processes located on the same machine as geckocore
 - Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
 - Subscriber can subscribe to multiple topics
 - Publishers are not bound to any one topic, but can also publish to multiple topics
