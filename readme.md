@@ -59,14 +59,8 @@ through it along with connections.
  hey there.....................   39.3 msgs/s      1.8 kB/s
  cv............................   14.3 msgs/s   4298.6 kB/s
 ```
-
-Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any string.
-
-## `geckolaunch.py`
-
-This launches a bunch of process at once and keeps track of CPU and memory
-consumption. Command `geckolaunch.py launch.json`, would produce the
-following:
+geckocore also is passed the PIDs for processes on the local machine and
+prints performance data on each process:
 
 ```bash
 +------------------------------
@@ -83,7 +77,12 @@ following:
 | publish[32878]................ cpu:   0.9%    mem:   0.07%
 ```
 
-A launch file is just a simple json file where each line takes the form:
+Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any string.
+
+## `geckolaunch.py`
+
+`geckolaunch.py` allows you to launch a bunch of processes quickly using a launch
+file. A launch file is just a simple json file where each line takes the form:
 `[file, function, kwargs]`. Here is an example:
 
 ```bash
@@ -116,25 +115,30 @@ topic names to pub/sub to.
 ## `geckopy`
 
 See the examples, but this acts like a `rospy` and helps make writing
-pub/sub processes easy.
+pub/sub processes easy. See the `/examples` folder to see it in action.
 
-# Todo
-
-These are ideas I really have not flushed out yet
-
-- serial-to-tcp to collect data
-- python/c example to use unix domain sockets
-- webserver displaying info
-    - `bjoern` - efficient web server written in C with python bindings
-- need some sort of logging system
-- data logger over tcp/unix domain sockets
-    - need to have simple setup class to make this easy
-    - automatically append time-date
-    - put every collect into a folder
-    - webpage serve up data
-        - show meta data for collect
-        - allow deletion of folder/data
-        - show available and used hard drive space
+- **init_node:** this sets up the the process for communications with `geckocore`
+- **log:** prints log messages
+    ```python
+    from pygecko import geckopy, Log
+    geckopy.loginfo('this is a info message')
+    geckopy.logwarn('this is a warning message')
+    geckopy.logerror('this is a error message')
+    geckopy.logdebug('this is a debug message')
+    ```
+- **on_shutdown:** pushes a function to a stack (FIFO) that will be called when `geckopy`
+shutsdown
+- **Subscriber:** creates a subscriber and appends the callback function to an
+array in geckopy
+- **Publisher:** creates a publisher and returns it
+- **Rate:** given a frequency of how often a loop should run (i.e., 10Hz), the
+returned object will dynamically set the sleep interval to achieve the rate. Ex:
+    ```python
+    from pygecko import geckopy
+    rate = geckopy.Rate(20)  # run loop at 20 Hz
+    while True:
+        rate.sleep()
+    ```
 
 # Change Log
 
