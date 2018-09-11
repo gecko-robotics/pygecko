@@ -21,13 +21,7 @@ to save/retrieve data to a file
 
 # Architecture
 
-```bash
-                                geckocore
-              spawn | pub --\  +---------+  /---> sub
-geckolaunch ------->| pub ---->|in    out|------> sub
-                    | pub --/  +---------+  \---> sub
-                                             \--> sub
-```
+![](pics/multiprocess.png)
 
 - Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
 - Subscriber can subscribe to multiple topics
@@ -81,6 +75,15 @@ Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any 
 
 ## `geckolaunch.py`
 
+
+```bash
+                                geckocore
+              spawn | pub --\  +---------+  /---> sub
+geckolaunch ------->| pub ---->|in    out|------> sub
+                    | pub --/  +---------+  \---> sub
+                                             \--> sub
+```
+
 `geckolaunch.py` allows you to launch a bunch of processes quickly using a launch
 file. A launch file is just a simple json file where each line takes the form:
 `[file, function, kwargs]`. Here is an example:
@@ -119,11 +122,13 @@ topic names to pub/sub to.
 
 ## `geckopy`
 
+![](pics/geckopy-flow.png)
+
 See the examples, but this acts like a `rospy` and helps make writing
 pub/sub processes easy. See the `/examples` folder to see it in action.
 
 - **init_node:** this sets up the the process for communications with `geckocore`
-- **log*:** prints log messages
+- **logxxx:** prints log messages
     ```python
     from pygecko import geckopy
     geckopy.loginfo('this is a info message')  # just send a string
@@ -160,6 +165,30 @@ machine. These args can be set in your individual python file or in a launch fil
 Ideally, when programming, you should never have to tell a sub/pub where to connect. `geckopy` has 
 that info for you because it was set in a launch file, passed to `geckopy` in args, the data is 
 found in a temp file in the tmp directory, or we fall back to the default values.
+
+**Maybe in the future:** So I could have core use MDNS telling processes it in/out addresses. Process:
+- `geckopy.init_node()` sends an MDNS ping out to the local network
+- `geckocore` hears it and returns its address info
+    - could house this in a thread attached to core?
+
+Issues:
+
+- UDP messages get lost, maybe send 5 pings everytime?
+- not sure about core latency in responding
+- how long should `geckopy` wait for a response?
+- how do you handle multiple cores on a network?
+    - maybe a key identifier or something so only one core responds?
+    - how does that get set ... launch file or command line?
+
+So what do you have to know to get `geckocore`'s info?
+
+| Method   | Key | IPv4/Zeroconfig | Ports | Scope   | Notes |
+|----------|-----|-----------------|-------|---------|-------|
+| `kwargs` | No  | Yes             | Yes   | Network | could get from launch file |
+| MDNS     | Yes | No              | No    | Network | need key for multiple cores on the network |
+| tempfile | No  | No              | No    | Machine | fallback solution |
+| default  | No  | No              | No    | Machine | no guarrentee this will work, all else has failed |
+
 
 # Change Log
 
