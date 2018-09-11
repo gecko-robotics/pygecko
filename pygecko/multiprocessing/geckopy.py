@@ -7,6 +7,7 @@ from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP, zmqUDS
+from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 # from pygecko.multiprocessing.delay import GeckoRate, Rate
 import signal
@@ -266,11 +267,14 @@ class GeckoPy(SignalCatch):
         # print(msg)
 
         # add a Sub() and get an ok from core???
-        p = Pub()
-        p.connect(zmqTCP('localhost', 9998), queue_size=1)
+        # create a pub for sending log messages
+        # HOWEVER, for right now, reuse it to send process info
+        self.logpub = Pub()
+        self.logpub.connect(zmqTCP('localhost', 9998), queue_size=1)
         for _ in range(retry):
-            p.pub('core_info', msg)
+            self.logpub.pub('core_info', msg)
             time.sleep(0.1)
+         
         # return
         #
         # # this will block and wait for geckocore to respond
@@ -294,7 +298,6 @@ def init_node(**kwargs):
         g_geckopy = GeckoPy(**kwargs)
         print("Created geckopy >> {}".format(g_geckopy))
 
-
 def log(msg):
     """
     Prints a message to the log.
@@ -305,7 +308,26 @@ def log(msg):
     else:
         print(Fore.BLUE + '{}[{}]:'.format(g_geckopy.name, g_geckopy.pid) + Fore.RESET + '{}'.format(msg))
 
+def loginfo(text, topic='log'):
+    global g_geckopy
+    msg = Log('INFO', g_geckopy.name, text)
+    g_geckopy.logpub(topic, msg)
+    
+def logdebug(text, topic='log'):
+    global g_geckopy
+    msg = Log('DEBUG', g_geckopy.name, text)
+    g_geckopy.logpub(topic, msg)
 
+def logwarn(text, topic='log'):
+    global g_geckopy
+    msg = Log('WARN', g_geckopy.name, text)
+    g_geckopy.logpub(topic, msg)
+    
+def logerror(text, topic='log'):
+    global g_geckopy
+    msg = Log('ERROR', g_geckopy.name, text)
+    g_geckopy.logpub(topic, msg)    
+    
 def is_shutdown():
     """
     Returns true if it is time to shutdown.
