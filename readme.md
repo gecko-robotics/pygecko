@@ -98,7 +98,12 @@ file. A launch file is just a simple json file where each line takes the form:
     ["process", "subscribe2", {"topic": "cv"}],
     ["process", "subscribe2", {"topic": "cv"}],
     ["process", "pcv", {"topic": "cv"}]
-  ]
+  ],
+  "geckocore": {
+      "type": "tcp",
+      "in": ["localhost", 9998],
+      "out": ["localhost", 9999]
+  }
 }
 ```
 
@@ -139,11 +144,28 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
     while True:
         rate.sleep()
     ```
+### Where is GeckoCore?
+
+`geckopy` resolves the core address in the following order
+
+1. `kwargs` passed to `geckopy` contains the address. This allows you to over ride 
+talking to a `geckocore` running on your machine and instead talk to one on another 
+machine. These args can be set in your individual python file or in a launch file.
+1. if `/tmp/gecko*.json` exists, then use the address in there. `geckocore` creates this file.
+1. if all else fails, use the default addresses:
+    - type: tcp
+    - in: localhost: 9998
+    - out: localhost: 9999
+
+Ideally, when programming, you should never have to tell a sub/pub where to connect. `geckopy` has 
+that info for you because it was set in a launch file, passed to `geckopy` in args, the data is 
+found in a temp file in the tmp directory, or we fall back to the default values.
 
 # Change Log
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2018-Sep-11 | 1.0.1 | working, but still need to flush it out some more
 2018-Jul-28 | 1.0.0 | totally nuked everything from orbit and started over
 2017-May-14 | 0.8.3 | updates and refactor
 2017-Apr-02 | 0.8.2 | fix pypi doc and refactor
