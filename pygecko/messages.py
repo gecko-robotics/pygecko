@@ -18,6 +18,8 @@ Wrench = namedtuple('Wrench', 'force torque')
 Pose = namedtuple('Pose', 'position orientation')  # value?
 Joystick = namedtuple('Joystick', 'axes buttons type')
 
+Log = namedtuple('Log', 'level name text')
+
 # with timestamp
 # CompressedImage = namedtuple('CompressedImage', 'shape data timestamp')
 # Image = namedtuple('Image', 'shape data timestamp')
