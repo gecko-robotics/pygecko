@@ -49,22 +49,36 @@ def publisher(**kwargs):
 
 
 
-def f(topic, msg):
-    # print("recv[{}]: {}".format(topic, msg))
-    geckopy.log(msg)
-    chew_up_cpu(.1)
+# def f(topic, msg):
+#     # print("recv[{}]: {}".format(topic, msg))
+#     geckopy.log(msg)
+#     chew_up_cpu(.1)
 
-def sub_bye():
-    print("*"*30)
-    print(" Subscriber shutting down ...")
-    print("*"*30)
+class Callback(object):
+    """
+    So the idea here is instead of using a simple callback function
+    like what is commented out above, I need to setup some stuff
+    and have it available during the callback. A simple class
+    allows me to do this
+    """
+    def __init__(self, name):
+        self.name = name
+    def callback(self, topic, msg):
+        geckopy.log(msg)
+        chew_up_cpu(.1)
+    def bye(self):
+        print("*"*30)
+        print(" {} shutting down ...".format(self.name)
+        print("*"*30)
 
 def subscriber(**kwargs):
     geckopy.init_node(**kwargs)
-    geckopy.on_shutdown(sub_bye)
+              
 
     topic = kwargs.get('topic')
-    s = geckopy.Subscriber([topic], f)
+    c = Callback(topic)
+    s = geckopy.Subscriber([topic], c.callback)
+    geckopy.on_shutdown(c.bye)
 
     geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
