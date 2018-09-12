@@ -32,7 +32,7 @@ def pub_bye():
 def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
-    geckopy.on_shutdown(sub_bye)
+    geckopy.on_shutdown(pub_bye)
 
     p = geckopy.Publisher()
     start = time.time()
@@ -68,12 +68,12 @@ class Callback(object):
         chew_up_cpu(.1)
     def bye(self):
         print("*"*30)
-        print(" {} shutting down ...".format(self.name)
+        print(" {} shutting down ...".format(self.name))
         print("*"*30)
 
 def subscriber(**kwargs):
     geckopy.init_node(**kwargs)
-              
+
 
     topic = kwargs.get('topic')
     c = Callback(topic)

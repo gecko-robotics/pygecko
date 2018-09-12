@@ -5,10 +5,11 @@
 # Copyright (c) 2018 Kevin Walchko
 # see LICENSE for full details
 ##############################################
-# 
+#
 from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
 from colorama import Fore, Back, Style
+import argparse
 import time
 
 def handleArgs():
@@ -19,12 +20,13 @@ def handleArgs():
     return args
 
 def format_print(topic, msg):
+    # print(msg.level)
     # msg format: {proc_name, level, text}
-    if msg.level == b'DEBUG': color = Fore.CYAN
-    elif msg.level == b'WARNING': color = Fore.YELLOW
-    elif msg.level == b'ERROR': color = Fore.RED
+    if msg.level == 'DEBUG': color = Fore.CYAN
+    elif msg.level == 'WARN': color = Fore.YELLOW
+    elif msg.level == 'ERROR': color = Fore.RED
     else: color = Fore.GREEN
-    
+
     # shorten proc names??
     print(Style.BRIGHT + color + '>> {}:'.format(msg.name[:8]) + Style.RESET_ALL + msg.text)
     # print(">> {}: {}".format(topic, msg))
@@ -32,13 +34,13 @@ def format_print(topic, msg):
 if __name__ == "__main__":
     args = handleArgs()
     topic = args['topic']
-    
+
     host = args['host']
     kwargs = {
         'in_addr': zmqTCP(host, 9998),
         'out_addr': zmqTCP(host, 9999)
     }
-    
+
     geckopy.init_node(**kwargs)
     geckopy.Subscriber([topic], format_print)
     geckopy.spin()

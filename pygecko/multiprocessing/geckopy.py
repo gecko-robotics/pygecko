@@ -201,10 +201,6 @@ class Rate(object):
         self.last_time = time.time()
 
 
-# class Rate(GeckoRate):
-#     pass
-
-
 class GeckoPy(SignalCatch):
     """
     This class setups a function in a new process.
@@ -236,6 +232,22 @@ class GeckoPy(SignalCatch):
         self.core_inaddr = kwargs.get(
             'core_inaddr',
             zmqTCP('localhost', 9998))
+
+        # if 'in_addr' in kwargs and 'out_addr' in kwargs:
+        #     self.out_addr = kwargs['out_addr']
+        #     self.in_addr = kwargs['in_addr']
+        # else:
+        #     files = glob('/tmp/gecko*.json')
+        #     if len(files) == 1:
+        #         fd = open(files[0])
+        #         j = fd.read(1000)
+        #         data = json.loads(j)
+        #         fd.close()
+        #         self.out_addr = data['out_addr']
+        #         self.in_addr = data['in_addr']
+        #     else:
+        #         self.in_addr = zmqTCP('localhost', 9998)
+        #         self.out_addr = zmqTCP('localhost', 9999)
 
         if self.core_inaddr:
             self.notify_core(True, self.core_inaddr)
@@ -274,7 +286,7 @@ class GeckoPy(SignalCatch):
         for _ in range(retry):
             self.logpub.pub('core_info', msg)
             time.sleep(0.1)
-         
+
         # return
         #
         # # this will block and wait for geckocore to respond
@@ -296,7 +308,7 @@ def init_node(**kwargs):
     global g_geckopy
     if g_geckopy is None:
         g_geckopy = GeckoPy(**kwargs)
-        print("Created geckopy >> {}".format(g_geckopy))
+        # print("Created geckopy >> {}".format(g_geckopy))
 
 def log(msg):
     """
@@ -311,23 +323,23 @@ def log(msg):
 def loginfo(text, topic='log'):
     global g_geckopy
     msg = Log('INFO', g_geckopy.name, text)
-    g_geckopy.logpub(topic, msg)
-    
+    g_geckopy.logpub.pub(topic, msg)
+
 def logdebug(text, topic='log'):
     global g_geckopy
     msg = Log('DEBUG', g_geckopy.name, text)
-    g_geckopy.logpub(topic, msg)
+    g_geckopy.logpub.pub(topic, msg)
 
 def logwarn(text, topic='log'):
     global g_geckopy
     msg = Log('WARN', g_geckopy.name, text)
-    g_geckopy.logpub(topic, msg)
-    
+    g_geckopy.logpub.pub(topic, msg)
+
 def logerror(text, topic='log'):
     global g_geckopy
     msg = Log('ERROR', g_geckopy.name, text)
-    g_geckopy.logpub(topic, msg)    
-    
+    g_geckopy.logpub.pub(topic, msg)
+
 def is_shutdown():
     """
     Returns true if it is time to shutdown.

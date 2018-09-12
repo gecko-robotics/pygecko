@@ -25,16 +25,17 @@
 #  cv............................   14.9 msgs/s   4467.5 kB/s
 # ^C>> GeckoCore[24295] is shutdown
 
-from __future__ import print_function
-from __future__ import division
+# from __future__ import print_function
+# from __future__ import division
 import zmq
-from zmq.devices import ProcessProxy
+# from zmq.devices import ProcessProxy
 import multiprocessing as mp
 import time
 # import socket as Socket
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
+from pygecko.transport.geckocorefile import CoreFile
 from pygecko.multiprocessing.geckopy import Rate
 from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
 import psutil
@@ -197,12 +198,22 @@ class GeckoCore(SignalCatch, GProcess):
         if out_addr is None:
             out_addr = zmqTCP('localhost', 9999)
 
+        data = {
+            'in': in_addr,
+            'out': out_addr
+        }
+
+        self.corefile = CoreFile(in_addr, out_addr)
+
         self.in_addr = in_addr
         self.out_addr = out_addr
 
         self.name = "GeckoCore"
 
         self.print_interval = 3  # seconds
+
+    # def __del__(self):
+    #     self.corefile.close()
 
     def socket_setup(self):
         """

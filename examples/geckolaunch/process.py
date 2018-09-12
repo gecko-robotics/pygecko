@@ -58,36 +58,36 @@ def publish(**kwargs):
 
 
 def pcv(**kwargs):
-    geckopy.init_node(**kwargs)
-    rate = geckopy.Rate(10)
-
-    topic = kwargs.get('topic', 'test')
-
-    p = geckopy.Publisher()
-
-    from imutils.video import WebcamVideoStream
-    camera = WebcamVideoStream(src=0).start()
-
-    datumn = time.time()
-
-    while not geckopy.is_shutdown():
-        img = camera.read()
-
-        if img:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            shape = img.shape
-            dtype = img.dtype
-            img = img.tobytes()
-            msg = {'img': img, 'shape': shape, 'dtype': dtype, 'stamp': time.time() - datumn}
-            p.pub(topic, msg)  # topic msg
-        else:
-            print("*** couldn't read image ***")
-
-        # sleep
-        rate.sleep()
-
-    # camera.release()
-    camera.stop()
+    # geckopy.init_node(**kwargs)
+    # rate = geckopy.Rate(10)
+    #
+    # topic = kwargs.get('topic', 'test')
+    #
+    # p = geckopy.Publisher()
+    #
+    # from imutils.video import WebcamVideoStream
+    # camera = WebcamVideoStream(src=0).start()
+    #
+    # datumn = time.time()
+    #
+    # while not geckopy.is_shutdown():
+    #     img = camera.read()
+    #
+    #     if img:
+    #         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #         shape = img.shape
+    #         dtype = img.dtype
+    #         img = img.tobytes()
+    #         msg = {'img': img, 'shape': shape, 'dtype': dtype, 'stamp': time.time() - datumn}
+    #         p.pub(topic, msg)  # topic msg
+    #     else:
+    #         print("*** couldn't read image ***")
+    #
+    #     # sleep
+    #     rate.sleep()
+    #
+    # # camera.release()
+    # camera.stop()
     print('cv bye ...')
 
 
@@ -100,9 +100,9 @@ def subscribe2(**kwargs):
             im = m['img']
             im = np.frombuffer(im, dtype=m['dtype'])
             im = im.reshape(m['shape'])
-            geckopy.log('image: {}x{}'.format(*im.shape[:2]))
+            geckopy.loginfo('image: {}x{}'.format(*im.shape[:2]))
         else:
-            geckopy.log('msg: {}'.format(m))
+            geckopy.logwarn('msg: {}'.format(m))
             chew_up_cpu(.2)
 
     topic = kwargs.get('topic', 'test')
