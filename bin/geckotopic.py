@@ -68,7 +68,8 @@ def publisher(**kwargs):
 
 
 def subscriber(**kwargs):
-    geckopy = GeckoPy()
+    # geckopy = GeckoPy()
+    geckopy.init_node(**kwargs)
 
     def f(topic, msg):
         print(">> {}: {}".format(topic, msg))

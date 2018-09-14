@@ -62,9 +62,9 @@ setup(
     #     # 'bin/camera_calibrate.py',
     #     # 'bin/image_view.py',
     #     # 'bin/service.py',  # fix
-    #     # 'bin/topic_echo.py',
-    #     # 'bin/topic_pub.py',
-    #     # 'bin/twist_keyboard.py'
+        'bin/gecko_log_display.py',
+        'bin/geckotopic.py',
+        'bin/twist_keyboard.py'
     #     # 'bin/video.py',
     #     # 'bin/webserver.py'
     ]

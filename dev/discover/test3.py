@@ -7,6 +7,7 @@ import time
 import ipaddress  # kjw
 import pickle
 from collections import namedtuple
+from pygecko.transport.helpers import zmqTCP, zmqUDS
 
 
 class Ascii(object):
@@ -26,20 +27,21 @@ class Pickle(object):
 
 
 class GeckoService(object):
-    def __init__(self, i, o, f):
+    def __init__(self, i, o):
         self.serviceName = "GeckoCore"
         self.in_addr = i
         self.out_addr = o
-        self.info_addr = f
-        self.ip = None
 
     def as_tuple(self):
-        return (self.in_addr, self.out_addr, self.info_addr,)
+        # return (self.in_addr, self.out_addr, self.info_addr,)
+        return (self.in_addr, self.out_addr,)
 
     def __repr__(self):
         """For printing"""
-        s = "{} [{}]\n  in: {}\n  out: {}\n  info: {}"
-        return s.format(self.serviceName, self.ip, self.in_addr, self.out_addr, self.info_addr)
+        # s = "{} [{}]\n  in: {}\n  out: {}\n  info: {}"
+        s = "{} [{}]\n  in: {}\n  out: {}"
+        return s.format(self.serviceName, self.ip, self.in_addr, self.out_addr,)
+        # return s.format(self.serviceName, self.ip, self.in_addr, self.out_addr, self.info_addr)
 
 
 
@@ -61,27 +63,24 @@ class ServiceFinder(object):
                 1)
         self.handler = handler()
 
-    def search(self, serviceName, pid, processname):
+    def search(self, pid, processname):
         """
         Search for services using multicast sends out a request for services
         of the specified name and then waits and gathers responses
         """
-        # print("Searching for service '%s'" % serviceName)
+        serviceName = 'GeckoCore'
         self.sock.settimeout(5)
-        # msg = "|".join(("findservice", serviceName, str(pid), processname)).encode('utf-8')
         msg = self.handler.dumps(("findservice", serviceName, str(pid), processname,))
         self.sock.sendto(msg, self.group)
-        servicesFound = []
+        servicesFound = None
         while True:
             try:
                 # data = returned message info
                 # server = ip:port, which is x.x.x.x:9990
                 data, server = self.sock.recvfrom(1024)
                 data = self.handler.loads(data)
-                if len(data) == 3:
-                    s = GeckoService(*data)
-                    s.ip = server[0]
-                    servicesFound.append(s)
+                if len(data) == 2:
+                    servicesFound = (zmqTCP(server[0], data[0]), zmqTCP(server[0], data[1]),)
                     break
             except socket.timeout:
                 break
@@ -91,7 +90,7 @@ class ServiceFinder(object):
 class ServiceProvider(object):
     """A simple multicast listener which responds to
     requests for services it has"""
-    def __init__(self, group, port, handler=Pickle):
+    def __init__(self, group, port, service, handler=Pickle):
         self.serverAddr = ('0.0.0.0', port)
         self.sock = socket.socket(
                 socket.AF_INET,
@@ -104,9 +103,9 @@ class ServiceProvider(object):
         self.sock.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_TTL, 1)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
-        self.services = {}
+        self.service = service
         self.exit = False
-        self.ended = threading.Event()
+        # self.ended = threading.Event()
         self.handler = handler()
 
         self.listener = threading.Thread(target=self.listenerThread)
@@ -117,11 +116,11 @@ class ServiceProvider(object):
 
     def stop(self):
         self.exit = True
-        self.ended.wait()
+        # self.ended.wait()
 
-    def addService(self, serv):
-        if serv.serviceName not in self.services:
-            self.services[serv.serviceName] = serv
+    # def addService(self, serv):
+    #     if serv.serviceName not in self.services:
+    #         self.services[serv.serviceName] = serv
 
     def listenerThread(self):
         self.sock.setblocking(0)
@@ -129,14 +128,14 @@ class ServiceProvider(object):
             if self.exit == True:
                 break
             else:
-                time.sleep(0.5)
+                time.sleep(0.2)
                 try:
                     data, address = self.sock.recvfrom(1024)
                 except:
                     continue
 
                 data = self.handler.loads(data)
-                print(data)
+                # print(data)
 
                 if len(data) == 4:
                     cmd = data[0]
@@ -145,12 +144,14 @@ class ServiceProvider(object):
                     process_name = data[3]
                     print('{}[{}]'.format(process_name, pid))
                     if cmd == "findservice":
-                        if serviceName in self.services:
-                            msg = self.services[serviceName].as_tuple()
+                        # if serviceName in self.services:
+                        if serviceName == 'GeckoCore':
+                            # msg = self.services[serviceName].as_tuple()
+                            msg = self.service.as_tuple()
                             msg = self.handler.dumps(msg)
                             self.sock.sendto(msg, address)
 
-        self.ended.set()
+        # self.ended.set()
 
 
 def main():
@@ -173,10 +174,15 @@ def main():
             print("Usage: hxsd provide")
             exit()
 
-        provider = serviceProvider(mcast_addr, mcast_port)
+        provider = ServiceProvider(
+            mcast_addr,
+            mcast_port,
+            GeckoService(9998, 9999)
+        )
 
-        s = GeckoService(9998,9999,'/tmp/uds_file')
-        provider.addService(s)
+        # s = GeckoService(9998,9999,'/tmp/uds_file')
+        # s = GeckoService(9998,9999)
+        # provider.addService(s)
 
         provider.start()
         try:
@@ -187,11 +193,12 @@ def main():
             provider.stop()
 
     elif sys.argv[1] == 'search':
-        if len(sys.argv) != 3:
-            print("usage: hxsd search [service]")
+        if len(sys.argv) != 2:
+            print("usage: hxsd search")
             exit()
-        finder = serviceFinder(mcast_addr, mcast_port)
-        resp = finder.search(sys.argv[2],11311,"func")
+        finder = ServiceFinder(mcast_addr, mcast_port)
+        # resp = finder.search(sys.argv[2],11311,"func")
+        resp = finder.search(11311,"func")
         print(resp)
 
 if __name__ == "__main__":
