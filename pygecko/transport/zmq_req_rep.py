@@ -59,7 +59,7 @@ class Rep(Base):
             # time.sleep(0.001)
             # print("*** no reply ***")
             pass
-        except Exception as e:
+        except Exception:
             # something else is wrong
             raise
 
@@ -79,7 +79,7 @@ class Rep(Base):
 
             jmsg = self.pickle.pack(msg)
             self.socket.send(jmsg)
-            
+
 
 class Req(Base):
     """

@@ -14,11 +14,12 @@ from __future__ import division
 import zmq
 # from zmq.devices import ProcessProxy
 import time
-import socket as Socket
+# import socket as Socket
 # import msgpack
 # import pickle
 # import json
 from pygecko.transport.zmq_base import Base
+from pygecko.transport.zmq_base import ZMQError
 
 
 class Pub(Base):
@@ -96,7 +97,7 @@ class Sub(Base):
         #     pass
         # else:
         #     raise Exception('topics must be a list')
-            # topics = [topics]
+        #     topics = [topics]
 
         # self.topics = topics
         try:
@@ -152,11 +153,10 @@ class Sub(Base):
             msg = self.pickle.unpack(jmsg)
             if self.cb_func:
                 self.cb_func(topic, msg)
-        except zmq.Again as e:
+        except zmq.Again:
             # no message has arrived yet or not connected to server
             # print(e)
             time.sleep(0.01)
-            pass
         except Exception as e:
             # something else is wrong
             # print(e)
