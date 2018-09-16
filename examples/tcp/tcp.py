@@ -42,7 +42,7 @@ def publisher(**kwargs):
         msg = {'time': time.time() - start}
         p.pub(topic, msg)  # topic msg
 
-        geckopy.log('[{}] published msg'.format(cnt))
+        geckopy.logdebug('[{}] published msg'.format(cnt))
         cnt += 1
         rate.sleep()
     print('pub bye ...')
@@ -64,7 +64,7 @@ class Callback(object):
     def __init__(self, name):
         self.name = name
     def callback(self, topic, msg):
-        geckopy.log(msg)
+        geckopy.loginfo("{}".format(msg))
         chew_up_cpu(.1)
     def bye(self):
         print("*"*30)
@@ -95,10 +95,6 @@ if __name__ == '__main__':
     # using those names. Appending them to procs allows me to keep them alive
     # until the program ends
     procs = []
-
-    # p = GeckoSimpleProcess()
-    # p.start(func=publisher, name='publisher {}'.format('core_info'), kwargs={'topic': 'core_info'})
-    # procs.append(p)
 
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
         # info to pass to processes

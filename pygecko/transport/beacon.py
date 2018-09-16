@@ -1,13 +1,17 @@
-#!/usr/bin/env python3
 # https://pymotw.com/2/socket/multicast.html
 import socket
 import struct
 import threading
 import time
-import ipaddress  # kjw
+# import ipaddress  # kjw
 import pickle
 from collections import namedtuple
 from pygecko.transport.helpers import zmqTCP, zmqUDS
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 
 class Ascii(object):
@@ -17,6 +21,11 @@ class Ascii(object):
     def loads(self, msg):
         return msg.decode('utf-8').split("|")
 
+class Json(object):
+    def dumps(self, data):
+        pass
+    def loads(self, msg):
+        pass
 
 class Pickle(object):
     """Use pickle to transport message"""
@@ -44,17 +53,21 @@ class GeckoService(object):
     #     # return s.format(self.serviceName, self.ip, self.in_addr, self.out_addr, self.info_addr)
 
 
+class Beacon(object):
+    mcast_addr = '224.3.29.110'
+    mcast_port = 11311
 
 
-class BeaconFinder(object):
+
+class BeaconFinder(Beacon):
     """Find Services using the magic of multicast
 
-    finder = BeaconFinder(mcast_addr, mcast_port)
+    finder = BeaconFinder()
     info = (11311,"func",)
     resp = finder.search(11311,"func")
     """
-    def __init__(self, ip, port, key, ttl=10, handler=Pickle):
-        self.group = (ip, port)
+    def __init__(self, key, ttl=10, handler=Pickle):
+        self.group = (self.mcast_addr, self.mcast_port)
         self.sock = socket.socket(
                 socket.AF_INET,
                 socket.SOCK_DGRAM)
@@ -86,7 +99,6 @@ class BeaconFinder(object):
                 # server = ip:port, which is x.x.x.x:9990
                 data, server = self.sock.recvfrom(1024)
                 data = self.handler.loads(data)
-                print(data)
                 if len(data) == 2:
                     servicesFound = (zmqTCP(server[0], data[0]), zmqTCP(server[0], data[1]),)
                     break
@@ -95,14 +107,13 @@ class BeaconFinder(object):
         return servicesFound
 
 
-class BeaconServer(object):
+class BeaconServer(Beacon):
     """A simple multicast listener which responds to
     requests for services it has
 
     provider = BeaconServer(
-        mcast_addr,
-        mcast_port,
-        GeckoService(9998, 9999)
+        GeckoService(9998, 9999),
+        'findservice'
     )
 
     provider.start()
@@ -113,8 +124,8 @@ class BeaconServer(object):
         provider.stop()
 
     """
-    def __init__(self, group, port, service, key, handler=Pickle):
-        self.serverAddr = ('0.0.0.0', port)
+    def __init__(self, service, key, handler=Pickle):
+        self.serverAddr = ('0.0.0.0', self.mcast_port)
         self.sock = socket.socket(
                 socket.AF_INET,
                 socket.SOCK_DGRAM,
@@ -122,7 +133,7 @@ class BeaconServer(object):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(self.serverAddr)
 
-        mreq = struct.pack("=4sl", socket.inet_aton(group), socket.INADDR_ANY)
+        mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_TTL, 1)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
@@ -142,6 +153,10 @@ class BeaconServer(object):
 
     def listenerThread(self):
         self.sock.setblocking(0)
+
+        msg = self.service.as_tuple()
+        msg = self.handler.dumps(msg)
+
         while True:
             if self.exit == True:
                 break
@@ -153,64 +168,16 @@ class BeaconServer(object):
                     continue
 
                 data = self.handler.loads(data)
-                print(data)
+                # print(data)
 
                 if len(data) == 4:
-                    cmd = data[0]
+                    key = data[0]
                     serviceName = data[1]
-                    pid = int(data[2])
-                    process_name = data[3]
-                    print('{}[{}]'.format(process_name, pid))
-                    if cmd == self.key:
+                    # pid = int(data[2])
+                    # process_name = data[3]
+                    # print('{}[{}]'.format(process_name, pid))
+                    if key == self.key:
                         if serviceName == self.service.serviceName:
-                            msg = self.service.as_tuple()
-                            msg = self.handler.dumps(msg)
+                            # msg = self.service.as_tuple()
+                            # msg = self.handler.dumps(msg)
                             self.sock.sendto(msg, address)
-
-
-def main():
-    import sys
-    mcast_addr = '224.3.29.110'
-    mcast_port = 19990
-
-    valid = ipaddress.ip_address(mcast_addr).is_multicast
-    print("Valid multicast address: {}".format(valid))
-    if not valid:
-        print("please select a valid multicast address")
-        sys.exit(1)
-
-    if len(sys.argv) == 1:
-        print("Usage: hxsd [provide|search]")
-        sys.exit(1)
-
-    if sys.argv[1] == 'provide':
-        if len(sys.argv) != 2:
-            print("Usage: hxsd provide")
-            exit()
-
-        provider = BeaconServer(
-            mcast_addr,
-            mcast_port,
-            GeckoService(9998, 9999),
-            "findservice"
-        )
-
-        provider.start()
-        try:
-            while True:
-                time.sleep(500)
-        except KeyboardInterrupt:
-            print("\nShutting things down...")
-            provider.stop()
-
-    elif sys.argv[1] == 'search':
-        if len(sys.argv) != 2:
-            print("usage: hxsd search")
-            exit()
-        finder = BeaconFinder(mcast_addr, mcast_port,"findservice")
-        # resp = finder.search(sys.argv[2],11311,"func")
-        resp = finder.search(11311,"func")
-        print(resp)
-
-if __name__ == "__main__":
-    main()

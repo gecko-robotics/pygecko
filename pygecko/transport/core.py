@@ -43,6 +43,7 @@ import os
 # from colorama import Fore, Back, Style
 # from threading import Thread
 import pickle
+from pygecko.transport.beacon import BeaconServer, GeckoService
 
 
 class GProcess(object):
@@ -192,21 +193,30 @@ class GeckoCore(SignalCatch, GProcess):
     This is the main hub through which all messages travel. All though this is
     a point of failure, it allows us to have some metrics on performance.
     """
-    def __init__(self, in_addr=None, out_addr=None):
-        if in_addr is None:
-            in_addr = zmqTCP('localhost', 9998)
-        if out_addr is None:
-            out_addr = zmqTCP('localhost', 9999)
+    def __init__(self, in_port=None, out_port=None):
+        if in_port is None:
+            in_port = 9998
+        if out_port is None:
+            out_port = 9999
 
-        data = {
-            'in': in_addr,
-            'out': out_addr
-        }
+        in_addr = zmqTCP('localhost', in_port)
+        out_addr = zmqTCP('localhost', out_port)
 
-        self.corefile = CoreFile(in_addr, out_addr)
+        self.in_port = in_port
+        self.out_port = out_port
 
         self.in_addr = in_addr
         self.out_addr = out_addr
+
+        # data = {
+        #     'in': in_addr,
+        #     'out': out_addr
+        # }
+
+        self.corefile = CoreFile(in_addr, out_addr)
+
+        # self.in_addr = in_addr
+        # self.out_addr = out_addr
 
         self.name = "GeckoCore"
 
@@ -255,6 +265,13 @@ class GeckoCore(SignalCatch, GProcess):
         self.perf = ProcPerformance()
 
         print(">> Starting up GeckoCore")
+
+        # setup mdns server to respond to address requests
+        provider = BeaconServer(
+            GeckoService(self.in_port, self.out_port),
+            os.uname().nodename.split('.')[0].lower()
+        )
+        provider.start()
 
         # reply = Rep()
         # reply.bind(zmqTCP('localhost', 10000))
@@ -307,4 +324,5 @@ class GeckoCore(SignalCatch, GProcess):
 
             rate.sleep()
 
+        provider.stop()
         print("** left main core loop ***")

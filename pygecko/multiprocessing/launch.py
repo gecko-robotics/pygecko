@@ -16,31 +16,10 @@ from colorama import Fore, Back, Style
 from threading import Thread
 from pygecko.multiprocessing.sig import SignalCatch
 from pygecko.transport.helpers import zmqTCP, zmqUDS
+from pygecko.transport.beacon import BeaconFinder
 from pygecko.multiprocessing.log import GeckoLog
 import psutil as psu
 import time
-
-
-# import signal
-#
-#
-# class SignalCatch(object):
-#     """
-#     Catches SIGINT and SIGTERM signals and sets kill = True
-#
-#     https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
-#     """
-#     kill = False
-#     def kill_signals(self):
-#         signal.signal(signal.SIGINT, self.exit_gracefully)
-#         signal.signal(signal.SIGTERM, self.exit_gracefully)
-#
-#     def exit_gracefully(self, signum, frame):
-#         """
-#         When handler gets called, it sets the self.kill to True
-#         """
-#         self.kill = True
-#         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
 
 
 class GeckoFactory(object):
@@ -76,16 +55,7 @@ class GeckoFactory(object):
         print('')
 
         self.ps = ps
-        self.event = mp.Event()
         self.timeout = to
-
-    def start_logger(self):
-        # setup logging
-        self.gecko_log = GeckoLog()
-        self.queue = mp.Queue()
-        self.t = mp.Process(target=self.gecko_log.run, name="GeckoLog", args=(self.event, self.queue,))
-        # self.t.daemon = True
-        self.t.start()
 
     def launch(self):
         """
@@ -102,26 +72,30 @@ class GeckoFactory(object):
         25) SIGXFSZ    26) SIGVTALRM  27) SIGPROF    28) SIGWINCH
         29) SIGINFO    30) SIGUSR1    31) SIGUSR2
         """
-        self.event.set()
-
-        self.start_logger()
 
         # list of process to shutdown when done
         plist = []
 
         # get GeckoCore addresses, either TCP or UDS
         if 'geckocore' in self.ps:
-            kind = self.ps['geckocore']['type']
-            if kind == 'tcp':
-                h, p = self.ps['geckocore']['in']
-                in_addr = zmqTCP(h, p)
-                h, p = self.ps['geckocore']['out']
-                out_addr = zmqTCP(h, p)
-            elif kind == 'uds':
-                f = self.ps['geckocore']['in']
-                in_addr = zmqUDS(f)
-                f = self.ps['geckocore']['out']
-                out_addr = zmqUDS(f)
+            if 'type' in self.ps['geckocore']:
+                kind = self.ps['geckocore']['type']
+                if kind == 'tcp':
+                    h, p = self.ps['geckocore']['in']
+                    in_addr = zmqTCP(h, p)
+                    h, p = self.ps['geckocore']['out']
+                    out_addr = zmqTCP(h, p)
+                elif kind == 'uds':
+                    f = self.ps['geckocore']['in']
+                    in_addr = zmqUDS(f)
+                    f = self.ps['geckocore']['out']
+                    out_addr = zmqUDS(f)
+            elif 'key' in self.ps['geckocore']:
+                key = self.ps['geckocore']['key']
+                finder = BeaconFinder(key)
+                resp = finder.search(0, '0')
+                in_addr = resp[0]
+                out_addr = resp[1]
         else:
             in_addr = zmqTCP('localhost', 9998)
             out_addr = zmqTCP('localhost', 9999)
@@ -141,9 +115,8 @@ class GeckoFactory(object):
                 raise Exception("** GeckoProcess Error: Wrong number of args for process **")
 
             # save some stuff
-            args['pyton'] = tuple(platform.sys.version_info)[:3]
+            args['python'] = tuple(platform.sys.version_info)[:3]
             args['os'] = platform.system()
-            args['queue'] = self.queue  # pass log queue
             args['core_inaddr'] = in_addr
             args['core_outaddr'] = out_addr
 
@@ -161,12 +134,6 @@ class GeckoFactory(object):
         self.plist = plist
 
     def __del__(self):
-        # kill the logger
-        self.event.clear()
-        self.t.join(timeout=0.1)
-        if self.t.is_alive():
-            self.t.terminate()
-
         if len(self.plist) > 0:
             self.end()
 
@@ -191,18 +158,8 @@ class GeckoLauncher(GeckoFactory):
         self.launch()
 
         try:
-            # alive = mp.active_children()
-            # palive = [psu.Process(p.pid) for p in alive]
-
-            while self.event.is_set():
+            while True:
                 time.sleep(1)
-                # print('+', '-'*30, sep='')
-                # print('| Alive processes:', len(alive))
-                # print('+', '-'*30, sep='')
-                # for ps, p in zip(palive, alive):
-                #     pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
-                #     label = '{}[{}]'.format(p.name, p.pid)
-                #     print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
 
         except (KeyboardInterrupt, SystemExit) as e:
             if KeyboardInterrupt == type(e):
@@ -212,11 +169,15 @@ class GeckoLauncher(GeckoFactory):
             # print('\n>> Received {}\n'.format(err))
 
             # set the kill flag
-            self.event.clear()
+            # self.event.clear()
             time.sleep(0.1)
 
         finally:
             self.end()
+
+
+
+
 
 # http://jtushman.github.io/blog/2014/01/14/python-%7C-multiprocessing-and-interrupts/
 # from multiprocessing import Process

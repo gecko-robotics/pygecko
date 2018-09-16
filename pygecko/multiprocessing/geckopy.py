@@ -7,11 +7,13 @@ from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP, zmqUDS
+from pygecko.transport.beacon import BeaconFinder
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 # from pygecko.multiprocessing.delay import GeckoRate, Rate
 import signal
 import time
+import os
 from colorama import Fore, Back, Style
 import multiprocessing as mp
 
@@ -85,18 +87,31 @@ class GeckoPy(SignalCatch):
         self.hooks = []  # functions to call on shutdown
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
-        self.queue = kwargs.get('queue', None)
+        # self.queue = kwargs.get('queue', None)
 
         # print(self.name, 'kwargs:\n{}'.format(kwargs))
 
-        # sets default
-        self.core_outaddr = kwargs.get(
-            'core_outaddr',
-            zmqTCP('localhost', 9999))
+        # key = os.uname().nodename.split('.')[0].lower()
 
-        self.core_inaddr = kwargs.get(
-            'core_inaddr',
-            zmqTCP('localhost', 9998))
+        key = kwargs.get('key', os.uname().nodename.split('.')[0].lower())
+        finder = BeaconFinder(key)
+        resp = finder.search(self.pid, self.name)
+
+        if resp:
+            self.core_inaddr = resp[0]
+            self.core_outaddr = resp[1]
+        else:
+            self.core_inaddr = zmqTCP('localhost', 9998)
+            self.core_outaddr = zmqTCP('localhost', 9999)
+
+        # sets default
+        # self.core_outaddr = kwargs.get(
+        #     'core_outaddr',
+        #     zmqTCP('localhost', 9999))
+        #
+        # self.core_inaddr = kwargs.get(
+        #     'core_inaddr',
+        #     zmqTCP('localhost', 9998))
 
         # if 'in_addr' in kwargs and 'out_addr' in kwargs:
         #     self.out_addr = kwargs['out_addr']
@@ -175,15 +190,15 @@ def init_node(**kwargs):
         g_geckopy = GeckoPy(**kwargs)
         # print("Created geckopy >> {}".format(g_geckopy))
 
-def log(msg):
-    """
-    Prints a message to the log.
-    """
-    global g_geckopy
-    if g_geckopy.queue:
-        g_geckopy.queue.put((g_geckopy.pid, g_geckopy.name, msg,))
-    else:
-        print(Fore.BLUE + '{}[{}]:'.format(g_geckopy.name, g_geckopy.pid) + Fore.RESET + '{}'.format(msg))
+# def log(msg):
+#     """
+#     Prints a message to the log.
+#     """
+#     global g_geckopy
+#     if g_geckopy.queue:
+#         g_geckopy.queue.put((g_geckopy.pid, g_geckopy.name, msg,))
+#     else:
+#         print(Fore.BLUE + '{}[{}]:'.format(g_geckopy.name, g_geckopy.pid) + Fore.RESET + '{}'.format(msg))
 
 def loginfo(text, topic='log'):
     global g_geckopy
