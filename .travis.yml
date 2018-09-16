@@ -6,7 +6,7 @@ sudo: false
 python:
     # - "2.7_with_system_site_packages"
     - "3.7"
-    - "2.7"
+    # - "2.7"
 
 # command to install dependencies that require sudo
 # https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
