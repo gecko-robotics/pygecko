@@ -38,6 +38,46 @@ import multiprocessing as mp
 g_geckopy = None
 
 
+class CoreFinder(object):
+    """
+    This uses various methods to find the address of geckocore
+    """
+    self.core_inaddr = None
+    self.core_outaddr = None
+
+    def find(self, **kwargs):
+        if 'geckocore' in kwargs:
+            core = kwargs['geckocore']
+
+            # outright tell it the address
+            if 'type' in core:
+                if core['type'].lower() == 'tcp':
+                    ain = core['in']
+                    aout = core['out']
+                    self.core_inaddr = zmqTCP(*ain)
+                    self.core_outaddr = zmqTCP(*aout)
+                elif core['type'].lower() == 'uds':
+                    raise NotImplementedError('uds not implemented yet')
+            # use multicast to find geckocore
+            elif 'key' in core:
+                key = core['key']
+                finder = BeaconFinder(key)
+                resp = finder.search(self.pid, self.name)
+                self.core_inaddr = resp[0]
+                self.core_outaddr = resp[1]
+            else:
+                raise Exception("geckoopy: kwargs has incorrect format")
+        # all else failed, use the default
+        else:
+            # need to check for /tmp/gecko*.json
+            if False:
+                pass
+            else:
+                self.core_inaddr = zmqTCP('localhost', 9998)
+                self.core_outaddr = zmqTCP('localhost', 9999)
+
+
+
 class Rate(object):
     """
     Uses sleep to keep a desired message/sample rate.
@@ -75,9 +115,6 @@ class GeckoPy(SignalCatch):
             core_inaddr: tcp or uds address of geckocore inputs
             queue: multiprocessing.Queue for log messages
         """
-        # print('pygecko', kwargs)
-        # signal.signal(signal.SIGINT, self.signal_handler)
-        # self.kill = False
         self.kill_signals()  # have to setup signals in new process
         self.subs = []   # subscriber nodes
         self.hooks = []  # functions to call on shutdown
@@ -136,12 +173,6 @@ class GeckoPy(SignalCatch):
                 True: proc up and running
                 False: proc is dead
         """
-        # print("********** wtf *************")
-
-        # request = Req()
-        # request.connect(zmqTCP('localhost', 10000))
-
-        # ans = None
         msg = {'proc_info': (self.pid, self.name, status,)}
         # print(msg)
 
@@ -154,18 +185,6 @@ class GeckoPy(SignalCatch):
             self.logpub.pub('core_info', msg)
             time.sleep(0.1)
 
-        # return
-        #
-        # # this will block and wait for geckocore to respond
-        # while not ans:
-        #     ans = request.get(msg)
-        #     # print("*** {} : {} ***".format(msg, ans))
-        #     # time.sleep(0.01)
-        #
-        # # print("**** notify core:", ans)
-        # request.close()
-        # # time.sleep(5)
-
 
 def init_node(**kwargs):
     """
@@ -177,35 +196,30 @@ def init_node(**kwargs):
         g_geckopy = GeckoPy(**kwargs)
         # print("Created geckopy >> {}".format(g_geckopy))
 
-# def log(msg):
-#     """
-#     Prints a message to the log.
-#     """
-#     global g_geckopy
-#     if g_geckopy.queue:
-#         g_geckopy.queue.put((g_geckopy.pid, g_geckopy.name, msg,))
-#     else:
-#         print(Fore.BLUE + '{}[{}]:'.format(g_geckopy.name, g_geckopy.pid) + Fore.RESET + '{}'.format(msg))
 
 def loginfo(text, topic='log'):
     global g_geckopy
     msg = Log('INFO', g_geckopy.name, text)
     g_geckopy.logpub.pub(topic, msg)
 
+
 def logdebug(text, topic='log'):
     global g_geckopy
     msg = Log('DEBUG', g_geckopy.name, text)
     g_geckopy.logpub.pub(topic, msg)
+
 
 def logwarn(text, topic='log'):
     global g_geckopy
     msg = Log('WARN', g_geckopy.name, text)
     g_geckopy.logpub.pub(topic, msg)
 
+
 def logerror(text, topic='log'):
     global g_geckopy
     msg = Log('ERROR', g_geckopy.name, text)
     g_geckopy.logpub.pub(topic, msg)
+
 
 def is_shutdown():
     """
