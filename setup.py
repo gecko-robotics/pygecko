@@ -8,8 +8,8 @@ from build_utils import BinaryDistribution
 
 PACKAGE_NAME = 'pygecko'
 BuildCommand.pkg = PACKAGE_NAME
-# BuildCommand.py3 = False  # python 3 build isn't working yet with zmq, need time to fix
-# BuildCommand.test = False  # need to write tests
+BuildCommand.py2 = False  # not supporting python2 anymore
+# BuildCommand.test = False  # don't do tests
 PublishCommand.pkg = PACKAGE_NAME
 PublishCommand.version = VERSION
 README = open('readme.md').read()
@@ -25,8 +25,8 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
+        # 'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
         'Operating System :: Unix',
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
@@ -43,7 +43,7 @@ setup(
         'pyzmq',          # connecting to different processes and computers
         # 'bjoern',         # http server, multiple connections
         # 'the_collector',  # saving data
-        'colorama',
+        'colorama',       # log messages
         'build_utils'     # installing and building the library
     ],
     url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),

@@ -10,9 +10,9 @@ from pygecko.file_storage import FileYaml
 
 # messages are all namedtuples
 from pygecko.messages import Vector, Quaternion, Pose, Twist, Wrench, Joystick
-from pygecko.messages import IMU, Lidar, PoseStamped, Image
+from pygecko.messages import IMU, Lidar, PoseStamped, Image, Log
 
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"
-__version__ = "1.0.1"
+__version__ = "1.0.2"

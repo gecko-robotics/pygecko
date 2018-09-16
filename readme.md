@@ -228,6 +228,7 @@ So what do you have to know to get `geckocore`'s info?
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2018-Sep-16 | 1.0.2 | dropping python 2.7 support, only 3.7+
 2018-Sep-11 | 1.0.1 | working, but still need to flush it out some more
 2018-Jul-28 | 1.0.0 | totally nuked everything from orbit and started over
 2017-May-14 | 0.8.3 | updates and refactor
