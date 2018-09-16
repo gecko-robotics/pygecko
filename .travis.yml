@@ -5,7 +5,7 @@ sudo: false
 
 python:
     # - "2.7_with_system_site_packages"
-    - "3.7"
+    - "3.6"
     # - "2.7"
 
 # command to install dependencies that require sudo
