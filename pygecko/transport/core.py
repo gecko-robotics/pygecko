@@ -32,7 +32,8 @@ import zmq
 import multiprocessing as mp
 import time
 # import socket as Socket
-from pygecko.transport.helpers import zmqTCP, zmqUDS
+from pygecko.transport.helpers import zmqTCP
+# from pygecko.transport.helpers import zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
 from pygecko.transport.geckocorefile import CoreFile
@@ -88,7 +89,7 @@ class MsgCounter(object):
         self.total_msgs = 0
         self.datumn = time.time()
 
-    def touch(self, topic, bytes=0):
+    def touch(self, topic, mbytes=0):
         self.total_msgs += 1
 
         # if topic not in self.topics.keys():
@@ -98,18 +99,18 @@ class MsgCounter(object):
 
         try:
             self.topics[topic][0] += 1
-            self.topics[topic][1] += bytes/(1024)  # kilobytes
-        except (NameError, KeyError) as e:
-            self.topics[topic] = [1, bytes/(1024)]
+            self.topics[topic][1] += mbytes/(1024)  # kilobytes
+        except (NameError, KeyError):
+            self.topics[topic] = [1, mbytes/(1024)]
 
     def dataprint(self, delta):
         print('+', '-'*30, sep='')
         print('| Topic Performance')
         for key, val in self.topics.items():
-            count, bytes = val
+            count, mbytes = val
             # the topic names (keys) should be binary strings, so need to
             # convert into normal strings
-            print('| {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(key.decode('utf-8'), count/delta, bytes/delta))
+            print('| {:.<30} {:6.1f} msgs/s {:8.1f} kB/s'.format(key.decode('utf-8'), count/delta, mbytes/delta))
 
             # reset msg,data count
             self.topics[key] = [0, 0]
@@ -137,7 +138,7 @@ class ProcPerformance(object):
     def pop(self, pid):
         try:
             self.procs.pop(pid)
-        except Exception as e:
+        except Exception:
             # print('*** pop: {} ***'.format(e))
             pass
 
@@ -260,13 +261,13 @@ class GeckoCore(SignalCatch, GProcess):
         """
         self.kill_signals()  # have to setup signals in new process
 
-        process = psutil.Process(self.ps.pid)
+        # process = psutil.Process(self.ps.pid)
 
         self.perf = ProcPerformance()
 
         print(">> Starting up GeckoCore")
 
-        # setup mdns server to respond to address requests
+        # setup multicast server to respond to address requests
         provider = BeaconServer(
             GeckoService(self.in_port, self.out_port),
             os.uname().nodename.split('.')[0].lower()
@@ -291,7 +292,7 @@ class GeckoCore(SignalCatch, GProcess):
         rate = Rate(100)
 
         mc = MsgCounter()
-        datumn = time.time()
+        # datumn = time.time()
         while not self.kill:
             # non-blocking so we can always check to see if there is a kill
             # signal to handle
