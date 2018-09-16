@@ -17,6 +17,7 @@ from threading import Thread
 from pygecko.multiprocessing.sig import SignalCatch
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.beacon import BeaconFinder
+from pygecko.transport.beacon import get_host_key
 from pygecko.multiprocessing.log import GeckoLog
 import psutil as psu
 import time
@@ -77,6 +78,7 @@ class GeckoFactory(object):
         plist = []
 
         # get GeckoCore addresses, either TCP or UDS
+        # FIXME: duplicate code ... put in a CoreFinder class
         if 'geckocore' in self.ps:
             if 'type' in self.ps['geckocore']:
                 kind = self.ps['geckocore']['type']
@@ -92,10 +94,18 @@ class GeckoFactory(object):
                     out_addr = zmqUDS(f)
             elif 'key' in self.ps['geckocore']:
                 key = self.ps['geckocore']['key']
+                if key == "localhost":
+                    key = get_host_key()
+                    print("<<< Using multicast key: {} >>>".format(key))
                 finder = BeaconFinder(key)
                 resp = finder.search(0, '0')
-                in_addr = resp[0]
-                out_addr = resp[1]
+                if resp:
+                    in_addr = resp[0]
+                    out_addr = resp[1]
+                else:
+                    print("<<< no multicast beacon response >>>")
+                    in_addr = zmqTCP('localhost', 9998)
+                    out_addr = zmqTCP('localhost', 9999)
         else:
             in_addr = zmqTCP('localhost', 9998)
             out_addr = zmqTCP('localhost', 9999)

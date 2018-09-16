@@ -9,6 +9,6 @@
     ["process", "subscribe2", {"topic": "hey there"}]
   ],
   "geckocore": {
-      "key": "logan"
+      "key": "localhost"
   }
 }

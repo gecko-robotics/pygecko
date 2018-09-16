@@ -42,8 +42,8 @@ class CoreFinder(object):
     """
     This uses various methods to find the address of geckocore
     """
-    self.core_inaddr = None
-    self.core_outaddr = None
+    core_inaddr = None
+    core_outaddr = None
 
     def find(self, **kwargs):
         if 'geckocore' in kwargs:
