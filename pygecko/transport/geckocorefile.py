@@ -1,4 +1,6 @@
 from tempfile import NamedTemporaryFile
+from glob import glob
+import shutil
 try:
     import simplejson as json
 except ImportError:
@@ -8,6 +10,12 @@ except ImportError:
 class CoreFile(object):
     def __init__(self, in_addr, out_addr, dir='/tmp'):
         prefix = 'gecko'
+
+        # check for old stale gecko json files and remove them
+        stale = glob(dir + '/' + prefix + '*.json')
+        for f in stale:
+            shutil.rmtree(f)
+
         data = {'in_addr': in_addr, 'out_addr': out_addr}
         self.fd = NamedTemporaryFile(dir=dir, prefix='gecko', suffix='.json', delete=True)
         self.fd.write(json.dumps(data).encode('utf8'))

@@ -22,10 +22,11 @@ class Ascii(object):
         return msg.decode('utf-8').split("|")
 
 class Json(object):
+    """Use json to transport message"""
     def dumps(self, data):
-        pass
+        return json.dumps(data).encode('utf-8')
     def loads(self, msg):
-        pass
+        return json.loads(msg.decode('utf-8'))
 
 class Pickle(object):
     """Use pickle to transport message"""

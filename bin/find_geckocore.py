@@ -5,7 +5,7 @@
 # Copyright (c) 2018 Kevin Walchko
 # see LICENSE for full details
 ##############################################
-import time
+# import time
 import argparse
 import os
 from pygecko.transport.beacon import BeaconFinder
