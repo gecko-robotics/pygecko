@@ -4,20 +4,20 @@
 # see LICENSE for full details
 ##############################################
 
-from __future__ import division, print_function, absolute_import
-import multiprocessing as mp
-import os
-import sys
-import platform
+# from __future__ import division, print_function, absolute_import
+# import multiprocessing as mp
+# import os
+# import sys
+# import platform
 from colorama import Fore, Back, Style
-from threading import Thread
+# from threading import Thread
 from pygecko.multiprocessing.sig import SignalCatch
-from pygecko.transport.zmq_sub_pub import Pub, Sub
-from pygecko.transport.zmq_req_rep import Rep, Req
-from pygecko.transport.helpers import zmq_version
-from pygecko.transport.helpers import zmqTCP, zmqUDS
-import psutil as psu
-import time
+# from pygecko.transport.zmq_sub_pub import Pub, Sub
+# from pygecko.transport.zmq_req_rep import Rep, Req
+# from pygecko.transport.helpers import zmq_version
+# from pygecko.transport.helpers import zmqTCP, zmqUDS
+# import psutil as psu
+# import time
 
 
 # import signal
@@ -74,7 +74,7 @@ class GeckoLog(SignalCatch):
             # to handle the kill signal
             try:
                 pid, name, msg = q.get(timeout=0.1) # wait for message
-            except:
+            except Exception:
                 pid = None
 
             # if we got something above, then print it out
