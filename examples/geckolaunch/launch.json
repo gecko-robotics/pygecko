@@ -6,10 +6,7 @@
     ["process", "subscribe2", {"topic": "hello"}],
     ["process", "subscribe2", {"topic": "hello"}],
     ["process", "subscribe2", {"topic": "hey there"}],
-    ["process", "subscribe2", {"topic": "hey there"}],
-    ["process", "subscribe2", {"topic": "cv"}],
-    ["process", "subscribe2", {"topic": "cv"}],
-    ["process", "pcv", {"topic": "cv"}]
+    ["process", "subscribe2", {"topic": "hey there"}]
   ],
   "geckocore": {
       "type": "tcp",

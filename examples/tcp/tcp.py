@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2018 Kevin Walchko
+# see LICENSE for full details
+##############################################
 
-from __future__ import print_function
-
-# fix path for now, once gecko is installed you don't need this
-# import sys
-# sys.path.append("../../")
-
-# from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
-
-# from math import sin, cos, pi, sqrt
 import time
 
 

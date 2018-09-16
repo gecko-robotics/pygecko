@@ -8,9 +8,9 @@
 #
 from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 import argparse
-import time
+# import time
 
 def handleArgs():
     parser = argparse.ArgumentParser(description='Displays geckopy.log() data')

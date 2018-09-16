@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-
-
-from __future__ import print_function
-
-# fix path for now
-# import sys
-# sys.path.append("../../")
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2018 Kevin Walchko
+# see LICENSE for full details
+##############################################
 
 # from pygecko.transport import Pub, Sub
-from pygecko.transport import zmqTCP, GeckoCore, zmqUDS
+from pygecko.transport import GeckoCore
+from pygecko.transport import zmqUDS
 from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
-
 import time
-import signal
-import os
 
 
 def publish(**kwargs):
@@ -50,7 +45,7 @@ def subscribe(**kwargs):
     addr = kwargs.get('sub_uds', None)
     print('subscriber addr:', addr)
 
-    s = geckopy.Subscriber([topic], f, addr=addr)
+    geckopy.Subscriber([topic], f, addr=addr)
     geckopy.spin(20)
     geckopy.log('sub bye ...')
 
@@ -88,7 +83,3 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             print('main process got ctrl-c')
             break
-
-    # s.join(0.1)
-    # p.join(0.1)
-    # core.join(0.1)
