@@ -4,9 +4,8 @@
 # see LICENSE for full details
 ##############################################
 
-from __future__ import division
-from __future__ import print_function
 import yaml
+import os
 try:
     import simplejson as json
 except ImportError:
@@ -25,9 +24,8 @@ class BaseFile(object):
     def getFileSize(self, fname):
         return os.path.getsize(fname)
 
-class FileJson(BaseFile):
-    db = None
 
+class FileJson(BaseFile):
     def read(self, fname):
         """
         Reads a Json file
@@ -43,7 +41,7 @@ class FileJson(BaseFile):
         except IOError:
             # print '[-] YamlDoc: IOError'
             raise FileStorageError('Could not open {0!s} for reading'.format((fname)))
-        except simplejson.errors.JSONDecodeError as e:
+        except json.errors.JSONDecodeError as e:
             print(e)
             raise
 
@@ -64,8 +62,8 @@ class FileJson(BaseFile):
             # print '[-] YamlDoc: IOError'
             raise FileStorageError('Could not open {0!s} for writing'.format((fname)))
 
+
 class FileYaml(BaseFile):
-    db = None
     def read(self, fname):
         """
         Reads a Yaml file

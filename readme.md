@@ -112,6 +112,20 @@ file. A launch file is just a simple json file where each line takes the form:
 }
 ```
 
+OR you can use a hostname as a `geckocore` key to find it on the network. Here
+the machine `bob.local` has a core we want to talk to:
+
+```bash
+{
+  "processes":
+  [...],
+  "geckocore": {
+      "key": "bob"
+  }
+}
+```
+
+
 Here we have a bunch of functions (`publish`,  `subscribe2`, and `pcv`) located in a
 python file called `process.py` (note, the `.py` file extension is assumed because
 `pygecko` uses `import` to load these functions. There is no reason eveything has
@@ -155,17 +169,35 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
 
 `geckopy` resolves the core address in the following order
 
-1. `kwargs` passed to `geckopy` contains the address. This allows you to over ride 
-talking to a `geckocore` running on your machine and instead talk to one on another 
+1. `kwargs` passed to `geckopy` contains the address. This allows you to over ride
+talking to a `geckocore` running on your machine and instead talk to one on another
 machine. These args can be set in your individual python file or in a launch file.
+    ```python
+    kwargs = {
+        "geckocore":
+            {
+                "key": "bob"
+            }
+    }
+
+    # OR
+
+    kwargs = {
+        "geckocore":{
+                "type": "tcp",
+                "in": ["bob", 12345],
+                "out": ["bob", 23456]
+            }
+    }
+    ```
 1. if `/tmp/gecko*.json` exists, then use the address in there. `geckocore` creates this file.
 1. if all else fails, use the default addresses:
     - type: tcp
     - in: localhost: 9998
     - out: localhost: 9999
 
-Ideally, when programming, you should never have to tell a sub/pub where to connect. `geckopy` has 
-that info for you because it was set in a launch file, passed to `geckopy` in args, the data is 
+Ideally, when programming, you should never have to tell a sub/pub where to connect. `geckopy` has
+that info for you because it was set in a launch file, passed to `geckopy` in args, the data is
 found in a temp file in the tmp directory, or we fall back to the default values.
 
 **Maybe in the future:** So I could have core use MDNS telling processes it in/out addresses. Process:

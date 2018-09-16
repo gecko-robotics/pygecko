@@ -3,18 +3,18 @@
 # Copyright (c) 2018 Kevin Walchko
 # see LICENSE for full details
 ##############################################
-from pygecko.transport.zmq_base import ZMQError
+# from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
-from pygecko.transport.zmq_req_rep import Req
-from pygecko.transport.helpers import zmqTCP, zmqUDS
-from pygecko.transport.beacon import BeaconFinder
+# from pygecko.transport.zmq_req_rep import Req
+from pygecko.transport.helpers import zmqTCP
+from pygecko.transport.beacon import BeaconFinder, get_host_key
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 # from pygecko.multiprocessing.delay import GeckoRate, Rate
-import signal
+# import signal
 import time
 import os
-from colorama import Fore, Back, Style
+# from colorama import Fore, Back, Style
 import multiprocessing as mp
 
 # Holly crap namespace and pickle use a lot of cpu!
@@ -36,10 +36,6 @@ import multiprocessing as mp
 # | subscribe[19340].............. cpu: 13.7%    mem: 0.10%
 
 g_geckopy = None
-
-
-class CoreFinder(object):
-    pass
 
 
 class Rate(object):
@@ -87,48 +83,39 @@ class GeckoPy(SignalCatch):
         self.hooks = []  # functions to call on shutdown
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
-        # self.queue = kwargs.get('queue', None)
 
-        # print(self.name, 'kwargs:\n{}'.format(kwargs))
+        if 'geckocore' in kwargs:
+            core = kwargs['geckocore']
 
-        # key = os.uname().nodename.split('.')[0].lower()
-
-        key = kwargs.get('key', os.uname().nodename.split('.')[0].lower())
-        finder = BeaconFinder(key)
-        resp = finder.search(self.pid, self.name)
-
-        if resp:
-            self.core_inaddr = resp[0]
-            self.core_outaddr = resp[1]
+            # outright tell it the address
+            if 'type' in core:
+                if core['type'].lower() == 'tcp':
+                    ain = core['in']
+                    aout = core['out']
+                    self.core_inaddr = zmqTCP(*ain)
+                    self.core_outaddr = zmqTCP(*aout)
+                elif core['type'].lower() == 'uds':
+                    raise NotImplementedError('uds not implemented yet')
+            # use multicast to find geckocore
+            elif 'key' in core:
+                key = core['key']
+                finder = BeaconFinder(key)
+                resp = finder.search(self.pid, self.name)
+                self.core_inaddr = resp[0]
+                self.core_outaddr = resp[1]
+            else:
+                raise Exception("geckoopy: kwargs has incorrect format")
+        # all else failed, use the default
         else:
-            self.core_inaddr = zmqTCP('localhost', 9998)
-            self.core_outaddr = zmqTCP('localhost', 9999)
+            # need to check for /tmp/gecko*.json
+            if False:
+                pass
+            else:
+                self.core_inaddr = zmqTCP('localhost', 9998)
+                self.core_outaddr = zmqTCP('localhost', 9999)
 
-        # sets default
-        # self.core_outaddr = kwargs.get(
-        #     'core_outaddr',
-        #     zmqTCP('localhost', 9999))
-        #
-        # self.core_inaddr = kwargs.get(
-        #     'core_inaddr',
-        #     zmqTCP('localhost', 9998))
-
-        # if 'in_addr' in kwargs and 'out_addr' in kwargs:
-        #     self.out_addr = kwargs['out_addr']
-        #     self.in_addr = kwargs['in_addr']
-        # else:
-        #     files = glob('/tmp/gecko*.json')
-        #     if len(files) == 1:
-        #         fd = open(files[0])
-        #         j = fd.read(1000)
-        #         data = json.loads(j)
-        #         fd.close()
-        #         self.out_addr = data['out_addr']
-        #         self.in_addr = data['in_addr']
-        #     else:
-        #         self.in_addr = zmqTCP('localhost', 9998)
-        #         self.out_addr = zmqTCP('localhost', 9999)
-
+        # here has to be a way to replace this with multicast ... I think
+        # I don't need the complexity above
         if self.core_inaddr:
             self.notify_core(True, self.core_inaddr)
 
