@@ -1,20 +1,16 @@
 from __future__ import print_function
 import time
-# try:
-#     import pygecko
-# except ImportError:
-#     # fix path for now
-#     import sys
-#     sys.path.append("../")
-#     import pygecko
+import os
+import time
+from math import pi
 
 from pygecko.multiprocessing import geckopy
 from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP, zmqUDS
 from pygecko.transport import GeckoCore
-from pygecko import FileJson, FileYaml
 from pygecko.test import GeckoSimpleProcess
 
+from pygecko import FileJson, FileYaml
 from pygecko import Quaternion
 from pygecko import Vector
 from pygecko import IMU
@@ -25,11 +21,6 @@ from pygecko import Pose
 # from pygecko import Image
 # from pygecko import PoseStamped
 # from pygecko import Lidar
-
-# import multiprocessing as mp
-import os
-import time
-from math import pi
 
 
 def file_func(Obj, fname):

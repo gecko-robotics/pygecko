@@ -173,6 +173,7 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
 talking to a `geckocore` running on your machine and instead talk to one on another
 machine. These args can be set in your individual python file or in a launch file.
     ```python
+    # use this key with multicast to find geckocore
     kwargs = {
         "geckocore":
             {
@@ -181,53 +182,67 @@ machine. These args can be set in your individual python file or in a launch fil
     }
 
     # OR
-
+    # tcp ip/hostname and port number
     kwargs = {
         "geckocore":{
                 "type": "tcp",
-                "in": ["bob", 12345],
-                "out": ["bob", 23456]
+                "in": ["bob.local", 12345],
+                "out": ["bob.local", 23456]
+            }
+    }
+
+    # OR
+    # unix domain sockets, only works on linux/unix
+    kwargs = {
+        "geckocore":{
+                "type": "uds",
+                "in": "ipc://file/path",
+                "out": "ipc://file/path"
+            }
+    }
+
+    # OR
+    # zmq address, either tcp or uds
+    kwargs = {
+        "geckocore":{
+                # this can be tcp or uds address for zmq
+                "in_addr": "tcp://1.2.3.4:1234",
+                "out_addr": "tcp://1.2.3.4:2345"
             }
     }
     ```
-1. if `/tmp/gecko*.json` exists, then use the address in there. `geckocore` creates this file.
-1. if all else fails, use the default addresses:
+1. Multicast beacon to find `geckocore`
+    - `geckopy.init_node()` sends a multicast ping out to the local network
+    - `geckocore` hears it and returns its address info
+        - Since there could be many `geckocores` running on different machines
+          on the local network, a *key* is used to get the response you want.
+          The key is based off the host name
+1. If `/tmp/gecko*.json` exists, then use the address in there. `geckocore` creates this file and it only works for processes running on the *same* machine as `geckocore`
+1. If all else fails, use the default addresses:
     - type: tcp
     - in: localhost: 9998
     - out: localhost: 9999
 
-Ideally, when programming, you should never have to tell a sub/pub where to connect. `geckopy` has
-that info for you because it was set in a launch file, passed to `geckopy` in args, the data is
-found in a temp file in the tmp directory, or we fall back to the default values.
-
-**Maybe in the future:** So I could have core use MDNS telling processes it in/out addresses. Process:
-- `geckopy.init_node()` sends an MDNS ping out to the local network
-- `geckocore` hears it and returns its address info
-    - could house this in a thread attached to core?
-
-Issues:
-
-- UDP messages get lost, maybe send 5 pings everytime?
-- not sure about core latency in responding
-- how long should `geckopy` wait for a response?
-- how do you handle multiple cores on a network?
-    - maybe a key identifier or something so only one core responds?
-    - how does that get set ... launch file or command line?
+Ideally, when programming, you should never have to tell a sub/pub where to
+connect. `geckopy` has that info for you because it was set in a launch
+file, passed to `geckopy` in args, the data is found in a temp file in the
+tmp directory, or we fall back to the default values.
 
 So what do you have to know to get `geckocore`'s info?
 
 | Method   | Key | IPv4/Zeroconfig | Ports | Scope   | Notes |
 |----------|-----|-----------------|-------|---------|-------|
 | `kwargs` | No  | Yes             | Yes   | Network | could get from launch file |
-| MDNS     | Yes | No              | No    | Network | need key for multiple cores on the network |
-| tempfile | No  | No              | No    | Machine | fallback solution |
-| default  | No  | No              | No    | Machine | no guarrentee this will work, all else has failed |
+| Multicast| Yes | No              | No    | Network | need key for multiple cores on the network, based off hostname |
+| tempfile | No  | No              | No    | Machine | fallback solution, file located in `/tmp` |
+| default  | No  | No              | No    | Machine | no guarantee this will work, all else has failed |
 
 
 # Change Log
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2018-Sep-16 | 1.0.3 | implemented a multicast connection process
 2018-Sep-16 | 1.0.2 | dropping python 2.7 support, only 3.7+
 2018-Sep-11 | 1.0.1 | working, but still need to flush it out some more
 2018-Jul-28 | 1.0.0 | totally nuked everything from orbit and started over

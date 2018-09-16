@@ -121,6 +121,7 @@ class GeckoPy(SignalCatch):
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
 
+        # FIXME: consolidate this into CoreFinder class
         if 'geckocore' in kwargs:
             core = kwargs['geckocore']
 

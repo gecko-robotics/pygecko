@@ -127,6 +127,8 @@ class GeckoFactory(object):
             # save some stuff
             args['python'] = tuple(platform.sys.version_info)[:3]
             args['os'] = platform.system()
+
+            # remove these!!
             args['core_inaddr'] = in_addr
             args['core_outaddr'] = out_addr
 
@@ -176,7 +178,7 @@ class GeckoLauncher(GeckoFactory):
             while True:
                 time.sleep(1)
 
-        except (KeyboardInterrupt, SystemExit) as e:
+        except (KeyboardInterrupt, SystemExit):
             # if KeyboardInterrupt == type(e):
             #     err = 'ctrl-C'
             # elif SystemExit == type(e):

@@ -15,4 +15,4 @@ from pygecko.messages import IMU, Lidar, PoseStamped, Image, Log
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
