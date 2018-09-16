@@ -12,7 +12,7 @@ import platform
 # import logging
 # import logging.config
 # import logging.handlers
-from colorama import Fore, Back, Style
+# from colorama import Fore, Back, Style
 from threading import Thread
 from pygecko.multiprocessing.sig import SignalCatch
 from pygecko.transport.helpers import zmqTCP, zmqUDS

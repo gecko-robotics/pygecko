@@ -75,7 +75,7 @@ def subscriber(**kwargs):
         print(">> {}: {}".format(topic, msg))
 
     topic = kwargs.get('topic')
-    s = geckopy.Subscriber([topic], f)
+    geckopy.Subscriber([topic], f)
 
     geckopy.spin()
 
