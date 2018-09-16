@@ -18,7 +18,7 @@ from pygecko.multiprocessing.sig import SignalCatch
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.beacon import BeaconFinder
 from pygecko.transport.beacon import get_host_key
-from pygecko.multiprocessing.log import GeckoLog
+# from pygecko.multiprocessing.log import GeckoLog
 import psutil as psu
 import time
 
