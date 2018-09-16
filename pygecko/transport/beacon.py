@@ -132,7 +132,8 @@ class BeaconServer(Beacon):
 
     """
     def __init__(self, service, key, handler=Pickle):
-        self.serverAddr = ('0.0.0.0', self.mcast_port)
+        ip = self.get_ip()
+        self.serverAddr = (ip, self.mcast_port)
         self.sock = socket.socket(
                 socket.AF_INET,
                 socket.SOCK_DGRAM,
@@ -162,6 +163,20 @@ class BeaconServer(Beacon):
 
     def stop(self):
         self.exit = True
+
+    def get_ip(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.255.255.255', 1))
+            IP = s.getsockname()[0]
+        except:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+
+        # self.ip = IP
+        return IP
 
     def listenerThread(self):
         self.sock.setblocking(0)
