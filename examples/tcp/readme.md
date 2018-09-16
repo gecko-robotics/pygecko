@@ -24,6 +24,8 @@ easier
 This does not use `geckolauncher.py`, but just starts a bunch of processes
 that call `GeckoPy`.
 
+This also uses multicast to find `geckocore`'s addresses for input/output.
+
 # Running
 
 Open two windows, in one, run `geckocore.py` and the other run `tcp.py`.

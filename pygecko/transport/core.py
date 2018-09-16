@@ -194,14 +194,17 @@ class GeckoCore(SignalCatch, GProcess):
     This is the main hub through which all messages travel. All though this is
     a point of failure, it allows us to have some metrics on performance.
     """
-    def __init__(self, in_port=None, out_port=None):
-        if in_port is None:
-            in_port = 9998
-        if out_port is None:
-            out_port = 9999
+    def __init__(self, in_port=None, out_port=None, in_addr=None, out_addr=None):
 
-        in_addr = zmqTCP('localhost', in_port)
-        out_addr = zmqTCP('localhost', out_port)
+        if in_addr is None:
+            if in_port is None:
+                in_port = 9998
+            in_addr = zmqTCP('localhost', in_port)
+
+        if out_addr is None:
+            if out_port is None:
+                out_port = 9999
+            out_addr = zmqTCP('localhost', out_port)
 
         self.in_port = in_port
         self.out_port = out_port

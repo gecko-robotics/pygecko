@@ -56,16 +56,17 @@ if __name__ == '__main__':
         'topic': 'hi'
     }
 
-    args['pub_uds'] = zmqUDS('/tmp/uds_ifile')
-    args['sub_uds'] = zmqUDS('/tmp/uds_ofile')
-
+    args['geckocore'] = {
+        'in_addr': zmqUDS('/tmp/uds_ifile'),
+        'out_addr': zmqUDS('/tmp/uds_ofile')
+    }
     # this is sort of like crossing RX/TX lines here
     #        +---------+
     # pub -> | in  out | -> sub
     #        +---------+
     core = GeckoCore(
-        in_addr=zmqUDS(args['pub_uds']),
-        out_addr=zmqUDS(args['sub_uds'])
+        in_addr=args['geckocore']['in_addr'],
+        out_addr=args['geckocore']['out_addr']
     )
     core.start()
 

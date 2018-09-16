@@ -140,6 +140,10 @@ class GeckoPy(SignalCatch):
                 resp = finder.search(self.pid, self.name)
                 self.core_inaddr = resp[0]
                 self.core_outaddr = resp[1]
+            # the fully qualified address has already been found
+            elif 'in_addr' in core and 'out_addr' in core:
+                self.core_inaddr = core["in_addr"]
+                self.core_outaddr = core["out_addr"]
             else:
                 raise Exception("geckoopy: kwargs has incorrect format")
         # all else failed, use the default

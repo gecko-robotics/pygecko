@@ -130,6 +130,11 @@ class GeckoFactory(object):
             args['core_inaddr'] = in_addr
             args['core_outaddr'] = out_addr
 
+            args['geckocore'] = {
+                'in_addr': in_addr,
+                'out_addr': out_addr
+            }
+
             # load the module and get the function
             m = __import__(mod)
             ff = getattr(m, fun)
