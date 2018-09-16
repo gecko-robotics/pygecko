@@ -274,7 +274,7 @@ class GeckoCore(SignalCatch, GProcess):
 
         # setup multicast server to respond to address requests
         key = get_host_key()
-        
+
         provider = BeaconServer(
             GeckoService(self.in_port, self.out_port),
             key
@@ -333,4 +333,4 @@ class GeckoCore(SignalCatch, GProcess):
             rate.sleep()
 
         provider.stop()
-        print("** left main core loop ***")
+        # print("** left main core loop ***")
