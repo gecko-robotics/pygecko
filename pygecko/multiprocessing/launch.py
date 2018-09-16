@@ -7,7 +7,7 @@
 from __future__ import division, print_function, absolute_import
 import multiprocessing as mp
 import os
-import sys
+# import sys
 import platform
 # import logging
 # import logging.config
@@ -177,10 +177,10 @@ class GeckoLauncher(GeckoFactory):
                 time.sleep(1)
 
         except (KeyboardInterrupt, SystemExit) as e:
-            if KeyboardInterrupt == type(e):
-                err = 'ctrl-C'
-            elif SystemExit == type(e):
-                err = 'exit'
+            # if KeyboardInterrupt == type(e):
+            #     err = 'ctrl-C'
+            # elif SystemExit == type(e):
+            #     err = 'exit'
             # print('\n>> Received {}\n'.format(err))
 
             # set the kill flag

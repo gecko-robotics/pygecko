@@ -4,7 +4,8 @@
 # see LICENSE for full details
 ##############################################
 
-from pygecko import Image
+# from pygecko import Image
+# from pygecko import Joystick
 
 
 def msg2cv(msg):

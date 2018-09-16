@@ -6,8 +6,8 @@ from __future__ import print_function
 # from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
 # from pygecko.test import GeckoSimpleProcess
-from pygecko import Lidar
-import time
+# from pygecko import Lidar
+# import time
 from pltslamshow import SlamShow
 from sslam import RMHC_SLAM
 from sslam import LDS01_Model
@@ -39,7 +39,7 @@ def subscriber(**kwargs):
         display.setPose(x, y, theta)
         display.refresh()
 
-    s = geckopy.Subscriber(['scan'], f)
+    geckopy.Subscriber(['scan'], f)
 
     geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
