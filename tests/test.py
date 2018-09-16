@@ -1,16 +1,17 @@
 from __future__ import print_function
 
-try:
-    import pygecko
-except ImportError:
-    # fix path for now
-    import sys
-    sys.path.append("../")
-    import pygecko
+# try:
+#     import pygecko
+# except ImportError:
+#     # fix path for now
+#     import sys
+#     sys.path.append("../")
+#     import pygecko
 
 from pygecko.multiprocessing import geckopy
-from pygecko.transport import Pub, Sub
-from pygecko.transport import zmqTCP, zmqUDS, GeckoCore
+# from pygecko.transport import Pub, Sub
+from pygecko.transport import zmqTCP, zmqUDS
+from pygecko.transport import GeckoCore
 from pygecko import FileJson, FileYaml
 from pygecko.test import GeckoSimpleProcess
 
@@ -18,14 +19,14 @@ from pygecko import Quaternion
 from pygecko import Vector
 from pygecko import IMU
 from pygecko import Twist
-from pygecko import Wrench
+# from pygecko import Wrench
 from pygecko import Pose
-from pygecko import Joystick
-from pygecko import Image
-from pygecko import PoseStamped
-from pygecko import Lidar
+# from pygecko import Joystick
+# from pygecko import Image
+# from pygecko import PoseStamped
+# from pygecko import Lidar
 
-import multiprocessing as mp
+# import multiprocessing as mp
 import os
 import time
 from math import pi
@@ -84,7 +85,7 @@ def msg_zmq(pub_addr, sub_addr):
 
     msg3 = Pose(
         Vector(1,2,3),
-        Vector(11,12,13))
+        Quaternion(1,2,3,4))
 
     def publisher(**kwargs):
         geckopy.init_node(**kwargs)
