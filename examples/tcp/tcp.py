@@ -8,11 +8,11 @@ from __future__ import print_function
 # import sys
 # sys.path.append("../../")
 
-from pygecko.transport import zmqTCP
+# from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
 
-from math import sin, cos, pi, sqrt
+# from math import sin, cos, pi, sqrt
 import time
 
 
@@ -77,7 +77,7 @@ def subscriber(**kwargs):
 
     topic = kwargs.get('topic')
     c = Callback(topic)
-    s = geckopy.Subscriber([topic], c.callback)
+    geckopy.Subscriber([topic], c.callback)
     geckopy.on_shutdown(c.bye)
 
     geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
