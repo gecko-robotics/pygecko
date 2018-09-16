@@ -43,6 +43,7 @@ setup(
         'pyzmq',          # connecting to different processes and computers
         # 'bjoern',         # http server, multiple connections
         # 'the_collector',  # saving data
+        'colorama',
         'build_utils'     # installing and building the library
     ],
     url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),
