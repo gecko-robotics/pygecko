@@ -8,11 +8,16 @@ import pickle
 # from collections import namedtuple
 from pygecko.transport.helpers import zmqTCP
 # from pygecko.transport.helpers import zmqUDS
+import os
 
 try:
     import simplejson as json
 except ImportError:
     import json
+
+
+def get_host_key():
+    return os.uname().nodename.split('.')[0].lower()
 
 
 class Ascii(object):

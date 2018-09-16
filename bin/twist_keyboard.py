@@ -12,10 +12,10 @@ import argparse
 import sys
 import tty
 import termios
-from pygecko.transport import zmqTCP, zmqUDS
+# from pygecko.transport import zmqTCP, zmqUDS
 from pygecko.multiprocessing import geckopy
 from pygecko.test import GeckoSimpleProcess
-import time
+# import time
 
 ######################################################
 # move to messages
@@ -89,7 +89,8 @@ def publisher(**kwargs):
 # set up and handle command line args
 def handleArgs():
     parser = argparse.ArgumentParser(description='A simple zero MQ publisher for keyboard messages')
-    parser.add_argument('-p', '--publish', nargs=2, help='publish messages to addr:port, ex. js 10.1.1.1 9000', default=['localhost', '9000'])
+    # parser.add_argument('-p', '--publish', nargs=2, help='publish messages to addr:port, ex. js 10.1.1.1 9000', default=['localhost', '9000'])
+    parser.add_argument('-k', '--key', help='geckocore key, default is localhost name', default=)
     # parser.add_argument('-v', '--verbose', help='display info to screen', action='store_true')
     args = vars(parser.parse_args())
     return args
