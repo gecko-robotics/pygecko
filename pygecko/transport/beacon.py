@@ -138,7 +138,12 @@ class BeaconServer(Beacon):
                 socket.SOCK_DGRAM,
                 socket.IPPROTO_UDP)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind(self.serverAddr)
+        try:
+            self.sock.bind(self.serverAddr)
+        except OSError as e:
+            print("*** {} ***".format(e))
+            # self.sock.bind(self.serverAddr)
+            raise
 
         mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP, mreq)

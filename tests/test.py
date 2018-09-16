@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import time
 # try:
 #     import pygecko
 # except ImportError:
@@ -65,8 +65,8 @@ tcp_pub = zmqTCP('localhost', 9998)
 tcp_sub = zmqTCP('localhost', 9999)
 
 # unix domain setup
-# uds_ifile = zmqUDS('/tmp/uds_ifile')
-# uds_ofile = zmqUDS('/tmp/uds_ofile')
+uds_ifile = zmqUDS('/tmp/uds_ifile')
+uds_ofile = zmqUDS('/tmp/uds_ofile')
 
 
 def msg_zmq(pub_addr, sub_addr):
@@ -113,9 +113,12 @@ def msg_zmq(pub_addr, sub_addr):
         assert t == b'test'  # FIXME: fix stupid binary string crap!
         assert msg == m
 
+    core.join(0.1)
+    time.sleep(1)  # if I run these too fast, I get errors on bind()
 
-# def test_msg_zmq_uds():
-#     msg_zmq(uds_ifile, uds_ofile)
+
+def test_msg_zmq_uds():
+    msg_zmq(uds_ifile, uds_ofile)
 
 
 def test_msg_zmq_tcp():
@@ -147,13 +150,16 @@ def py_zmq(pub_addr, sub_addr):
     assert t == b'test'
     assert msg == {'a':1, 'b':[1,2,3], 'c':'hello cowboy'}
 
+    core.join(0.1)
+    time.sleep(1)  # if I run these too fast, I get errors on bind()
+
 
 def test_py_zmq_tcp():
     py_zmq(tcp_pub, tcp_sub)
 
 
-# def test_py_zmq_uds():
-#     py_zmq(uds_ifile, uds_ofile)
+def test_py_zmq_uds():
+    py_zmq(uds_ifile, uds_ofile)
 
 
 # def py_geckpy(pub_addr, sub_addr):

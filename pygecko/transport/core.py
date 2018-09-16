@@ -27,10 +27,6 @@
 
 # from __future__ import print_function
 # from __future__ import division
-import zmq
-# from zmq.devices import ProcessProxy
-import multiprocessing as mp
-import time
 # import socket as Socket
 from pygecko.transport.helpers import zmqTCP
 # from pygecko.transport.helpers import zmqUDS
@@ -39,12 +35,15 @@ from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.geckocorefile import CoreFile
 from pygecko.multiprocessing.geckopy import Rate
 from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
+from pygecko.transport.beacon import BeaconServer
+from pygecko.transport.beacon import GeckoService
+from pygecko.transport.beacon import get_host_key
 import psutil
 import os
-# from colorama import Fore, Back, Style
-# from threading import Thread
 import pickle
-from pygecko.transport.beacon import BeaconServer, GeckoService
+import zmq
+import multiprocessing as mp
+import time
 
 
 class GProcess(object):
@@ -195,7 +194,10 @@ class GeckoCore(SignalCatch, GProcess):
     a point of failure, it allows us to have some metrics on performance.
     """
     def __init__(self, in_port=None, out_port=None, in_addr=None, out_addr=None):
-
+        """
+        in/out_port: port on localhost
+        in/out_addr: full address string
+        """
         if in_addr is None:
             if in_port is None:
                 in_port = 9998
@@ -271,9 +273,11 @@ class GeckoCore(SignalCatch, GProcess):
         print(">> Starting up GeckoCore")
 
         # setup multicast server to respond to address requests
+        key = get_host_key()
+        
         provider = BeaconServer(
             GeckoService(self.in_port, self.out_port),
-            os.uname().nodename.split('.')[0].lower()
+            key
         )
         provider.start()
 
