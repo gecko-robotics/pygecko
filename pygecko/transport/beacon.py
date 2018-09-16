@@ -132,7 +132,8 @@ class BeaconServer(Beacon):
 
     """
     def __init__(self, service, key, handler=Pickle):
-        ip = self.get_ip()
+        # ip = self.get_ip()
+        ip = '0.0.0.0'
         self.serverAddr = (ip, self.mcast_port)
         self.sock = socket.socket(
                 socket.AF_INET,
