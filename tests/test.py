@@ -9,7 +9,7 @@ from __future__ import print_function
 #     import pygecko
 
 from pygecko.multiprocessing import geckopy
-# from pygecko.transport import Pub, Sub
+from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP, zmqUDS
 from pygecko.transport import GeckoCore
 from pygecko import FileJson, FileYaml
@@ -65,13 +65,13 @@ tcp_pub = zmqTCP('localhost', 9998)
 tcp_sub = zmqTCP('localhost', 9999)
 
 # unix domain setup
-uds_ifile = zmqUDS('/tmp/uds_ifile')
-uds_ofile = zmqUDS('/tmp/uds_ofile')
+# uds_ifile = zmqUDS('/tmp/uds_ifile')
+# uds_ofile = zmqUDS('/tmp/uds_ofile')
 
 
 def msg_zmq(pub_addr, sub_addr):
     # start message hub
-    core = GeckoCore(pub_addr, sub_addr)
+    core = GeckoCore(in_addr=pub_addr, out_addr=sub_addr)
     core.start()
 
     msg1 = IMU(
@@ -114,8 +114,8 @@ def msg_zmq(pub_addr, sub_addr):
         assert msg == m
 
 
-def test_msg_zmq_uds():
-    msg_zmq(uds_ifile, uds_ofile)
+# def test_msg_zmq_uds():
+#     msg_zmq(uds_ifile, uds_ofile)
 
 
 def test_msg_zmq_tcp():
@@ -124,7 +124,7 @@ def test_msg_zmq_tcp():
 
 def py_zmq(pub_addr, sub_addr):
     # start message hub
-    core = GeckoCore(pub_addr, sub_addr)
+    core = GeckoCore(in_addr=pub_addr, out_addr=sub_addr)
     core.start()
 
     def publisher(**kwargs):
@@ -152,8 +152,8 @@ def test_py_zmq_tcp():
     py_zmq(tcp_pub, tcp_sub)
 
 
-def test_py_zmq_uds():
-    py_zmq(uds_ifile, uds_ofile)
+# def test_py_zmq_uds():
+#     py_zmq(uds_ifile, uds_ofile)
 
 
 # def py_geckpy(pub_addr, sub_addr):
