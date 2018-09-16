@@ -35,7 +35,7 @@ import time
 from pygecko.transport.helpers import zmqTCP
 # from pygecko.transport.helpers import zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
-from pygecko.transport.zmq_req_rep import Rep, Req
+# from pygecko.transport.zmq_req_rep import Rep, Req
 from pygecko.transport.geckocorefile import CoreFile
 from pygecko.multiprocessing.geckopy import Rate
 from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
@@ -304,7 +304,7 @@ class GeckoCore(SignalCatch, GProcess):
             msg = None
             try:
                 topic, msg = self.ins.raw_recv(flags=zmq.NOBLOCK)
-            except Exception as e:
+            except Exception:
                 # if self.kill:
                 #     return
                 # time.sleep(0.005)

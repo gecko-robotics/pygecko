@@ -13,13 +13,13 @@ import platform
 # import logging.config
 # import logging.handlers
 # from colorama import Fore, Back, Style
-from threading import Thread
-from pygecko.multiprocessing.sig import SignalCatch
+# from threading import Thread
+# from pygecko.multiprocessing.sig import SignalCatch
 from pygecko.transport.helpers import zmqTCP, zmqUDS
 from pygecko.transport.beacon import BeaconFinder
 from pygecko.transport.beacon import get_host_key
 # from pygecko.multiprocessing.log import GeckoLog
-import psutil as psu
+# import psutil as psu
 import time
 
 
