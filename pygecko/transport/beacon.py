@@ -5,8 +5,9 @@ import threading
 import time
 # import ipaddress  # kjw
 import pickle
-from collections import namedtuple
-from pygecko.transport.helpers import zmqTCP, zmqUDS
+# from collections import namedtuple
+from pygecko.transport.helpers import zmqTCP
+# from pygecko.transport.helpers import zmqUDS
 
 try:
     import simplejson as json
@@ -159,13 +160,13 @@ class BeaconServer(Beacon):
         msg = self.handler.dumps(msg)
 
         while True:
-            if self.exit == True:
+            if self.exit is True:
                 break
             else:
                 time.sleep(0.2)
                 try:
                     data, address = self.sock.recvfrom(1024)
-                except:
+                except Exception:
                     continue
 
                 data = self.handler.loads(data)
