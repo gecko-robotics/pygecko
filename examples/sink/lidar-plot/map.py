@@ -2,12 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 
-from __future__ import print_function
-# from pygecko.transport import zmqTCP
 from pygecko.multiprocessing import geckopy
-# from pygecko.test import GeckoSimpleProcess
-# from pygecko import Lidar
-# import time
 from pltslamshow import SlamShow
 from sslam import RMHC_SLAM
 from sslam import LDS01_Model
@@ -25,7 +20,7 @@ def subscriber(**kwargs):
     # callback function
     def f(topic, msg):
         # print("recv[{}]: {}".format(topic, msg))
-        geckopy.log(msg.timestamp)
+        geckopy.loginfo(msg.timestamp)
         pts = msg.scan
         slam.update(pts)
 

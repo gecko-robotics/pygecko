@@ -3,31 +3,5 @@
 # Copyright (c) 2014 Kevin Walchko
 # see LICENSE for full details
 ##############################################
-from __future__ import absolute_import, print_function, division
 from pygecko.multiprocessing.launch import GeckoLauncher
-# from pygecko.multiprocessing.geckopy import Rate
-# from pygecko.multiprocessing.geckopy import Throttle
-# from pygecko.multiprocessing.sig import SignalCatch
-# from pygecko.multiprocessing.delay import GeckoRate, Rate, Throttle
-
-
-# import signal
-#
-#
-# class SignalCatch(object):
-#     """
-#     Catches SIGINT and SIGTERM signals and sets kill = True
-#
-#     https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
-#     """
-#     kill = False
-#     def kill_signals(self):
-#         signal.signal(signal.SIGINT, self.exit_gracefully)
-#         signal.signal(signal.SIGTERM, self.exit_gracefully)
-#
-#     def exit_gracefully(self, signum, frame):
-#         """
-#         When handler gets called, it sets the self.kill to True
-#         """
-#         self.kill = True
-#         # print(">> Got signal[{}], kill = {}".format(signum, self.kill))
+from pygecko.multiprocessing.process import GeckoSimpleProcess
