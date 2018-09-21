@@ -5,6 +5,7 @@
 ##############################################
 # from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
+from pygecko.transport.srv import cService, cServiceProxy
 # from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
 from pygecko.transport.beacon import BeaconFinder, get_host_key
@@ -117,6 +118,7 @@ class GeckoPy(SignalCatch):
         """
         self.kill_signals()  # have to setup signals in new process
         self.subs = []   # subscriber nodes
+        self.srvs = []   # services
         self.hooks = []  # functions to call on shutdown
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
@@ -278,6 +280,54 @@ def Subscriber(topics, cb_func, addr=None, bind=False):
     g_geckopy.subs.append(s)
 
 
+def Service(name, callback, addr):
+    """
+    name does nothing and i need to directly pass the address
+    """
+    global g_geckopy
+    s = cService(name, callback)
+    # bind or connect?
+    s.bind(addr)
+    # notify core??
+    # how do people find this?
+    g_gecko.srvs.append(s)
+
+
+def ServiceProxy(name, addr):
+    """
+    right now name does nothing and i need to pass an address
+
+    eventually name should be used in some manor to lookup the address
+    """
+    global g_geckopy
+    sp = cServiceProxy(name, addr)
+    # try:
+    #     sp = g_gecko.srvs[name]
+    # except KeyError:
+    #     logerror("ServiceProxy: {} not found".format(name))
+    #     sp = None
+    return sp
+
+
+def wait_for_service(name, timeout=None):
+    logerror("not sure wait_for_service is correct")
+    return True
+
+    global g_geckopy
+    # find service
+    # how???
+    start = time.time()
+    rate = Rate(10)
+    while name not in g_geckopy.srvs:
+        # ask core for service address?
+        # wait here for it ... how long?
+        rate.sleep()
+        if timeout:
+            if (start - time.time()) > timeout:
+                return False
+    return True
+
+
 def on_shutdown(hook):
     """
     Allows you to setup hooks for when eveything shuts down. Function accepts
@@ -302,4 +352,8 @@ def spin(hertz=50):
     while not g_geckopy.kill:
         for sub in g_geckopy.subs:
             sub.recv_nb()
+
+        for srv in g_geckopy.srvs:
+            srv.handle()
+
         rate.sleep()

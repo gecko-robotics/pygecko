@@ -1,6 +1,7 @@
 from tempfile import NamedTemporaryFile
 from glob import glob
 import os
+import platform
 try:
     import simplejson as json
 except ImportError:
@@ -11,6 +12,10 @@ class CoreFile(object):
     fd = None
     def __init__(self, in_addr, out_addr, dir='/tmp'):
         prefix = 'gecko'
+
+        # windows sucks!
+        if platform.system() == 'Windows':
+            dir = ''
 
         # check for old stale gecko json files and remove them
         stale = glob(dir + '/' + prefix + '*.json')
