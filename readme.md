@@ -18,6 +18,8 @@ on macOS and various linux systems
 - All of this runs on [Raspberry Pi 3](http://www.raspberrypi.org)
     - Also runs on macOS (UNIX) and Windows
 
+**WARNING:** This really doesn't work on windows and it is not tested on windows. I from time to time do test it, but rarely. The main platforms are Linux and macOS (UNIX).
+
 # Architecture
 
 ![](pics/multiprocess.png)
