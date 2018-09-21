@@ -17,7 +17,10 @@ except ImportError:
 
 
 def get_host_key():
-    return os.uname().nodename.split('.')[0].lower()
+    try:
+        key = os.uname().nodename.split('.')[0].lower()
+    except:
+        socket.gethostname()
 
 
 class Ascii(object):
@@ -172,7 +175,10 @@ class BeaconServer(Beacon):
             s.connect(('10.255.255.255', 1))
             IP = s.getsockname()[0]
         except:
-            IP = '127.0.0.1'
+            try:
+                IP = socket.gethostbyname(socket.gethostname())
+            except:
+                IP = '127.0.0.1'
         finally:
             s.close()
 

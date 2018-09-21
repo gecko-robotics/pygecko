@@ -1,4 +1,5 @@
-from pygecko.transport.geckopy import Rate
+# from pygecko.multiprocessing.geckopy import Rate
+from pygecko.multiprocessing import geckopy
 from pygecko.transport.zmq_req_rep import Req
 
 
@@ -50,7 +51,7 @@ class cServiceProxy(object):
             hz = kwargs.get('hz', 10)
 
         ans = None
-        rate = Rate(hz)
+        rate = geckopy.Rate(hz)
         while ans is None:
             ans = request.get_nb()
             rate.sleep()

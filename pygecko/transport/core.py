@@ -219,7 +219,7 @@ class GeckoCore(SignalCatch, GProcess):
         #     'out': out_addr
         # }
 
-        self.corefile = CoreFile(in_addr, out_addr)
+        # self.corefile = CoreFile(in_addr, out_addr)
 
         # self.in_addr = in_addr
         # self.out_addr = out_addr
