@@ -259,7 +259,7 @@ def Publisher(addr=None, queue_size=5, bind=False):
 
 
 # def Subscriber(self, topics, cb, host='localhost', uds_file=None):
-def Subscriber(topics, cb_func, addr=None, bind=False):
+def Subscriber(topics, cb_func=None, addr=None, bind=False):
     """
     addr: either a valid tcp or uds address. If nothing is passed in, then
           it is set to what geckopy defaults to
@@ -277,7 +277,10 @@ def Subscriber(topics, cb_func, addr=None, bind=False):
     else:
         s.connect(addr)
 
-    g_geckopy.subs.append(s)
+    if ca_func:
+        g_geckopy.subs.append(s)
+    # should this be else: ???
+    return s
 
 
 def Service(name, callback, addr):
