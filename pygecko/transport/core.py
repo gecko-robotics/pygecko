@@ -38,6 +38,7 @@ from pygecko.multiprocessing.sig import SignalCatch  # this one causes import pr
 from pygecko.transport.beacon import BeaconServer
 from pygecko.transport.beacon import GeckoService
 from pygecko.transport.beacon import get_host_key
+from pygecko.transport.beacon import GetIP
 import psutil
 import os
 import pickle
@@ -198,15 +199,19 @@ class GeckoCore(SignalCatch, GProcess):
         in/out_port: port on localhost
         in/out_addr: full address string
         """
+        self.ip = GetIP().get()
+
+        print("<<< {} >>>".format(self.ip))
+
         if in_addr is None:
             if in_port is None:
                 in_port = 9998
-            in_addr = zmqTCP('localhost', in_port)
+            in_addr = zmqTCP(self.ip, in_port)
 
         if out_addr is None:
             if out_port is None:
                 out_port = 9999
-            out_addr = zmqTCP('localhost', out_port)
+            out_addr = zmqTCP(self.ip, out_port)
 
         self.in_port = in_port
         self.out_port = out_port
@@ -246,7 +251,9 @@ class GeckoCore(SignalCatch, GProcess):
 
     def handle_reply(self, msg):
         """
+        Handles the message telling core about the process name and pid.
 
+        WARNING: this should only add pids from the same machine (IP address)
         """
         ans = True
         # print("*** request!! ***")
@@ -260,6 +267,28 @@ class GeckoCore(SignalCatch, GProcess):
             print('*** core wtf: bad msg: {} ****'.format(msg))
             # print(msg)
         return ans
+
+    def handle_reply2(self, pid, name):
+        """
+        Handles the message telling core about the process name and pid.
+
+        WARNING: this should only add pids from the same machine (IP address)
+        """
+        # ans = True
+        # # print("*** request!! ***")
+        # if 'proc_info' in msg:
+        #     pid, name, status = msg['proc_info']
+        #     if status:
+        #         self.perf.push(pid, name)
+        #     else:
+        #         self.perf.pop(pid)
+        # else:
+        #     print('*** core wtf: bad msg: {} ****'.format(msg))
+        #     # print(msg)
+        # return ans
+        pid = int(pid)
+        print("<<< pid: {}   name: {} >>>".format(pid, name))
+        self.perf.push(pid, name)
 
     def run(self):
         """
@@ -277,7 +306,8 @@ class GeckoCore(SignalCatch, GProcess):
 
         provider = BeaconServer(
             GeckoService(self.in_port, self.out_port),
-            key
+            key,
+            self.handle_reply2
         )
         provider.start()
 

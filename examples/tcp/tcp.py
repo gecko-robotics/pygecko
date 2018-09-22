@@ -94,7 +94,10 @@ if __name__ == '__main__':
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
         # info to pass to processes
         args = {
-            'topic': topic
+            'topic': topic,
+            "geckocore": {
+                "key": "multiped"
+            }
         }
 
         p = GeckoSimpleProcess()

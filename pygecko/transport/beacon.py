@@ -7,7 +7,8 @@ import time
 import pickle
 # from collections import namedtuple
 from pygecko.transport.helpers import zmqTCP
-# from pygecko.transport.helpers import zmqUDS
+from pygecko.transport.helpers import GetIP
+from pygecko.transport.helpers import GetIP
 import os
 
 try:
@@ -20,7 +21,9 @@ def get_host_key():
     try:
         key = os.uname().nodename.split('.')[0].lower()
     except:
-        socket.gethostname()
+        key = socket.gethostname()
+
+    return key
 
 
 class Ascii(object):
@@ -45,6 +48,31 @@ class Pickle(object):
         return pickle.loads(msg)
 
 
+# class GetIP(object):
+#     ip = None
+#     def get(self):
+#         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#         try:
+#             # doesn't even have to be reachable
+#             s.connect(('10.255.255.255', 1))
+#             IP = s.getsockname()[0]
+#         except:
+#             try:
+#                 n = socket.gethostname()
+#                 # make sure it has a zeroconfig .local or you end up
+#                 # with 127.0.0.1 as your address
+#                 if n.find('.local') < 0:
+#                     n += '.local'
+#                 IP = socket.gethostbyname(n)
+#             except:
+#                 IP = '127.0.0.1'
+#         finally:
+#             s.close()
+#
+#         self.ip = IP
+#         return IP
+
+
 class GeckoService(object):
     def __init__(self, i, o):
         self.serviceName = "GeckoCore"
@@ -66,15 +94,16 @@ class GeckoService(object):
 class Beacon(object):
     mcast_addr = '224.3.29.110'
     mcast_port = 11311
-
+    timeout = 5
 
 
 class BeaconFinder(Beacon):
-    """Find Services using the magic of multicast
+    """
+    Find Services using the magic of multicast
 
-    finder = BeaconFinder()
-    info = (11311,"func",)
-    resp = finder.search(11311,"func")
+    key = hostname
+    finder = BeaconFinder(key)
+    ('tcp://in', 'tcp://out',) = finder.search(11311,"function_name")
     """
     def __init__(self, key, ttl=10, handler=Pickle):
         self.group = (self.mcast_addr, self.mcast_port)
@@ -99,7 +128,7 @@ class BeaconFinder(Beacon):
         one mdns ping. As soon as a responce is received, the function returns.
         """
         serviceName = 'GeckoCore'
-        self.sock.settimeout(5)
+        self.sock.settimeout(self.timeout)
         msg = self.handler.dumps((self.key, serviceName, str(pid), processname,))
         self.sock.sendto(msg, self.group)
         servicesFound = None
@@ -123,7 +152,9 @@ class BeaconServer(Beacon):
 
     provider = BeaconServer(
         GeckoService(9998, 9999),
-        'findservice'
+        'hostname',
+        callback_function [optional],
+        handler [optional]
     )
 
     provider.start()
@@ -134,9 +165,9 @@ class BeaconServer(Beacon):
         provider.stop()
 
     """
-    def __init__(self, service, key, handler=Pickle):
-        # ip = self.get_ip()
+    def __init__(self, service, key, callback=None, handler=Pickle):
         ip = '0.0.0.0'
+        self.callback = callback
         self.serverAddr = (ip, self.mcast_port)
         self.sock = socket.socket(
                 socket.AF_INET,
@@ -147,7 +178,6 @@ class BeaconServer(Beacon):
             self.sock.bind(self.serverAddr)
         except OSError as e:
             print("*** {} ***".format(e))
-            # self.sock.bind(self.serverAddr)
             raise
 
         mreq = struct.pack("=4sl", socket.inet_aton(self.mcast_addr), socket.INADDR_ANY)
@@ -161,6 +191,10 @@ class BeaconServer(Beacon):
         self.listener = threading.Thread(target=self.listenerThread)
         self.key = key
 
+        # print("[Beacon]==================")
+        # print(" key: {}".format(self.key))
+        # print(" service: {}".format(self.service.as_tuple()))
+
     def start(self):
         self.listener.setDaemon(True)
         self.listener.start()
@@ -168,25 +202,11 @@ class BeaconServer(Beacon):
     def stop(self):
         self.exit = True
 
-    def get_ip(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            # doesn't even have to be reachable
-            s.connect(('10.255.255.255', 1))
-            IP = s.getsockname()[0]
-        except:
-            try:
-                IP = socket.gethostbyname(socket.gethostname())
-            except:
-                IP = '127.0.0.1'
-        finally:
-            s.close()
-
-        # self.ip = IP
-        return IP
-
     def listenerThread(self):
         self.sock.setblocking(0)
+
+        ip = GetIP().get()
+        # print("<<< beacon ip: {} >>>".format(ip))
 
         msg = self.service.as_tuple()
         msg = self.handler.dumps(msg)
@@ -202,16 +222,21 @@ class BeaconServer(Beacon):
                     continue
 
                 data = self.handler.loads(data)
-                # print(data)
+                # print(">><< {}:{} >><<".format(address,data))
 
                 if len(data) == 4:
                     key = data[0]
                     serviceName = data[1]
-                    # pid = int(data[2])
-                    # process_name = data[3]
-                    # print('{}[{}]'.format(process_name, pid))
                     if key == self.key:
                         if serviceName == self.service.serviceName:
-                            # msg = self.service.as_tuple()
-                            # msg = self.handler.dumps(msg)
                             self.sock.sendto(msg, address)
+
+                            # is there a callback to save process pid/name?
+                            if self.callback:
+                                # is the message coming from the same machine?
+                                # if so, then save the info
+                                if ip == address[0]:
+                                    # print(">><< same addresses >><<")
+                                    pid = int(data[2])
+                                    name = data[3]
+                                    self.callback(pid, name)

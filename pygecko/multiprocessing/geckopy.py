@@ -45,8 +45,12 @@ class CoreFinder(object):
     """
     core_inaddr = None
     core_outaddr = None
+    start_core = False
 
-    def find(self, **kwargs):
+    def __init__(self, pid, name, **kwargs):
+        self.pid = pid
+        self.name = name
+
         if 'geckocore' in kwargs:
             core = kwargs['geckocore']
 
@@ -59,25 +63,107 @@ class CoreFinder(object):
                     self.core_outaddr = zmqTCP(*aout)
                 elif core['type'].lower() == 'uds':
                     raise NotImplementedError('uds not implemented yet')
+                elif core['type'].lower() == 'loopback':
+                    # self.core_inaddr = zmqTCP('127.0.0.1', 9998)  # or localhost?
+                    # self.core_outaddr = zmqTCP('127.0.0.1', 9999)
+                    self.set_address('127.0.0.1', 9998, 9999)
+
+                self.notify_core()  # send pid/name using pub
+
+                print("[kwargs]================\n in: {}\n out: {}\n".format(self.core_inaddr, self.core_outaddr))
             # use multicast to find geckocore
             elif 'key' in core:
                 key = core['key']
                 finder = BeaconFinder(key)
-                resp = finder.search(self.pid, self.name)
-                self.core_inaddr = resp[0]
-                self.core_outaddr = resp[1]
+                resp = finder.search(pid, name)
+                if resp:
+                    print("[multicast]================\n in: {}\n out: {}\n".format(*resp))
+                    self.core_inaddr = resp[0]
+                    self.core_outaddr = resp[1]
+                else:
+                    # self.core_inaddr = zmqTCP('localhost', 9998)
+                    # self.core_outaddr = zmqTCP('localhost', 9999)
+                    print("<<< multicast fail >>>")
+                    self.set_address('localhost', 9998, 9999)
             else:
                 raise Exception("geckoopy: kwargs has incorrect format")
         # all else failed, use the default
         else:
             # need to check for /tmp/gecko*.json
             if False:
-                pass
+                print("[corefile]================\n in: {}\n out: {}\n".format(self.core_inaddr, self.core_outaddr))
             else:
-                self.core_inaddr = zmqTCP('localhost', 9998)
-                self.core_outaddr = zmqTCP('localhost', 9999)
+                # self.core_inaddr = zmqTCP('localhost', 9998)
+                # self.core_outaddr = zmqTCP('localhost', 9999)
+                self.set_address('localhost', 9998, 9999)
 
+            self.notify_core()  # send pid/name using pub
 
+        if 'launch' in kwargs:
+            if kwargs['start_core'] == True:
+                self.start_core = True
+                # raise NotImplementedError('launching core not implemented yet')
+
+    def set_address(self, h, pin, pout):
+        self.core_inaddr = zmqTCP(h, pin)
+        self.core_outaddr = zmqTCP(h, pout)
+
+    def notify_core(self, retry=3):
+        """
+        Pass info to geckocore:
+            {'proc_info': (pid, name, status)}
+
+            psutil returns name as python for everything. It doesn't know about
+            the multiprocessing.Process.name
+
+            status: [remove, unnecessary]
+                True: proc up and running
+                False: proc is dead
+        """
+        msg = {'proc_info': (self.pid, self.name, True,)}
+        # print(msg)
+
+        # add a Sub() and get an ok from core???
+        # create a pub for sending log messages
+        # HOWEVER, for right now, reuse it to send process info
+        pub = Pub()
+        # self.logpub.connect(zmqTCP('localhost', 9998), queue_size=1)
+        pub.connect(self.core_inaddr, queue_size=1)
+        for _ in range(retry):
+            pub.pub('core_info', msg)
+            time.sleep(0.1)
+"""
+if 'geckocore' in self.ps:
+    if 'type' in self.ps['geckocore']:
+        kind = self.ps['geckocore']['type']
+        if kind == 'tcp':
+            h, p = self.ps['geckocore']['in']
+            in_addr = zmqTCP(h, p)
+            h, p = self.ps['geckocore']['out']
+            out_addr = zmqTCP(h, p)
+        elif kind == 'uds':
+            f = self.ps['geckocore']['in']
+            in_addr = zmqUDS(f)
+            f = self.ps['geckocore']['out']
+            out_addr = zmqUDS(f)
+    elif 'key' in self.ps['geckocore']:
+        key = self.ps['geckocore']['key']
+        if key == "localhost":
+            key = get_host_key()
+            print("<<< Using multicast key: {} >>>".format(key))
+        finder = BeaconFinder(key)
+        resp = finder.search(0, '0')
+        if resp:
+            in_addr = resp[0]
+            out_addr = resp[1]
+        else:
+            print("<<< no multicast beacon response >>>")
+            in_addr = zmqTCP('localhost', 9998)
+            out_addr = zmqTCP('localhost', 9999)
+else:
+    in_addr = zmqTCP('localhost', 9998)
+    out_addr = zmqTCP('localhost', 9999)
+"""
 
 class Rate(object):
     """
@@ -116,6 +202,7 @@ class GeckoPy(SignalCatch):
             core_inaddr: tcp or uds address of geckocore inputs
             queue: multiprocessing.Queue for log messages
         """
+        # geckopy info
         self.kill_signals()  # have to setup signals in new process
         self.subs = []   # subscriber nodes
         self.srvs = []   # services
@@ -123,74 +210,52 @@ class GeckoPy(SignalCatch):
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
 
-        # FIXME: consolidate this into CoreFinder class
-        if 'geckocore' in kwargs:
-            core = kwargs['geckocore']
+        # find the core
+        finder = CoreFinder(self.pid, self.name, **kwargs)
+        self.core_inaddr = finder.core_inaddr
+        self.core_outaddr = finder.core_outaddr
 
-            # outright tell it the address
-            if 'type' in core:
-                if core['type'].lower() == 'tcp':
-                    ain = core['in']
-                    aout = core['out']
-                    self.core_inaddr = zmqTCP(*ain)
-                    self.core_outaddr = zmqTCP(*aout)
-                elif core['type'].lower() == 'uds':
-                    raise NotImplementedError('uds not implemented yet')
-            # use multicast to find geckocore
-            elif 'key' in core:
-                key = core['key']
-                finder = BeaconFinder(key)
-                resp = finder.search(self.pid, self.name)
-                self.core_inaddr = resp[0]
-                self.core_outaddr = resp[1]
-            # the fully qualified address has already been found
-            elif 'in_addr' in core and 'out_addr' in core:
-                self.core_inaddr = core["in_addr"]
-                self.core_outaddr = core["out_addr"]
-            else:
-                raise Exception("geckoopy: kwargs has incorrect format")
-        # all else failed, use the default
-        else:
-            # need to check for /tmp/gecko*.json
-            if False:
-                pass
-            else:
-                self.core_inaddr = zmqTCP('localhost', 9998)
-                self.core_outaddr = zmqTCP('localhost', 9999)
+        print("<<< in: {} >>".format(self.core_inaddr))
+        print("<<< out: {} >>".format(self.core_outaddr))
+
+        # publish log messages
+        self.logpub = Pub()
+        self.logpub.connect(self.core_inaddr, queue_size=1)
 
         # here has to be a way to replace this with multicast ... I think
         # I don't need the complexity above
-        if self.core_inaddr:
-            self.notify_core(True, self.core_inaddr)
+        # if self.core_inaddr:
+        #     self.notify_core(True, self.core_inaddr)
 
     def __del__(self):
         if len(self.hooks) > 0:
             for h in self.hooks:
                 h()
 
-    def notify_core(self, status, addr=None, retry=3):
-        """
-        Pass info to geckocore:
-            {'proc_info': (pid, name, status)}
-
-            psutil returns name as python for everything. It doesn't know about
-            the multiprocessing.Process.name
-
-            status:
-                True: proc up and running
-                False: proc is dead
-        """
-        msg = {'proc_info': (self.pid, self.name, status,)}
-        # print(msg)
-
-        # add a Sub() and get an ok from core???
-        # create a pub for sending log messages
-        # HOWEVER, for right now, reuse it to send process info
-        self.logpub = Pub()
-        self.logpub.connect(zmqTCP('localhost', 9998), queue_size=1)
-        for _ in range(retry):
-            self.logpub.pub('core_info', msg)
-            time.sleep(0.1)
+    # def notify_core(self, status, addr=None, retry=3):
+    #     """
+    #     Pass info to geckocore:
+    #         {'proc_info': (pid, name, status)}
+    #
+    #         psutil returns name as python for everything. It doesn't know about
+    #         the multiprocessing.Process.name
+    #
+    #         status:
+    #             True: proc up and running
+    #             False: proc is dead
+    #     """
+    #     msg = {'proc_info': (self.pid, self.name, status,)}
+    #     # print(msg)
+    #
+    #     # add a Sub() and get an ok from core???
+    #     # create a pub for sending log messages
+    #     # HOWEVER, for right now, reuse it to send process info
+    #     self.logpub = Pub()
+    #     # self.logpub.connect(zmqTCP('localhost', 9998), queue_size=1)
+    #     self.logpub.connect(self.core_inaddr, queue_size=1)
+    #     for _ in range(retry):
+    #         self.logpub.pub('core_info', msg)
+    #         time.sleep(0.1)
 
 
 def init_node(**kwargs):
@@ -277,7 +342,7 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
     else:
         s.connect(addr)
 
-    if ca_func:
+    if cb_func:
         g_geckopy.subs.append(s)
     # should this be else: ???
     return s
