@@ -93,10 +93,28 @@ if __name__ == '__main__':
 
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
         # info to pass to processes
+        # args = {
+        #     'topic': topic,
+        #     "geckocore": {
+        #         "key": "multiped"
+        #     }
+        # }
+
+        # args = {
+        #     'topic': topic,
+        #     "geckocore": {
+        #         "type": "tcp",
+        #         "in": ["multiped.local", 9998],
+        #         "out": ["multiped.local", 9999]
+        #     }
+        # }
+
         args = {
             'topic': topic,
-            "geckocore": {
-                "key": "multiped"
+            "geckocore":{
+                # this can be tcp or uds address for zmq
+                "in_addr": "tcp://multiped.local:9998",
+                "out_addr": "tcp://multiped.local:9999"
             }
         }
 

@@ -10,5 +10,6 @@
   ],
   "geckocore": {
       "key": "localhost"
-  }
+  },
+  "start_core": false
 }

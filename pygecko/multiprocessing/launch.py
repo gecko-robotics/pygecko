@@ -9,21 +9,17 @@ import multiprocessing as mp
 import os
 import sys
 import platform
-# import logging
-# import logging.config
-# import logging.handlers
-# from colorama import Fore, Back, Style
-# from threading import Thread
 # from pygecko.multiprocessing.sig import SignalCatch
-from pygecko.transport.helpers import zmqTCP, zmqUDS
-from pygecko.transport.beacon import BeaconFinder
-from pygecko.transport.beacon import get_host_key
-# from pygecko.multiprocessing.log import GeckoLog
-# import psutil as psu
+# from pygecko.transport.helpers import zmqTCP, zmqUDS
+# from pygecko.transport.beacon import BeaconFinder
+# from pygecko.transport.beacon import get_host_key
+# from pygecko.multiprocessing.corefinder import CoreFinder
+from pygecko.multiprocessing.process import GeckoSimpleProcess
+from pygecko.transport import GeckoCore
 import time
 
 
-class GeckoFactory(object):
+class GeckoLauncher(object):
     """
     Base class that handles setup/teardown processes
 
@@ -44,6 +40,9 @@ class GeckoFactory(object):
 
     address=('127.0.0.1', 5000), authkey='abc'
     """
+    plist = []
+    core = None
+
     def __init__(self, ps, to=1.0):
         print('+', '-'*40, sep='')
         print('| geckolaunch')
@@ -75,40 +74,29 @@ class GeckoFactory(object):
         """
 
         # list of process to shutdown when done
-        plist = []
+        plist = self.plist
 
-        # get GeckoCore addresses, either TCP or UDS
-        # FIXME: duplicate code ... put in a CoreFinder class
+        # find the core
+        # finder = CoreFinder(self.pid, self.name, **kwargs)
+        # in_addr = finder.core_inaddr
+        # out_addr = finder.core_outaddr
+
+        # save some stuff
+        args = {}
+        # args['python'] = tuple(platform.sys.version_info)[:3]
+        args['os'] = platform.system()
+
         if 'geckocore' in self.ps:
-            if 'type' in self.ps['geckocore']:
-                kind = self.ps['geckocore']['type']
-                if kind == 'tcp':
-                    h, p = self.ps['geckocore']['in']
-                    in_addr = zmqTCP(h, p)
-                    h, p = self.ps['geckocore']['out']
-                    out_addr = zmqTCP(h, p)
-                elif kind == 'uds':
-                    f = self.ps['geckocore']['in']
-                    in_addr = zmqUDS(f)
-                    f = self.ps['geckocore']['out']
-                    out_addr = zmqUDS(f)
-            elif 'key' in self.ps['geckocore']:
-                key = self.ps['geckocore']['key']
-                if key == "localhost":
-                    key = get_host_key()
-                    print("<<< Using multicast key: {} >>>".format(key))
-                finder = BeaconFinder(key)
-                resp = finder.search(0, '0')
-                if resp:
-                    in_addr = resp[0]
-                    out_addr = resp[1]
-                else:
-                    print("<<< no multicast beacon response >>>")
-                    in_addr = zmqTCP('localhost', 9998)
-                    out_addr = zmqTCP('localhost', 9999)
+            args['geckocore'] = self.ps['geckocore']
         else:
-            in_addr = zmqTCP('localhost', 9998)
-            out_addr = zmqTCP('localhost', 9999)
+            raise Exception("GeckoLauncher: launch file needs to have geckocore section")
+
+        if 'start_core' in self.ps:
+            # start core here
+            # pass
+            if self.ps['start_core']:
+                self.core = GeckoCore()
+                self.core.start()
 
         sys.path.append(os.getcwd())  # put module directory in path
         for cmd in self.ps['processes']:
@@ -124,26 +112,14 @@ class GeckoFactory(object):
             else:
                 raise Exception("** GeckoProcess Error: Wrong number of args for process **")
 
-            # save some stuff
-            args['python'] = tuple(platform.sys.version_info)[:3]
-            args['os'] = platform.system()
-
-            # remove these!!
-            args['core_inaddr'] = in_addr
-            args['core_outaddr'] = out_addr
-
-            args['geckocore'] = {
-                'in_addr': in_addr,
-                'out_addr': out_addr
-            }
-
             # load the module and get the function
             m = __import__(mod)
             ff = getattr(m, fun)
 
-            p = mp.Process(name=fun, target=ff, kwargs=args)
+            # start a process
+            p = GeckoSimpleProcess()
+            p.start(func=ff, name=fun, kwargs=args)
 
-            p.start()
             print('>> Started:', mod + '.' + fun)
             plist.append(p)
 
@@ -156,19 +132,7 @@ class GeckoFactory(object):
 
     def end(self):
         print('Main loop killing processes')
-        for p in self.plist:
-            p.join(timeout=self.timeout)
-            if p.is_alive():
-                print('** Had to terminate() process:', p.name)
-                p.terminate()
-            else:
-                print('>> Clean exit:', p.name)
         self.plist = []
-
-
-class GeckoLauncher(GeckoFactory):
-    def __init__(self, ps):
-        GeckoFactory.__init__(self, ps)
 
     def loop(self):
 
@@ -179,14 +143,6 @@ class GeckoLauncher(GeckoFactory):
                 time.sleep(1)
 
         except (KeyboardInterrupt, SystemExit):
-            # if KeyboardInterrupt == type(e):
-            #     err = 'ctrl-C'
-            # elif SystemExit == type(e):
-            #     err = 'exit'
-            # print('\n>> Received {}\n'.format(err))
-
-            # set the kill flag
-            # self.event.clear()
             time.sleep(0.1)
 
         finally:
