@@ -1,3 +1,9 @@
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2018 Kevin Walchko
+# see LICENSE for full details
+##############################################
+#
 # https://pymotw.com/2/socket/multicast.html
 import socket
 import struct

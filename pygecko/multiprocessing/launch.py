@@ -15,7 +15,7 @@ import platform
 # from pygecko.transport.beacon import get_host_key
 # from pygecko.multiprocessing.corefinder import CoreFinder
 from pygecko.multiprocessing.process import GeckoSimpleProcess
-from pygecko.transport import GeckoCore
+# from pygecko.transport import GeckoCore
 import time
 
 
@@ -91,12 +91,12 @@ class GeckoLauncher(object):
         else:
             raise Exception("GeckoLauncher: launch file needs to have geckocore section")
 
-        if 'start_core' in self.ps:
-            # start core here
-            # pass
-            if self.ps['start_core']:
-                self.core = GeckoCore()
-                self.core.start()
+        # if 'start_core' in self.ps:
+        #     # start core here
+        #     # pass
+        #     if self.ps['start_core']:
+        #         self.core = GeckoCore()
+        #         self.core.start()
 
         sys.path.append(os.getcwd())  # put module directory in path
         for cmd in self.ps['processes']:

@@ -1,3 +1,9 @@
+##############################################
+# The MIT License (MIT)
+# Copyright (c) 2018 Kevin Walchko
+# see LICENSE for full details
+##############################################
+#
 # from pygecko.multiprocessing.geckopy import Rate
 from pygecko.multiprocessing import geckopy
 from pygecko.transport.zmq_req_rep import Req
