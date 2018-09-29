@@ -18,6 +18,87 @@ import time
 #     key = cv2.waitKey(10)
 
 
+import matplotlib.pyplot as plt
+import matplotlib.cm as colormap
+from math import sin, cos, radians
+import numpy as np
+
+class ImShow(object):
+    figsize = (5, 5)
+
+    def __init__(self, title=None):
+        fig = plt.figure(figsize=self.figsize)
+
+        # Store Python ID of figure to detect window close
+        self.figid = id(fig)
+
+        # fig.canvas.set_window_title('SLAM')
+        # plt.title(title)
+
+        self.ax = fig.gca()
+        self.ax.set_aspect("auto")
+        self.ax.set_autoscale_on(True)
+
+        # Use an "artist" to speed up map drawing
+        self.img_artist = None
+
+        # We base the axis on pixels, to support displaying the map
+        # self.ax.set_xlim([0, map_size_pixels])
+        # self.ax.set_ylim([0, map_size_pixels])
+
+        # Hence we must relabel the axis ticks to show millimeters
+        # ticks = np.arange(0,self.map_size_pixels+100,100)
+        # labels = [str(self.map_scale_mm_per_pixel * tick) for tick in ticks]
+        # self.ax.xaxis.set_ticks(ticks)
+        # self.ax.set_xticklabels(labels)
+        # self.ax.yaxis.set_ticks(ticks)
+        # self.ax.set_yticklabels(labels)
+        #
+        # self.ax.set_xlabel('X (mm)')
+        # self.ax.set_ylabel('Y (mm)')
+
+        self.ax.grid(False)
+
+    def display(self, msg):
+
+        mapimg = np.reshape(np.frombuffer(msg.bytes, dtype=np.uint8), msg.shape)
+
+        if self.img_artist is None:
+            self.img_artist = self.ax.imshow(mapimg, cmap=colormap.gray)
+        else:
+            self.img_artist.set_data(mapimg)
+
+        # If we have a new figure, something went wrong (closing figure failed)
+        if self.figid != id(plt.gcf()):
+            print("something wrong")
+            return False
+
+        # Redraw current objects without blocking
+        plt.draw()
+
+        # Refresh display, setting flag on window close or keyboard interrupt
+        ok = True
+        try:
+            plt.pause(.01) # Arbitrary pause to force redraw
+        except:
+            ok = False
+
+        return ok
+
+
+def subscriber2(**kwargs):
+    geckopy.init_node(**kwargs)
+    fig = ImShow()
+
+    def callback(topic, msg):
+        fig.display(msg)
+
+    geckopy.Subscriber(['camera'], callback)
+
+    geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
+    print('sub bye ...')
+
+
 def subscriber(**kwargs):
     geckopy.init_node(**kwargs)
 
@@ -25,7 +106,7 @@ def subscriber(**kwargs):
         # print('msg',msg.shape)
         img = np.frombuffer(msg.bytes, dtype=np.uint8)
         img = img.reshape(msg.shape)
-        print('image[{}]'.format(msg.timestamp,img.shape))
+        # print('image[{}]'.format(msg.timestamp,img.shape))
         cv2.imshow('image',img)
         key = cv2.waitKey(1)
 
@@ -35,46 +116,7 @@ def subscriber(**kwargs):
     print('sub bye ...')
 
 
-# def publisher(**kwargs):
-#     from imutils.video import VideoStream
-#     geckopy.init_node(**kwargs)
-#     rate = geckopy.Rate(10)  # 10 Hz
-#
-#     p = geckopy.Publisher()
-#
-#     # determine if we should use picamera or standard usb camera
-#     if platform.system() == 'Linux':
-#         picam = True
-#     else:
-#         picam = False
-#
-#     # camera = VideoStream(usePiCamera=picam, resolution=(320, 240), framerate=10)
-#     camera = cv2.VideoCapture(0)
-#
-#     while not geckopy.is_shutdown():
-#         ok,img = camera.read()
-#         img = cv2.CvtColor(img, cv2.COLOR_BGR2GRAY)
-#         msg = Image(img.shape, img.tobytes())
-#         p.pub('camera', msg)
-#         rate.sleep()
-#
-#     print('pub bye ...')
-
-
 if __name__ == '__main__':
-    # core = GeckoCore()
-    # core.start()
 
     args = {}
-    subscriber(**args)
-    # p = GeckoSimpleProcess()
-    # p.start(func=publisher, name='cam_pub', kwargs=args)
-
-    # s = GeckoSimpleProcess()
-    # s.start(func=subscriber, name='ca_sub', kwargs=args)
-    #
-    # try:
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     pass
+    subscriber2(**args)

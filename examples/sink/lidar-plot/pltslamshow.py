@@ -59,15 +59,11 @@ class SlamShow(object):
 		self._add_vehicle(map_center_mm,map_center_mm,0)
 
 	def displayMap(self, mapbytes):
-
 		mapimg = np.reshape(np.frombuffer(mapbytes, dtype=np.uint8), (self.map_size_pixels, self.map_size_pixels))
 
 		if self.img_artist is None:
-
 			self.img_artist = self.ax.imshow(mapimg, cmap=colormap.gray)
-
 		else:
-
 			self.img_artist.set_data(mapimg)
 
 	def setPose(self, x_mm, y_mm, theta_deg):
@@ -84,7 +80,6 @@ class SlamShow(object):
 		self._add_vehicle(x_mm, y_mm, theta_deg)
 
 	def _add_vehicle(self, x_mm, y_mm, theta_deg):
-
 		#Use a very short arrow shaft to orient the head of the arrow
 		dx, dy = plt_rotate(0, 0, 0.1, theta_deg)
 
@@ -94,7 +89,6 @@ class SlamShow(object):
 				dx, dy, head_width=ROBOT_WIDTH_MM/s, head_length=ROBOT_HEIGHT_MM/s, fc='r', ec='r')
 
 	def refresh(self):
-
 		# If we have a new figure, something went wrong (closing figure failed)
 		if self.figid != id(plt.gcf()):
 			return False

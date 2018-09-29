@@ -19,9 +19,9 @@ def publisher(**kwargs):
 
     while not geckopy.is_shutdown():
         scan = []
-        for _ in range(360):
+        for angle in range(360):
             r = 4000 + randint(0, 100)
-            scan.append(r)  # 5m
+            scan.append((angle, r,))  # 5m
         msg = Lidar(scan)
         p.pub('scan', msg)  # topic msg
 
