@@ -50,7 +50,6 @@ def publisher(**kwargs):
 
     camera = VideoStream(usePiCamera=picam)
     camera.start()
-    # camera = cv2.VideoCapture(0)
 
     while not geckopy.is_shutdown():
         img = camera.read()
