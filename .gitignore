@@ -11,6 +11,7 @@ dist/
 old/
 *.bag
 *.wav
+*.pickle
 
 # OS generated files #
 ######################
