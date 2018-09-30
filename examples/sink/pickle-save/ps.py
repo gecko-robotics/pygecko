@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-from picklesave import PickleJar, MsgBox
+from picklesave import PickleJar
 from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
 from pygecko import IMU, Vector
@@ -33,10 +33,10 @@ def publisher(**kwargs):
 
 
 if __name__ == '__main__':
-    # jar = PickleJar("t.p", buffer_size=5)
-    jar = MsgBox("t.p", buffer_size=5)
+    jar = PickleJar("t.pickle", buffer_size=5)
+    # jar = MsgBox("t.p", buffer_size=5)
     names = ['a','b','c']
-    for i in range(10):
+    for i in range(30):
         msg = IMU(Vector(1,2,3), Vector(4,5,6), Vector(7,8,9))
         jar.push(names[i%3], msg)
 
@@ -44,12 +44,16 @@ if __name__ == '__main__':
 
     print("\n=======================\n")
 
-    # data = PickleJar.read("t.p")
-    data = MsgBox.read("t.p")
+    data = PickleJar.read("t.pickle")
+    # data = MsgBox.read("t.pickle")
 
     print("\n=======================\n")
 
-    pprint(data)
+    if data:
+        for key in data:
+            print('\n[{}]--------'.format(key))
+            for d in data[key]:
+                print('  {}'.format(d))
 
     # with open("t.p", "rb") as fd:
     #     d = pickle.load(fd)

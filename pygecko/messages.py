@@ -5,7 +5,8 @@
 ##############################################
 from collections import namedtuple
 import time
-# import msgpack
+import numpy as np
+import msgpack
 
 
 # simple ones, no stamp, wouldn't just send these. They are datatypes that
@@ -27,7 +28,7 @@ Log = namedtuple('Log', 'level name text')
 # Path = namedtuple("Path", 'path')
 
 
-class Image(namedtuple('Image', 'shape bytes timestamp')):
+class Image(namedtuple('Image', 'shape bytes compressed timestamp')):
     """
     OpenCV images
     -------------------------------
@@ -35,16 +36,19 @@ class Image(namedtuple('Image', 'shape bytes timestamp')):
     s = img.shape
     msg = Image(s, d)
 
-    img = np.frombytes(msg.d, dtype=np.uint8)
+    img = np.frombuffer(msg.d, dtype=np.uint8)
     img.reshape(msg.shape)
+    -------------------------------
+    You can compress the image by passing compress=True ... the compression
+    ratio is not very high
     """
     __slots__ = ()
 
-    def __new__(cls, s, b, ts=None):
+    def __new__(cls, s, b, c=False, ts=None):
         if ts:
-            return cls.__bases__[0].__new__(cls, s, b, ts)
+            return cls.__bases__[0].__new__(cls, s, b, c, ts)
         else:
-            return cls.__bases__[0].__new__(cls, s, b, time.time())
+            return cls.__bases__[0].__new__(cls, s, b, c, time.time())
 
 
 class PoseStamped(namedtuple('Pose', 'position orientation timestamp')):
@@ -84,3 +88,34 @@ class Lidar(namedtuple('Lidar', 'scan timestamp')):
             return cls.__bases__[0].__new__(cls, s, ts)
         else:
             return cls.__bases__[0].__new__(cls, s, time.time())
+
+
+def image2msg(img, compressed=False):
+    if compressed:
+        # import cv2
+        # import msgpack
+        # jpg = cv2.imencode('.jpg', img)[1]
+        m = msgpack.dumps(img.tobytes())
+        msg = Image(img.shape, m, True)
+    else:
+        msg = Image(img.shape, img.tobytes(), False)
+    return msg
+
+
+def msg2image(msg):
+    if msg.compressed:
+        # import cv2
+        # import msgpack
+        # raw = nparr = np.fromstring(msg.bytes, np.uint8)
+        # img = np.frombuffer(raw, dtype=np.uint8)
+        # if len(msg.shape) == 3:
+        #     img = cv2.imdecode(img, cv2.IMREAD_COLOR)  # cv2.IMREAD_COLOR = 1
+        # else:
+        #     cv2.imdecode(img, cv2.IMREAD_GRAYSCALE)  # cv2.IMREAD_GRAYSCALE = 0
+        raw = msgpack.loads(msg.bytes)
+        img = np.frombuffer(raw, dtype=np.uint8)
+        img = img.reshape(msg.shape)
+    else:
+        img = np.frombuffer(msg.bytes, dtype=np.uint8)
+        img = img.reshape(msg.shape)
+    return img

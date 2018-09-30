@@ -11,6 +11,7 @@ from pygecko.file_storage import FileYaml
 # messages are all namedtuples
 from pygecko.messages import Vector, Quaternion, Pose, Twist, Wrench, Joystick
 from pygecko.messages import IMU, Lidar, PoseStamped, Image, Log
+from pygecko.messages import image2msg, msg2image
 
 
 __author__ = 'Kevin Walchko'

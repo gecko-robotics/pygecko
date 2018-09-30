@@ -44,6 +44,7 @@ setup(
         # 'bjoern',         # http server, multiple connections
         # 'the_collector',  # saving data
         'colorama',       # log messages
+        'numpy',          # basic image stuff ... remove/optional?
         'build_utils'     # installing and building the library
     ],
     url="https://github.com/MomsFriendlyRobotCompany/{}".format(PACKAGE_NAME),

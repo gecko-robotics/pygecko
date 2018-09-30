@@ -5,18 +5,23 @@
 ##############################################
 # if you don't have opencv installed and need to run a test that does
 import random
+import numpy as np
 
 COLOR_BGR2GRAY = 0
 COLOR_RGB2GRAY = 0
 COLOR_BGR2RGB = 0
 COLOR_RGB2BGR = 0
 
-class Image(object):
-    def __init__(self, w, h):
-        # I think this is a cpu hog!
-        self.img = [random.randint(0,255) for x in range(w*h)]
-    def tobytes(self):
-        return bytes(self.img)
+# class cvImage(object):
+#     def __init__(self, w, h):
+#         # I think this is a cpu hog!
+#         self.img = [random.randint(0,255) for x in range(w*h)]
+#         self.shape = (h,w)
+#     def tobytes(self):
+#         return bytes(self.img)
+
+def cvImage(w, h, d=1):
+    return np.random.randint(256, size=(d, h, w), dtype=np.uint8)
 
 
 class VideoCapture(object):
@@ -32,7 +37,7 @@ class VideoCapture(object):
             self.height = b
 
     def read(self):
-        return True, Image(self.width, self.height)
+        return True, cvImage(self.height, self.width)
 
     def release(self):
         pass

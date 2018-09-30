@@ -8,7 +8,7 @@ from pygecko.multiprocessing import geckopy
 from pygecko.transport import Pub, Sub
 from pygecko.transport import zmqTCP, zmqUDS
 from pygecko.transport import GeckoCore
-from pygecko.test import GeckoSimpleProcess
+from pygecko.multiprocessing import GeckoSimpleProcess
 
 from pygecko import FileJson, FileYaml
 from pygecko import Quaternion
@@ -18,9 +18,31 @@ from pygecko import Twist
 # from pygecko import Wrench
 from pygecko import Pose
 # from pygecko import Joystick
-# from pygecko import Image
+from pygecko import Image, image2msg, msg2image
 # from pygecko import PoseStamped
 # from pygecko import Lidar
+
+# Fake cv2 things for testing
+import pygecko.test.fake_camera as pcv2
+
+
+def test_images():
+    img = pcv2.cvImage(6, 4)
+    msg = image2msg(img)
+    print(msg)
+    ret = msg2image(msg)
+    print(ret)
+    assert img.all() == ret.all()
+
+
+def test_compressed_images():
+    img = pcv2.cvImage(6, 4)
+    msg = image2msg(img, compressed=True)
+    print(msg)
+    ret = msg2image(msg)
+    print(ret)
+    assert img.all() == ret.all()
+
 
 
 def file_func(Obj, fname):
