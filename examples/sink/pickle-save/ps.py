@@ -1,36 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-
+from picklesave import PickleJar, MsgBox
 from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
+from pygecko import IMU, Vector
 import pickle
+from pprint import pprint
 
-class PickleJar(object):
-    def __init__(self, fname, buffer_size=100):
-        self.fd = open(fname, 'wb')
-        self.buffer = []
-        self.buffer_size = buffer_size
-    def __del__(self):
-        self.close()
-    def push(self, data):
-        self.buffer.append(data)
-        if len(self.buffer) > self.buffer_size:
-            self.write()
-    def write(self):
-        for d in self.buffer:
-            pickle.dump(d, self.fd)
-        self.buffer = []
-    def close(self):
-        self.fd.close()
-
-
-class Callback(object):
-    def __init__(self):
-        self.jar = PickleJar('test.pickle')
-    def callback(self, topic, msg):
-        geckopy.loginfo("recv[{}]: {}".format(topic, msg))
-        self.jar.push(msg)
 
 def subscriber(**kwargs):
     geckopy.init_node(**kwargs)
@@ -56,9 +33,32 @@ def publisher(**kwargs):
 
 
 if __name__ == '__main__':
-    args = {}
-    p = GeckoSimpleProcess()
-    p.start(func=publisher, name='publisher', kwargs=args)
+    # jar = PickleJar("t.p", buffer_size=5)
+    jar = MsgBox("t.p", buffer_size=5)
+    names = ['a','b','c']
+    for i in range(10):
+        msg = IMU(Vector(1,2,3), Vector(4,5,6), Vector(7,8,9))
+        jar.push(names[i%3], msg)
 
-    s = GeckoSimpleProcess()
-    s.start(func=subscriber, name='subscriber', kwargs=args)
+    jar.close()
+
+    print("\n=======================\n")
+
+    # data = PickleJar.read("t.p")
+    data = MsgBox.read("t.p")
+
+    print("\n=======================\n")
+
+    pprint(data)
+
+    # with open("t.p", "rb") as fd:
+    #     d = pickle.load(fd)
+    #     print(d)
+
+    # print(d)
+    # args = {}
+    # p = GeckoSimpleProcess()
+    # p.start(func=publisher, name='publisher', kwargs=args)
+    #
+    # s = GeckoSimpleProcess()
+    # s.start(func=subscriber, name='subscriber', kwargs=args)
