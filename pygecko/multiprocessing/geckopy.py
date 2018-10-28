@@ -86,12 +86,12 @@ class GeckoPy(SignalCatch):
         self.pid = mp.current_process().pid
 
         # find the core
-        finder = CoreFinder(self.pid, self.name, **kwargs)
-        self.core_inaddr = finder.core_inaddr
-        self.core_outaddr = finder.core_outaddr
+        # finder = CoreFinder(self.pid, self.name, **kwargs)
+        # self.core_inaddr = finder.core_inaddr
+        # self.core_outaddr = finder.core_outaddr
 
-        print("<<< in: {} >>".format(self.core_inaddr))
-        print("<<< out: {} >>".format(self.core_outaddr))
+        # print("<<< in: {} >>".format(self.core_inaddr))
+        # print("<<< out: {} >>".format(self.core_outaddr))
 
         # publish log messages
         self.logpub = Pub()
@@ -162,11 +162,14 @@ def Publisher(addr=None, queue_size=5, bind=False):
     """
     global g_geckopy
     p = Pub()
-    if addr is None:
-        addr = g_geckopy.core_inaddr
+    # if addr is None:
+    #     addr = g_geckopy.core_inaddr
 
     if bind:
-        p.bind(addr, queue_size=queue_size)
+        port = p.bind(addr, queue_size=queue_size)
+        bf = BeaconFinder('local')
+        msg = PubIPC('local',topic???,g_geckopy.pid,g_geckopy.name).msg
+        ans = bf.send(msg)
     else:
         p.connect(addr, queue_size=queue_size)
 

@@ -4,7 +4,8 @@
 # see LICENSE for full details
 ##############################################
 from pygecko.transport.helpers import zmqTCP
-from pygecko.transport.beacon import BeaconFinder, get_host_key
+from pygecko.transport.beacon import get_host_key
+from mbeacon import BeaconFinder
 from pygecko.transport.zmq_sub_pub import Pub
 import time
 
@@ -25,24 +26,24 @@ class CoreFinder(object):
             core = kwargs['geckocore']
 
             # outright tell it the address
-            if 'type' in core:
-                if core['type'].lower() == 'tcp':
-                    ain = core['in']
-                    aout = core['out']
-                    self.core_inaddr = zmqTCP(*ain)
-                    self.core_outaddr = zmqTCP(*aout)
-                elif core['type'].lower() == 'uds':
-                    raise NotImplementedError('uds not implemented yet')
-                elif core['type'].lower() == 'loopback':
-                    # self.core_inaddr = zmqTCP('127.0.0.1', 9998)  # or localhost?
-                    # self.core_outaddr = zmqTCP('127.0.0.1', 9999)
-                    self.set_address('127.0.0.1', 9998, 9999)
-
-                self.notify_core()  # send pid/name using pub
-
-                print("[kwargs]================\n in: {}\n out: {}\n".format(self.core_inaddr, self.core_outaddr))
+            # if 'type' in core:
+            #     if core['type'].lower() == 'tcp':
+            #         ain = core['in']
+            #         aout = core['out']
+            #         self.core_inaddr = zmqTCP(*ain)
+            #         self.core_outaddr = zmqTCP(*aout)
+            #     elif core['type'].lower() == 'uds':
+            #         raise NotImplementedError('uds not implemented yet')
+            #     elif core['type'].lower() == 'loopback':
+            #         # self.core_inaddr = zmqTCP('127.0.0.1', 9998)  # or localhost?
+            #         # self.core_outaddr = zmqTCP('127.0.0.1', 9999)
+            #         self.set_address('127.0.0.1', 9998, 9999)
+            #
+            #     self.notify_core()  # send pid/name using pub
+            #
+            #     print("[kwargs]================\n in: {}\n out: {}\n".format(self.core_inaddr, self.core_outaddr))
             # use multicast to find geckocore
-            elif 'key' in core:
+            if 'key' in core:
                 key = core['key']
                 finder = BeaconFinder(key)
                 resp = finder.search(pid, name)
@@ -54,7 +55,8 @@ class CoreFinder(object):
                     # self.core_inaddr = zmqTCP('localhost', 9998)
                     # self.core_outaddr = zmqTCP('localhost', 9999)
                     print("<<< multicast fail >>>")
-                    self.set_address('localhost', 9998, 9999)
+                    exit(1)
+                    # self.set_address('localhost', 9998, 9999)
             else:
                 raise Exception("geckoopy: kwargs has incorrect format")
         # all else failed, use the default

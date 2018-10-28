@@ -59,11 +59,14 @@ class Base(object):
         out: none
         """
         # print(type(self).__name__, 'bind to {}'.format(addr))
-        self.socket.bind(addr)
+        # self.socket.bind(addr)
+        port = self.socket.bind_to_random_port(addr)
         if hwm:
             self.socket.set_hwm(hwm)
         elif queue_size:
             self.socket.set_hwm(queue_size)
+
+        return port
 
     def connect(self, addr, hwm=None, queue_size=10):
         """
