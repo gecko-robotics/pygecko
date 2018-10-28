@@ -45,8 +45,8 @@ class Rep(Base):
         ret = False
         try:
             jmsg = self.socket.recv_multipart(flags=zmq.NOBLOCK)[0]
-            print("*** {} ***".format(jmsg))
             msg = self.pickle.unpack(jmsg)
+            print("*** {} ***".format(msg))
 
             msg = callback(msg)
 
@@ -90,7 +90,7 @@ class Req(Base):
         self.socket = self.ctx.socket(zmq.REQ)
 
     def __del__(self):
-        pass
+        self.close()
 
     def get_nb(self, msg):
         """

@@ -6,10 +6,11 @@
 # from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
 from pygecko.transport.srv import cService, cServiceProxy
-# from pygecko.transport.zmq_req_rep import Req
-# from pygecko.transport.helpers import zmqTCP
+from pygecko.transport.zmq_req_rep import Req
+from pygecko.transport.helpers import zmqTCP
+from pygecko.transport.beacon import GetIP
 # from pygecko.transport.beacon import BeaconFinder, get_host_key
-from pygecko.multiprocessing.corefinder import CoreFinder
+# from pygecko.multiprocessing.corefinder import CoreFinder
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 # from pygecko.multiprocessing.delay import GeckoRate, Rate
@@ -85,6 +86,11 @@ class GeckoPy(SignalCatch):
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
 
+        # hard code for now
+        host = GetIP().get()  # FIXME: kwargs should provide this
+        self.req_addr = zmqTCP(host, 11311)  # set/get topic addrs
+        self.proc_ip = host  # this ip address
+
         # find the core
         # finder = CoreFinder(self.pid, self.name, **kwargs)
         # self.core_inaddr = finder.core_inaddr
@@ -94,8 +100,8 @@ class GeckoPy(SignalCatch):
         # print("<<< out: {} >>".format(self.core_outaddr))
 
         # publish log messages
-        self.logpub = Pub()
-        self.logpub.connect(self.core_inaddr, queue_size=1)
+        # self.logpub = Pub()
+        # self.logpub.connect(self.core_inaddr, queue_size=1)
 
         # here has to be a way to replace this with multicast ... I think
         # I don't need the complexity above
@@ -107,6 +113,40 @@ class GeckoPy(SignalCatch):
             for h in self.hooks:
                 h()
 
+    def register_publisher(self, topics, port):
+        addr = zmqTCP(self.proc_ip, port)
+        msg = {
+            'T': 0,  # publish
+            'topics': topics,
+            'addr': addr,
+            'pid': self.pid,
+            'name': self.name
+        }
+
+        request = Req()
+        request.connect(self.req_addr)
+        ans = request.get(msg)
+        if ans is None or ans['status'] != 0:
+            print("*** {} ***".format(ans))
+            raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+
+        # request.close()
+
+    def find_publisher(self, topic):
+        msg = {
+            'T': 1,  # subscriber
+            'topics': topic,
+            'pid': self.pid,
+            'name': self.name
+        }
+        request = Req()
+        request.connect(self.req_addr)
+        ans = request.get(msg)
+        if ans is None:
+            raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+
+        # request.close()
+        return ans
 
 def init_node(**kwargs):
     """
@@ -152,7 +192,7 @@ def is_shutdown():
 
 
 # def Publisher(self, uds_file=None, host='localhost', queue_size=10, bind=False):
-def Publisher(addr=None, queue_size=5, bind=False):
+def Publisher(topics, addr=None, queue_size=5, bind=True):
     """
     addr: either a valid tcp or uds address. If nothing is passed in, then
           it is set to what geckopy defaults to
@@ -162,14 +202,18 @@ def Publisher(addr=None, queue_size=5, bind=False):
     """
     global g_geckopy
     p = Pub()
-    # if addr is None:
-    #     addr = g_geckopy.core_inaddr
+    if (addr is None) and (bind):
+        addr = g_geckopy.proc_ip
+        addr = zmqTCP(addr)
+        print('>> pub', addr)
+        # addr = g_geckopy.core_inaddr
 
     if bind:
-        port = p.bind(addr, queue_size=queue_size)
-        bf = BeaconFinder('local')
-        msg = PubIPC('local',topic???,g_geckopy.pid,g_geckopy.name).msg
-        ans = bf.send(msg)
+        port = p.bind(addr, queue_size=queue_size, random=True)
+        # bf = BeaconFinder('local')
+        # msg = PubIPC('local',topic???,g_geckopy.pid,g_geckopy.name).msg
+        # ans = bf.send(msg)
+        g_geckopy.register_publisher(topics, port)
     else:
         p.connect(addr, queue_size=queue_size)
 
@@ -186,9 +230,24 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
           to a different port
     """
     global g_geckopy
+
+    if len(topics) > 1:
+        topics = [topics[0]]
+        print("*** Sub topics can only be one, using:", topics)
+
     s = Sub(cb_func=cb_func, topics=topics)
-    if addr is None:
-        addr = g_geckopy.core_outaddr
+    # if addr is None:
+    #     addr = g_geckopy.core_outaddr
+
+    if (addr is None) and (not bind):
+        # addr = g_geckopy.proc_ip
+        # addr = zmqTCP(addr)
+        msg = g_geckopy.find_publisher(topics)
+        if msg and msg['status'] != 0:
+            raise Exception("Subscriber couldn't talk to core")
+        else:
+            addr = msg['addr']
+        print('>> sub', addr)
 
     if bind:
         s.bind(addr)

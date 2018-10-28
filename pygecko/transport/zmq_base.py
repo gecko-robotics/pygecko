@@ -47,7 +47,7 @@ class Base(object):
         self.ctx.term()
         # print('[<] shutting down {}'.format(type(self).__name__))
 
-    def bind(self, addr, hwm=None, queue_size=10):
+    def bind(self, addr, hwm=None, queue_size=10, random=False):
         """
         Binds a socket to an addr. Only one socket can bind.
         Usually pub binds and sub connects, but not always!
@@ -59,8 +59,13 @@ class Base(object):
         out: none
         """
         # print(type(self).__name__, 'bind to {}'.format(addr))
-        # self.socket.bind(addr)
-        port = self.socket.bind_to_random_port(addr)
+        if random:
+            # https://pyzmq.readthedocs.io/en/latest/api/zmq.html#zmq.Socket.bind_to_random_port
+            port = self.socket.bind_to_random_port(addr)  # tcp://* ???
+        else:
+            port = int(addr.split(':')[2])  # tcp://ip:port
+            self.socket.bind(addr)
+
         if hwm:
             self.socket.set_hwm(hwm)
         elif queue_size:

@@ -8,6 +8,7 @@
 
 from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
+import socket
 import time
 
 
@@ -29,15 +30,16 @@ def publisher(**kwargs):
     rate = geckopy.Rate(2)
     geckopy.on_shutdown(pub_bye)
 
-    p = geckopy.Publisher()
-    start = time.time()
     topic = kwargs.get('topic')
+    p = geckopy.Publisher(topic)
+    start = time.time()
     cnt = 0
     while not geckopy.is_shutdown():
         msg = {'time': time.time() - start}
         p.pub(topic, msg)  # topic msg
 
-        geckopy.logdebug('[{}] published msg'.format(cnt))
+        # geckopy.logdebug('[{}] published msg'.format(cnt))
+        print(cnt)
         cnt += 1
         rate.sleep()
     print('pub bye ...')
@@ -59,7 +61,8 @@ class Callback(object):
     def __init__(self, name):
         self.name = name
     def callback(self, topic, msg):
-        geckopy.loginfo("{}".format(msg))
+        # geckopy.loginfo("{}".format(msg))
+        print("{}".format(msg))
         chew_up_cpu(.1)
     def bye(self):
         print("*"*30)
@@ -73,7 +76,7 @@ def subscriber(**kwargs):
     topic = kwargs.get('topic')
     c = Callback(topic)
     geckopy.Subscriber([topic], c.callback)
-    geckopy.on_shutdown(c.bye)
+    # geckopy.on_shutdown(c.bye)
 
     geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
