@@ -13,7 +13,8 @@ from pygecko.messages import Vector, Quaternion, Pose, Twist, Wrench, Joystick
 from pygecko.messages import IMU, Lidar, PoseStamped, Image, Log
 from pygecko.messages import image2msg, msg2image
 
+from pygecko.version  import __version__
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"
-__version__ = "1.0.3"
+# __version__ = "1.0.3"

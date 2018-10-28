@@ -7,7 +7,7 @@
 ##############################################
 
 from pygecko.multiprocessing import geckopy
-from pygecko.test import GeckoSimpleProcess
+from pygecko.multiprocessing import GeckoSimpleProcess
 import time
 
 
@@ -82,6 +82,7 @@ def subscriber(**kwargs):
 if __name__ == '__main__':
     # normally you wouldn't run this here, but is running else where
     # this is just for testing
+    # from pygecko.transport import GeckoCore
     # core = GeckoCore()
     # core.start()
 
@@ -93,12 +94,12 @@ if __name__ == '__main__':
 
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
         # info to pass to processes
-        # args = {
-        #     'topic': topic,
-        #     "geckocore": {
-        #         "key": "multiped"
-        #     }
-        # }
+        args = {
+            'topic': topic,
+            "geckocore": {
+                "key": "logan"
+            }
+        }
 
         # args = {
         #     'topic': topic,
@@ -109,14 +110,14 @@ if __name__ == '__main__':
         #     }
         # }
 
-        args = {
-            'topic': topic,
-            "geckocore":{
-                # this can be tcp or uds address for zmq
-                "in_addr": "tcp://multiped.local:9998",
-                "out_addr": "tcp://multiped.local:9999"
-            }
-        }
+        # args = {
+        #     'topic': topic,
+        #     "geckocore":{
+        #         # this can be tcp or uds address for zmq
+        #         "in_addr": "tcp://0.0.0.0:9998",
+        #         "out_addr": "tcp://0.0.0.0:9999"
+        #     }
+        # }
 
         p = GeckoSimpleProcess()
         p.start(func=publisher, name='publisher {}'.format(topic), kwargs=args)
