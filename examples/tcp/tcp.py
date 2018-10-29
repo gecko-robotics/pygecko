@@ -8,30 +8,24 @@
 
 from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
+import socket
 import time
 
 
 def chew_up_cpu(interval):
     # chew up some cpu
     start = time.time()
-    while (time.time() - start) < interval:
-        5*5
+    while (time.time() - start) < interval: 5*5
 
-
-def pub_bye():
-    print("-"*30)
-    print(" Publisher shutting down ...")
-    print("-"*30)
 
 
 def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
-    geckopy.on_shutdown(pub_bye)
 
-    p = geckopy.Publisher()
-    start = time.time()
     topic = kwargs.get('topic')
+    p = geckopy.Publisher(topic)
+    start = time.time()
     cnt = 0
     while not geckopy.is_shutdown():
         msg = {'time': time.time() - start}
@@ -58,6 +52,8 @@ class Callback(object):
     """
     def __init__(self, name):
         self.name = name
+    def __del__(self):
+        self.bye()
     def callback(self, topic, msg):
         geckopy.loginfo("{}".format(msg))
         chew_up_cpu(.1)
@@ -73,7 +69,7 @@ def subscriber(**kwargs):
     topic = kwargs.get('topic')
     c = Callback(topic)
     geckopy.Subscriber([topic], c.callback)
-    geckopy.on_shutdown(c.bye)
+    # geckopy.on_shutdown(c.bye)
 
     geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
@@ -97,34 +93,16 @@ if __name__ == '__main__':
         args = {
             'topic': topic,
             "geckocore": {
-                "key": "logan"
+                "host": 'localhost'
             }
         }
 
-        # args = {
-        #     'topic': topic,
-        #     "geckocore": {
-        #         "type": "tcp",
-        #         "in": ["multiped.local", 9998],
-        #         "out": ["multiped.local", 9999]
-        #     }
-        # }
-
-        # args = {
-        #     'topic': topic,
-        #     "geckocore":{
-        #         # this can be tcp or uds address for zmq
-        #         "in_addr": "tcp://0.0.0.0:9998",
-        #         "out_addr": "tcp://0.0.0.0:9999"
-        #     }
-        # }
-
         p = GeckoSimpleProcess()
-        p.start(func=publisher, name='publisher {}'.format(topic), kwargs=args)
+        p.start(func=publisher, name='pub_{}'.format(topic), kwargs=args)
         procs.append(p)
 
         s = GeckoSimpleProcess()
-        s.start(func=subscriber, name='subscriber {}'.format(topic), kwargs=args)
+        s.start(func=subscriber, name='sub_{}'.format(topic), kwargs=args)
         procs.append(s)
 
     while True:
