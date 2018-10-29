@@ -131,7 +131,20 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
         rate.sleep()
     ```
 
+# Basic User API
 
+- GeckoCore(port=11311, hertz=5)
+- geckopy.*
+    - init_node(kwargs)
+        - kwargs = {'host': 'machine.local')
+        - kwargs = {'host': '1.2.3.4')
+        - kwargs = {'host': 'localhost')
+    - logX(test, topic='log')
+        - X: Error, Debug, Info, Warning
+    - is_shutdown()
+    - Publisher(topics, addr=None, queue_size=10, bind=True)
+    - Subscriber(topics, callback=None, addr=None, bind=False)
+    - spin(hertz=100)
 
 # Change Log
 
