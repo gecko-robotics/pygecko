@@ -16,77 +16,55 @@ on macOS and various linux systems
     - instead of `roslaunch` use `geckolaunch.py`
 - `simplejson`/`pyyaml` - config and launch files
 - All of this runs on [Raspberry Pi 3](http://www.raspberrypi.org)
-    - Also runs on macOS (UNIX) and Windows
-
-**WARNING:** This really doesn't work on windows and it is not tested on windows. I from time to time do test it, but rarely. The main platforms are Linux and macOS (UNIX).
+    - Also runs on macOS (UNIX)
 
 # Architecture
 
 ![](pics/multiprocess.png)
 
-- GeckoCore is a main message hub and calculates statistics for data through put and node cpu/memory usage
+- GeckoCore is a main hub and prints node cpu/memory usage
     - Actually, when gecko processes start up, they tell geckocore their pid numbers so it can track usage using `psutil` library
     - Obviously this only works on processes located on the same machine as geckocore
+    - GeckoCore really just displays info and keeps track of publisher topics/addresses
 - Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
-- Subscriber can subscribe to multiple topics
-- Publishers are not bound to any one topic, but can also publish to multiple topics
+- Subscriber can subscribe to one topic
+- Publishers can also publish to multiple topics
 
 ## `geckocore.py`
 
-This is the main message hub and keeps track of messages statistics that pass
-through it along with connections.
+This is the main message hub. GeckoCore also is passed the PIDs for processes on the 
+local machine and prints performance data on each process:
 
 ```bash
-+------------------------------------------------------------
-| GeckoCore[32871].............. cpu:   6.7%    mem:   0.06%
-| Total messages seen: 1058
++========================================
+| Processes Performance
+| [24790] GeckoCore............. cpu:  0.3%  mem:  0.0%
+| [24793] pub_ryan.............. cpu:  0.1%  mem:  0.0%
+| [24795] pub_mike.............. cpu:  0.1%  mem:  0.0%
+| [24796] sub_mike.............. cpu: 20.5%  mem:  0.0%
+| [24797] pub_sammie............ cpu:  0.1%  mem:  0.0%
+| [24798] sub_sammie............ cpu: 20.5%  mem:  0.0%
 +------------------------------
-| LISTEN 192.168.86.213:9998 connected to None:None
-| LISTEN 192.168.86.213:9999 connected to None:None
-| ESTABLISHED 192.168.86.213:9998 connected to 192.168.86.213:49793
-| ESTABLISHED 192.168.86.213:9998 connected to 192.168.86.213:49792
-| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49794
-| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49795
-| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49796
-| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49797
-| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49798
-| ESTABLISHED 192.168.86.213:9999 connected to 192.168.86.213:49799
-| ESTABLISHED 192.168.86.213:9998 connected to 192.168.86.213:49800
+| ESTABLISHED Connections
+| pub_mike............ 192.168.86.22:50551 --> 192.168.86.22:50557
+| sub_mike............ 192.168.86.22:50557 --> 192.168.86.22:50551
+| pub_sammie.......... 192.168.86.22:50554 --> 192.168.86.22:50558
+| sub_sammie.......... 192.168.86.22:50558 --> 192.168.86.22:50554
 +------------------------------
- hello.........................   39.3 msgs/s      1.8 kB/s
- hey there.....................   39.3 msgs/s      1.8 kB/s
- cv............................   14.3 msgs/s   4298.6 kB/s
+| LISTEN Connections
+| GeckoCore........... 192.168.86.22:11311
+| pub_ryan............ 192.168.86.22:50548
+| pub_mike............ 192.168.86.22:50551
+| pub_sammie.......... 192.168.86.22:50554
++========================================
+| Published Topics <topic>@tcp://<ip>:<port>
+|  1: ryan@tcp://192.168.86.22:50548
+|  2: mike@tcp://192.168.86.22:50551
+|  3: sammie@tcp://192.168.86.22:50554
++========================================
 ```
-geckocore also is passed the PIDs for processes on the local machine and
-prints performance data on each process:
-
-```bash
-+------------------------------
-| Alive processes: 9
-+------------------------------
-| subscribe2[32880]............. cpu:   3.5%    mem:   0.07%
-| subscribe2[32882]............. cpu:   3.5%    mem:   0.07%
-| subscribe2[32885]............. cpu:   2.2%    mem:   0.08%
-| subscribe2[32884]............. cpu:   2.2%    mem:   0.08%
-| pcv[32886].................... cpu:   5.7%    mem:   0.18%
-| subscribe2[32881]............. cpu:   3.5%    mem:   0.07%
-| subscribe2[32883]............. cpu:   3.4%    mem:   0.07%
-| publish[32879]................ cpu:   0.9%    mem:   0.07%
-| publish[32878]................ cpu:   0.9%    mem:   0.07%
-```
-
-Note that the topics above are: `hello`, `hey there`, and `cv`. They can be any string.
 
 ## `geckolaunch.py`
-
-
-```bash
-                                geckocore
-              spawn | pub --\  +---------+  /---> sub
-geckolaunch ------->| pub ---->|in    out|------> sub
-                    | pub --/  +---------+  \---> sub
-                                             \--> sub
-```
 
 `geckolaunch.py` allows you to launch a bunch of processes quickly using a launch
 file. A launch file is just a simple json file where each line takes the form:
@@ -107,36 +85,10 @@ file. A launch file is just a simple json file where each line takes the form:
     ["process", "pcv", {"topic": "cv"}]
   ],
   "geckocore": {
-      "type": "tcp",
-      "in": ["localhost", 9998],
-      "out": ["localhost", 9999]
+      "host": "localhost"  # or hostname.local
   }
 }
 ```
-
-OR you can use a hostname as a `geckocore` key to find it on the network. Here
-the machine `bob.local` has a core we want to talk to:
-
-```bash
-{
-  "processes":
-  [...],
-  "geckocore": {
-      "key": "bob"
-  }
-}
-```
-
-
-Here we have a bunch of functions (`publish`,  `subscribe2`, and `pcv`) located in a
-python file called `process.py` (note, the `.py` file extension is assumed because
-`pygecko` uses `import` to load these functions. There is no reason eveything has
-to be located in one file, I was just lazy when I wrote this example and did
-a lot of copy/paste. :smile:
-
-There are a bunch of `kwargs` (dictionaries) that are passed to the functions full
-of whatever args you want to pass. In this example, the args are mostly just
-topic names to pub/sub to.
 
 ## `geckopy`
 
@@ -154,8 +106,6 @@ pub/sub processes easy. See the `/examples` folder to see it in action.
     geckopy.logerror('this is a error message')
     geckopy.logdebug('this is a debug message')
     ```
-- **on_shutdown:** pushes a function to a stack (FIFO) that will be called when `geckopy`
-shutsdown
 - **Subscriber:** creates a subscriber and appends the callback function to an
 array in geckopy
 - **Publisher:** creates a publisher and returns it
@@ -167,83 +117,14 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
     while True:
         rate.sleep()
     ```
-### Where is GeckoCore?
 
-`geckopy` resolves the core address in the following order
-
-1. `kwargs` passed to `geckopy` contains the address. This allows you to over ride
-talking to a `geckocore` running on your machine and instead talk to one on another
-machine. These args can be set in your individual python file or in a launch file.
-    ```python
-    # use this key with multicast to find geckocore
-    kwargs = {
-        "geckocore":
-            {
-                "key": "bob"
-            }
-    }
-
-    # OR
-    # tcp ip/hostname and port number
-    kwargs = {
-        "geckocore":{
-                "type": "tcp",
-                "in": ["bob.local", 12345],
-                "out": ["bob.local", 23456]
-            }
-    }
-
-    # OR
-    # unix domain sockets, only works on linux/unix
-    kwargs = {
-        "geckocore":{
-                "type": "uds",
-                "in": "ipc://file/path",
-                "out": "ipc://file/path"
-            }
-    }
-
-    # OR
-    # zmq address, either tcp or uds
-    kwargs = {
-        "geckocore":{
-                # this can be tcp or uds address for zmq
-                "in_addr": "tcp://1.2.3.4:1234",
-                "out_addr": "tcp://1.2.3.4:2345"
-            }
-    }
-    ```
-1. Multicast beacon to find `geckocore`
-    - `geckopy.init_node()` sends a multicast ping out to the local network
-    - `geckocore` hears it and returns its address info
-        - Since there could be many `geckocores` running on different machines
-          on the local network, a *key* is used to get the response you want.
-          The key is based off the host name
-1. If `/tmp/gecko*.json` exists, then use the address in there. `geckocore` creates this file and it only works for processes running on the *same* machine as `geckocore`
-1. If all else fails, use the default addresses:
-    - type: tcp
-    - in: localhost: 9998
-    - out: localhost: 9999
-
-Ideally, when programming, you should never have to tell a sub/pub where to
-connect. `geckopy` has that info for you because it was set in a launch
-file, passed to `geckopy` in args, the data is found in a temp file in the
-tmp directory, or we fall back to the default values.
-
-So what do you have to know to get `geckocore`'s info?
-
-| Method   | Key | IPv4/Zeroconfig | Ports | Scope   | Notes |
-|----------|-----|-----------------|-------|---------|-------|
-| `kwargs` | No  | Yes             | Yes   | Network | could get from launch file |
-| Multicast| Yes | No              | No    | Network | need key for multiple cores on the network, based off hostname |
-| tempfile | No  | No              | No    | Machine | fallback solution, file located in `/tmp` |
-| default  | No  | No              | No    | Machine | no guarantee this will work, all else has failed |
 
 
 # Change Log
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2018-Oct-28 | 1.1.0 | simplified and removed geckocore as the main hub
 2018-Sep-16 | 1.0.3 | implemented a multicast connection process
 2018-Sep-16 | 1.0.2 | dropping python 2.7 support, only 3.7+
 2018-Sep-11 | 1.0.1 | working, but still need to flush it out some more
