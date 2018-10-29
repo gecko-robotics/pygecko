@@ -20,17 +20,32 @@ on macOS and various linux systems
 
 # Architecture
 
-![](pics/multiprocess.png)
+![](pics/multiprocess-2.png)
 
 - GeckoCore is a main hub and prints node cpu/memory usage
     - Actually, when gecko processes start up, they tell geckocore their pid numbers so it can track usage using `psutil` library
     - Obviously this only works on processes located on the same machine as geckocore
     - GeckoCore really just displays info and keeps track of publisher topics/addresses
-- Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship.
-- Subscriber can subscribe to one topic
+    - There is only **one** core per machine
+- Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship
+- Pubs/Subs can exist on remote machines
+    - If a Pub/Sub is on a remote machine, then it's performance data is not displayed
+    - There currently is no mechanism to get the remote performance data
+- Subscriber can subscribe to one topic **(TBD)**
 - Publishers can also publish to multiple topics
 
 ## `geckocore.py`
+
+![](pics/multiprocess-3.png)
+
+1. Publisher opens a random port and publishes data on a topic
+1. Publisher tells GeckoCore the topic and address/port
+1. GeckoCore acknowledges the publisher
+1. A subscriber wants to listen to a topic and asks GeckoCore for the address/port
+1. GeckoCore:
+    1. If topic is found, return the address/port and an ok status
+    1. If topic is *not* found, returns a topic not found status
+1. Subscriber connects to the publisher with the given address/port
 
 This is the main message hub. GeckoCore also is passed the PIDs for processes on the 
 local machine and prints performance data on each process:
@@ -91,8 +106,6 @@ file. A launch file is just a simple json file where each line takes the form:
 ```
 
 ## `geckopy`
-
-![](pics/geckopy-flow.png)
 
 See the examples, but this acts like a `rospy` and helps make writing
 pub/sub processes easy. See the `/examples` folder to see it in action.
