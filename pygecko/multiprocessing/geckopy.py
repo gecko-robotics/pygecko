@@ -117,11 +117,34 @@ class GeckoPy(SignalCatch):
             raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
 
         # request.close()
+    # def find_publisher2(self, topics):
+    #     ret = {}
+    #
+    #     request = Req()
+    #     request.connect(self.req_addr)
+    #
+    #     for topic in topics:
+    #         msg = {
+    #             'T': ZmqType.sub,  # subscriber
+    #             'topics': topic,
+    #             'pid': self.pid,
+    #             'name': self.name
+    #         }
+    #         ans = request.get(msg)
+    #         if ans:
+    #             if ans['status'] == Status.ok:
+    #                 try:
+    #                     ret[ans['addr']].append(ans['topic'])
+    #                 except:
+    #                     ret[ans['addr']] = [ans['topic']]
+    #
+    #     # request.close()
+    #     return ans
 
-    def find_publisher(self, topic):
+    def find_publisher(self, topics):
         msg = {
             'T': ZmqType.sub,  # subscriber
-            'topics': topic,
+            'topics': topics,
             'pid': self.pid,
             'name': self.name
         }
@@ -129,7 +152,8 @@ class GeckoPy(SignalCatch):
         request.connect(self.req_addr)
         ans = request.get(msg)
         if ans is None:
-            raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+            # raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+            ans = {'status': Staus.core_not_found}
 
         # request.close()
         return ans
@@ -248,7 +272,7 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
         # addr = g_geckopy.proc_ip
         # addr = zmqTCP(addr)
         msg = g_geckopy.find_publisher(topics)
-        if msg and msg['status'] != 0:
+        if msg and msg['status'] != Status.ok:
             raise Exception("Subscriber couldn't talk to core")
         else:
             addr = msg['addr']
@@ -264,6 +288,43 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
     # should this be else: ???
     return s
 
+def SubscriberMulti(topics, cb_func=None, addr=None, bind=False):
+    """
+    Creates a subscriber that can connect or bind to an address.
+
+    addr: either a valid tcp or uds address. If nothing is passed in, then
+          it is set to what geckopy defaults to
+    queue_size: how many messages to queue up, default is 5
+    bind: by default this connects to geckocore, but you can also have it bind
+          to a different port
+    """
+    global g_geckopy
+
+    # if len(topics) > 1:
+    #     topics = [topics[0]]
+    #     print("*** Sub topics can only be one, using:", topics)
+
+    s = Sub(cb_func=cb_func, topics=topics)
+
+    if (addr is None) and (not bind):
+        # addr = g_geckopy.proc_ip
+        # addr = zmqTCP(addr)
+        msg = g_geckopy.find_publisher(topics)
+        if msg and msg['status'] != Status.ok:
+            raise Exception("Subscriber couldn't talk to core")
+        else:
+            addr = msg['addr']
+        print('>> sub', addr)
+
+    if bind:
+        s.bind(addr)
+    else:
+        s.connect(addr)
+
+    if cb_func:
+        g_geckopy.subs.append(s)
+    # should this be else: ???
+    return s
 
 def spin(hertz=50):
     """
