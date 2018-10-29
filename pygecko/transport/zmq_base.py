@@ -25,24 +25,29 @@ class Base(object):
     Base class for other derived pub/sub/service classes
     """
     # ctx = zmq.Context()
-    socket = None
-    pack = None
+    # socket = None
+    # pack = None
+    # topics = None
 
-    def __init__(self, kind=None):
+    def __init__(self, kind=None, serialize=Pickle):  # FIXME: kind is not used???
+        topics = None
+        pack = None  # ???
         self.ctx = zmq.Context()
-        self.pickle = Pickle()
+        self.pickle = serialize()  # use pack or serialize??
         if kind:
             self.socket = self.ctx.socket(kind)
         else:
             self.socket = None
 
     def __del__(self):
+        """Calls close()"""
         self.close()
         # self.ctx.term()
         # self.socket.close()
         # print('[<] shutting down {}'.format(type(self).__name__))
 
     def close(self):
+        """Closes socket and terminates context"""
         self.socket.close()
         self.ctx.term()
         # print('[<] shutting down {}'.format(type(self).__name__))
@@ -52,11 +57,12 @@ class Base(object):
         Binds a socket to an addr. Only one socket can bind.
         Usually pub binds and sub connects, but not always!
 
-        in:
+        args:
           addr as tcp or uds
           hwm (high water mark) a int that limits buffer length
           queue_size is the same as hwm
-        out: none
+          random: select a random port to bind to
+        return: port number
         """
         # print(type(self).__name__, 'bind to {}'.format(addr))
         if random:
@@ -78,8 +84,11 @@ class Base(object):
         Connects a socket to an addr. Many different sockets can connect.
         Usually pub binds and sub connects, but not always!
 
-        in: addr as tcp or uds, hwm (high water mark) a int that limits buffer length
-        out: none
+        args:
+            addr as tcp or uds
+            hwm (high water mark) a int that limits buffer length
+            queue_size is the same as hwm
+        return: none
         """
         # print(type(self).__name__, 'connect to {}'.format(addr))
         self.socket.connect(addr)

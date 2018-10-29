@@ -9,6 +9,7 @@ from pygecko.transport.srv import cService, cServiceProxy
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
 from pygecko.transport.helpers import GetIP
+from pygecko.transport.core import ZmqType
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 from colorama import Fore, Style
@@ -197,6 +198,8 @@ def is_shutdown():
 
 def Publisher(topics, addr=None, queue_size=5, bind=True):
     """
+    Creates a publisher that can either connect or bind to an address.
+
     addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
           it is set to what geckopy defaults to
     queue_size: how many messages to queue up, default is 5
@@ -205,10 +208,11 @@ def Publisher(topics, addr=None, queue_size=5, bind=True):
     """
     global g_geckopy
     p = Pub()
+    p.topics = topics  # need to keep track
     if (addr is None) and (bind):
         addr = g_geckopy.proc_ip
         addr = zmqTCP(addr)
-        print('>> pub', addr)
+        # print('>> pub', addr)
         # addr = g_geckopy.core_inaddr
 
     if bind:
@@ -222,6 +226,8 @@ def Publisher(topics, addr=None, queue_size=5, bind=True):
 
 def Subscriber(topics, cb_func=None, addr=None, bind=False):
     """
+    Creates a subscriber that can connect or bind to an address.
+    
     addr: either a valid tcp or uds address. If nothing is passed in, then
           it is set to what geckopy defaults to
     queue_size: how many messages to queue up, default is 5

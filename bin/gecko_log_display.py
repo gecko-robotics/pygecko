@@ -35,10 +35,8 @@ if __name__ == "__main__":
     args = handleArgs()
     topic = args['topic']
 
-    host = args['host']
     kwargs = {
-        'in_addr': zmqTCP(host, 9998),
-        'out_addr': zmqTCP(host, 9999)
+        'host': args['host']
     }
 
     geckopy.init_node(**kwargs)

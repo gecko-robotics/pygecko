@@ -16,6 +16,7 @@ import socket
 
 
 class GetIP(object):
+    """Returns the IP address using a couple of different methods"""
     ip = None
     def get(self):
         """Get ip address of host machine"""
