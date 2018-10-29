@@ -12,6 +12,11 @@ class GeckoSimpleProcess(object):
     """
     A simple class to help processes start/stop easily. It is main intended for
     testing and some simple things.
+
+    p = GeckoSimpleProcess()  # create process
+    p.start(function)         # start the process, runs function
+    ...                       # stuff happens
+    p.join()                  # time to go ... bye!
     """
     ps = None
 
@@ -41,22 +46,22 @@ class GeckoSimpleProcess(object):
         if kwargs:
             kwargs = kwargs['kwargs']  # WTF???
         else:
-            kwargs = {}
+            kwargs = {"host": "localhost"}
 
-        if 'core_inaddr' not in kwargs:
-            kwargs['core_inaddr'] = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
-        if 'core_outaddr' not in kwargs:
-            kwargs['core_outaddr'] = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
+        # if 'core_inaddr' not in kwargs:
+        #     kwargs['core_inaddr'] = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
+        # if 'core_outaddr' not in kwargs:
+        #     kwargs['core_outaddr'] = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
 
         self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()
-        print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
+        # print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
 
     def join(self, timeout=None):
-        print('>> Stopping Simple Process {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')
+        # print('>> Stopping Simple Process {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')
         if self.ps:
             self.ps.join(timeout)
             if self.ps.is_alive():
                 self.ps.terminate()
         self.ps = None
-        print('stopped')
+        # print('stopped')

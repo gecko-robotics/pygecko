@@ -1,10 +1,15 @@
 from __future__ import print_function
 from setuptools import setup
-from pygecko import __version__ as VERSION
 from build_utils import BuildCommand
 from build_utils import PublishCommand
 from build_utils import BinaryDistribution
 
+ver = {}
+with open("pygecko/version.py") as fp:
+    exec(fp.read(), ver)
+VERSION = ver['__version__']
+
+# __version__ = "1.0.3"
 
 PACKAGE_NAME = 'pygecko'
 BuildCommand.pkg = PACKAGE_NAME
@@ -38,6 +43,7 @@ setup(
     ],
     install_requires=[
         'pyyaml',         # config files
+        'psutil',
         'simplejson',     # config files
         'msgpack',        # efficient message serialization through zmq
         'pyzmq',          # connecting to different processes and computers

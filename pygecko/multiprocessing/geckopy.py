@@ -4,19 +4,17 @@
 # see LICENSE for full details
 ##############################################
 # from pygecko.transport.zmq_base import ZMQError
-from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
-from pygecko.transport.srv import cService, cServiceProxy
-# from pygecko.transport.zmq_req_rep import Req
-# from pygecko.transport.helpers import zmqTCP
-# from pygecko.transport.beacon import BeaconFinder, get_host_key
-from pygecko.multiprocessing.corefinder import CoreFinder
+from pygecko.transport.zmq_sub_pub import Pub, Sub
+# from pygecko.transport.srv import cService, cServiceProxy
+from pygecko.transport.zmq_req_rep import Req
+from pygecko.transport.helpers import zmqTCP
+from pygecko.transport.helpers import GetIP
+from pygecko.gecko_enums import ZmqType, Status
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
-# from pygecko.multiprocessing.delay import GeckoRate, Rate
-# import signal
+from colorama import Fore, Style
 import time
 import os
-# from colorama import Fore, Back, Style
 import multiprocessing as mp
 
 # Holly crap namespace and pickle use a lot of cpu!
@@ -84,28 +82,99 @@ class GeckoPy(SignalCatch):
         self.hooks = []  # functions to call on shutdown
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
+        self.logpub = None
 
-        # find the core
-        finder = CoreFinder(self.pid, self.name, **kwargs)
-        self.core_inaddr = finder.core_inaddr
-        self.core_outaddr = finder.core_outaddr
-
-        print("<<< in: {} >>".format(self.core_inaddr))
-        print("<<< out: {} >>".format(self.core_outaddr))
-
-        # publish log messages
-        self.logpub = Pub()
-        self.logpub.connect(self.core_inaddr, queue_size=1)
-
-        # here has to be a way to replace this with multicast ... I think
-        # I don't need the complexity above
-        # if self.core_inaddr:
-        #     self.notify_core(True, self.core_inaddr)
+        # hard code for now
+        if 'host' in kwargs.keys():
+            host = kwargs.pop('host')
+            if host == 'localhost':
+                host = GetIP().get()
+        else:
+            host = GetIP().get()  # FIXME: kwargs should provide this
+        self.req_addr = zmqTCP(host, 11311)  # set/get topic addrs
+        self.proc_ip = host  # this ip address
 
     def __del__(self):
         if len(self.hooks) > 0:
             for h in self.hooks:
                 h()
+
+    def register_publisher(self, topics, port):
+        addr = zmqTCP(self.proc_ip, port)
+        msg = {
+            'T': ZmqType.pub,  # publish
+            'topics': topics,
+            'addr': addr,
+            'pid': self.pid,
+            'name': self.name
+        }
+
+        request = Req()
+        request.connect(self.req_addr)
+        ans = request.get(msg)
+        if ans is None or ans['status'] != Status.ok:
+            print("*** {} ***".format(ans))
+            raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+
+        # request.close()
+    # def find_publisher2(self, topics):
+    #     ret = {}
+    #
+    #     request = Req()
+    #     request.connect(self.req_addr)
+    #
+    #     for topic in topics:
+    #         msg = {
+    #             'T': ZmqType.sub,  # subscriber
+    #             'topics': topic,
+    #             'pid': self.pid,
+    #             'name': self.name
+    #         }
+    #         ans = request.get(msg)
+    #         if ans:
+    #             if ans['status'] == Status.ok:
+    #                 try:
+    #                     ret[ans['addr']].append(ans['topic'])
+    #                 except:
+    #                     ret[ans['addr']] = [ans['topic']]
+    #
+    #     # request.close()
+    #     return ans
+
+    def find_publisher(self, topics):
+        msg = {
+            'T': ZmqType.sub,  # subscriber
+            'topics': topics,
+            'pid': self.pid,
+            'name': self.name
+        }
+        request = Req()
+        request.connect(self.req_addr)
+        ans = request.get(msg)
+        if ans is None:
+            # raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+            ans = {'status': Staus.core_not_found}
+
+        # request.close()
+        return ans
+
+    def __format_print(self, topic, msg):
+        # print(msg.level)
+        # msg format: {proc_name, level, text}
+        if msg.level == 'DEBUG': color = Fore.CYAN
+        elif msg.level == 'WARN': color = Fore.YELLOW
+        elif msg.level == 'ERROR': color = Fore.RED
+        else: color = Fore.GREEN
+
+        # shorten proc names??
+        print(Style.BRIGHT + color + '>> {}:'.format(msg.name[:10]) + Style.RESET_ALL + msg.text)
+        # print(">> {}: {}".format(topic, msg))
+
+    def log(self, topic, msg):
+        if self.logpub is None:
+            self.__format_print(topic, msg)
+        else:
+            self.logpub.pub(topic, msg)
 
 
 def init_node(**kwargs):
@@ -122,25 +191,25 @@ def init_node(**kwargs):
 def loginfo(text, topic='log'):
     global g_geckopy
     msg = Log('INFO', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def logdebug(text, topic='log'):
     global g_geckopy
     msg = Log('DEBUG', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def logwarn(text, topic='log'):
     global g_geckopy
     msg = Log('WARN', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def logerror(text, topic='log'):
     global g_geckopy
     msg = Log('ERROR', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def is_shutdown():
@@ -151,10 +220,11 @@ def is_shutdown():
     return g_geckopy.kill
 
 
-# def Publisher(self, uds_file=None, host='localhost', queue_size=10, bind=False):
-def Publisher(addr=None, queue_size=5, bind=False):
+def Publisher(topics, addr=None, queue_size=5, bind=True):
     """
-    addr: either a valid tcp or uds address. If nothing is passed in, then
+    Creates a publisher that can either connect or bind to an address.
+
+    addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
           it is set to what geckopy defaults to
     queue_size: how many messages to queue up, default is 5
     bind: by default this connects to geckocore, but you can also have it bind
@@ -162,20 +232,26 @@ def Publisher(addr=None, queue_size=5, bind=False):
     """
     global g_geckopy
     p = Pub()
-    if addr is None:
-        addr = g_geckopy.core_inaddr
+    p.topics = topics  # need to keep track
+    if (addr is None) and (bind):
+        addr = g_geckopy.proc_ip
+        addr = zmqTCP(addr)
+        # print('>> pub', addr)
+        # addr = g_geckopy.core_inaddr
 
     if bind:
-        p.bind(addr, queue_size=queue_size)
+        port = p.bind(addr, queue_size=queue_size, random=True)
+        g_geckopy.register_publisher(topics, port)
     else:
         p.connect(addr, queue_size=queue_size)
 
     return p
 
 
-# def Subscriber(self, topics, cb, host='localhost', uds_file=None):
 def Subscriber(topics, cb_func=None, addr=None, bind=False):
     """
+    Creates a subscriber that can connect or bind to an address.
+
     addr: either a valid tcp or uds address. If nothing is passed in, then
           it is set to what geckopy defaults to
     queue_size: how many messages to queue up, default is 5
@@ -183,9 +259,24 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
           to a different port
     """
     global g_geckopy
+
+    if len(topics) > 1:
+        topics = [topics[0]]
+        print("*** Sub topics can only be one, using:", topics)
+
     s = Sub(cb_func=cb_func, topics=topics)
-    if addr is None:
-        addr = g_geckopy.core_outaddr
+    # if addr is None:
+    #     addr = g_geckopy.core_outaddr
+
+    if (addr is None) and (not bind):
+        # addr = g_geckopy.proc_ip
+        # addr = zmqTCP(addr)
+        msg = g_geckopy.find_publisher(topics)
+        if msg and msg['status'] != Status.ok:
+            raise Exception("Subscriber couldn't talk to core")
+        else:
+            addr = msg['addr']
+        print('>> sub', addr)
 
     if bind:
         s.bind(addr)
@@ -197,68 +288,43 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
     # should this be else: ???
     return s
 
-
-def Service(name, callback, addr):
+def SubscriberMulti(topics, cb_func=None, addr=None, bind=False):
     """
-    name does nothing and i need to directly pass the address
-    """
-    global g_geckopy
-    s = cService(name, callback)
-    # bind or connect?
-    s.bind(addr)
-    # notify core??
-    # how do people find this?
-    g_gecko.srvs.append(s)
+    Creates a subscriber that can connect or bind to an address.
 
-
-def ServiceProxy(name, addr):
-    """
-    right now name does nothing and i need to pass an address
-
-    eventually name should be used in some manor to lookup the address
+    addr: either a valid tcp or uds address. If nothing is passed in, then
+          it is set to what geckopy defaults to
+    queue_size: how many messages to queue up, default is 5
+    bind: by default this connects to geckocore, but you can also have it bind
+          to a different port
     """
     global g_geckopy
-    sp = cServiceProxy(name, addr)
-    # try:
-    #     sp = g_gecko.srvs[name]
-    # except KeyError:
-    #     logerror("ServiceProxy: {} not found".format(name))
-    #     sp = None
-    return sp
 
+    # if len(topics) > 1:
+    #     topics = [topics[0]]
+    #     print("*** Sub topics can only be one, using:", topics)
 
-def wait_for_service(name, timeout=None):
-    logerror("not sure wait_for_service is correct")
-    return True
+    s = Sub(cb_func=cb_func, topics=topics)
 
-    global g_geckopy
-    # find service
-    # how???
-    start = time.time()
-    rate = Rate(10)
-    while name not in g_geckopy.srvs:
-        # ask core for service address?
-        # wait here for it ... how long?
-        rate.sleep()
-        if timeout:
-            if (start - time.time()) > timeout:
-                return False
-    return True
+    if (addr is None) and (not bind):
+        # addr = g_geckopy.proc_ip
+        # addr = zmqTCP(addr)
+        msg = g_geckopy.find_publisher(topics)
+        if msg and msg['status'] != Status.ok:
+            raise Exception("Subscriber couldn't talk to core")
+        else:
+            addr = msg['addr']
+        print('>> sub', addr)
 
+    if bind:
+        s.bind(addr)
+    else:
+        s.connect(addr)
 
-def on_shutdown(hook):
-    """
-    Allows you to setup hooks for when eveything shuts down. Function accepts
-    no arguments.
-
-    hook = function()
-
-    This is an array, so functions are called in order they were put in:
-    FIFO.
-    """
-    global g_geckopy
-    g_geckopy.hooks.append(hook)
-
+    if cb_func:
+        g_geckopy.subs.append(s)
+    # should this be else: ???
+    return s
 
 def spin(hertz=50):
     """
@@ -275,3 +341,66 @@ def spin(hertz=50):
             srv.handle()
 
         rate.sleep()
+
+###########################################################################
+
+# def Service(name, callback, addr):
+#     """
+#     name does nothing and i need to directly pass the address
+#     """
+#     global g_geckopy
+#     s = cService(name, callback)
+#     # bind or connect?
+#     s.bind(addr)
+#     # notify core??
+#     # how do people find this?
+#     g_gecko.srvs.append(s)
+
+
+# def ServiceProxy(name, addr):
+#     """
+#     right now name does nothing and i need to pass an address
+#
+#     eventually name should be used in some manor to lookup the address
+#     """
+#     global g_geckopy
+#     sp = cServiceProxy(name, addr)
+#     # try:
+#     #     sp = g_gecko.srvs[name]
+#     # except KeyError:
+#     #     logerror("ServiceProxy: {} not found".format(name))
+#     #     sp = None
+#     return sp
+
+
+# def wait_for_service(name, timeout=None):
+#     logerror("not sure wait_for_service is correct")
+#     return True
+#
+#     global g_geckopy
+#     # find service
+#     # how???
+#     start = time.time()
+#     rate = Rate(10)
+#     while name not in g_geckopy.srvs:
+#         # ask core for service address?
+#         # wait here for it ... how long?
+#         rate.sleep()
+#         if timeout:
+#             if (start - time.time()) > timeout:
+#                 return False
+#     return True
+
+
+# def on_shutdown(hook):
+#     """
+#     Allows you to setup hooks for when eveything shuts down. Function accepts
+#     no arguments.
+#
+#     hook = function()
+#
+#     This is an array, so functions are called in order they were put in:
+#     FIFO.
+#     """
+#     global g_geckopy
+#     g_geckopy.hooks.append(hook)

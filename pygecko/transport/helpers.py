@@ -13,11 +13,13 @@ from __future__ import print_function
 from __future__ import division
 import zmq
 import socket
-# from pygecko.transport.beacon import GetIP
+
 
 class GetIP(object):
+    """Returns the IP address using a couple of different methods"""
     ip = None
     def get(self):
+        """Get ip address of host machine"""
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # doesn't even have to be reachable
@@ -28,7 +30,7 @@ class GetIP(object):
                 n = socket.gethostname()
                 # make sure it has a zeroconfig .local or you end up
                 # with 127.0.0.1 as your address
-                if n.find('.local') < 0:
+                if n.find('.local') < 0 and n.find('.lan') < 0:
                     n += '.local'
                 IP = socket.gethostbyname(n)
             except:
@@ -39,21 +41,36 @@ class GetIP(object):
         self.ip = IP
         return IP
 
+    def getbyname(self, name):
+        """Given a host name, determine its ip address"""
+        try:
+            # make sure it has a zeroconfig .local or you end up
+            # with 127.0.0.1 as your address
+            if name.find('.local') < 0: name += '.local'
+            IP = socket.gethostbyname(name)
+        except:
+            IP = None
+        self.ip = IP
+        return IP
+
 def zmq_version():
     """
     What version of the zmq (C++) library is python tied to?
     """
-    print('Using ZeroMQ version: {0!s}'.format((zmq.zmq_version())))
+    return 'Using ZeroMQ version: {0!s}'.format((zmq.zmq_version()))
 
 
-def zmqTCP(host, port):
+def zmqTCP(host, port=None):
     """
     Set the zmq address as TCP: tcp://host:port
     """
-    if host == 'localhost':  # do I need to do this?
-        # host = Socket.gethostbyname(Socket.gethostname())
+    if host == 'localhost':
         host = GetIP().get()
-    return 'tcp://{}:{}'.format(host, port)
+    if port:
+        ret = 'tcp://{}:{}'.format(host, port)
+    else:
+        ret = 'tcp://{}'.format(host)
+    return ret
 
 
 def zmqUDS(mnt_pt):

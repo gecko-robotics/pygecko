@@ -5,5 +5,3 @@
 ##############################################
 from pygecko.multiprocessing.launch import GeckoLauncher
 from pygecko.multiprocessing.process import GeckoSimpleProcess
-from pygecko.multiprocessing.corefinder import CoreFinder
-from pygecko.multiprocessing.process import GeckoSimpleProcess

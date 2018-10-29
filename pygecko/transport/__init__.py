@@ -10,4 +10,4 @@ from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
 from pygecko.transport.helpers import zmq_version
 from pygecko.transport.helpers import zmqTCP, zmqUDS
-from pygecko.transport.beacon import GetIP
+from pygecko.transport.helpers import GetIP

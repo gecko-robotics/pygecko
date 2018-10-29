@@ -9,11 +9,6 @@ import multiprocessing as mp
 import os
 import sys
 import platform
-# from pygecko.multiprocessing.sig import SignalCatch
-# from pygecko.transport.helpers import zmqTCP, zmqUDS
-# from pygecko.transport.beacon import BeaconFinder
-# from pygecko.transport.beacon import get_host_key
-# from pygecko.multiprocessing.corefinder import CoreFinder
 from pygecko.multiprocessing.process import GeckoSimpleProcess
 # from pygecko.transport import GeckoCore
 import time
@@ -147,58 +142,3 @@ class GeckoLauncher(object):
 
         finally:
             self.end()
-
-
-
-
-
-# http://jtushman.github.io/blog/2014/01/14/python-%7C-multiprocessing-and-interrupts/
-# from multiprocessing import Process
-# from multiprocessing.managers import SyncManager
-# import signal
-# from time import sleep
-#
-# # initializer for SyncManager
-# def mgr_init():
-#     signal.signal(signal.SIGINT, signal.SIG_IGN)
-#     print 'initialized manager'
-#
-# def f(process_number, shared_array):
-#     try:
-#         print "starting thread: ", process_number
-#         while True:
-#             shared_array.append(process_number)
-#             sleep(3)
-#     except KeyboardInterrupt:
-#         print "Keyboard interrupt in process: ", process_number
-#     finally:
-#         print "cleaning up thread", process_number
-#
-# if __name__ == '__main__':
-#
-#     processes = []
-#
-#   # now using SyncManager vs a Manager
-#     manager = SyncManager()
-#     # explicitly starting the manager, and telling it to ignore the interrupt signal
-#     manager.start(mgr_init)
-#     try:
-#         shared_array = manager.list()
-#
-#         for i in xrange(4):
-#             p = Process(target=f, args=(i, shared_array))
-#             p.start()
-#             processes.append(p)
-#
-#         try:
-#             for process in processes:
-#                 process.join()
-#         except KeyboardInterrupt:
-#             print "Keyboard interrupt in main"
-#
-#         for item in shared_array:
-#             # we still have access to it!  Yay!
-#             print item
-#     finally:
-#       # to be safe -- explicitly shutting down the manager
-#         manager.shutdown()
