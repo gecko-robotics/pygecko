@@ -13,11 +13,12 @@ from __future__ import print_function
 from __future__ import division
 import zmq
 import socket
-# from pygecko.transport.beacon import GetIP
+
 
 class GetIP(object):
     ip = None
     def get(self):
+        """Get ip address of host machine"""
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             # doesn't even have to be reachable
@@ -40,6 +41,7 @@ class GetIP(object):
         return IP
 
     def getbyname(self, name):
+        """Given a host name, determine its ip address"""
         try:
             # make sure it has a zeroconfig .local or you end up
             # with 127.0.0.1 as your address
@@ -54,7 +56,7 @@ def zmq_version():
     """
     What version of the zmq (C++) library is python tied to?
     """
-    print('Using ZeroMQ version: {0!s}'.format((zmq.zmq_version())))
+    return 'Using ZeroMQ version: {0!s}'.format((zmq.zmq_version()))
 
 
 def zmqTCP(host, port=None):

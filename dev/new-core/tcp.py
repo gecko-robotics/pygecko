@@ -15,20 +15,13 @@ import time
 def chew_up_cpu(interval):
     # chew up some cpu
     start = time.time()
-    while (time.time() - start) < interval:
-        5*5
+    while (time.time() - start) < interval: 5*5
 
-
-def pub_bye():
-    print("-"*30)
-    print(" Publisher shutting down ...")
-    print("-"*30)
 
 
 def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
-    geckopy.on_shutdown(pub_bye)
 
     topic = kwargs.get('topic')
     p = geckopy.Publisher(topic)
@@ -38,8 +31,7 @@ def publisher(**kwargs):
         msg = {'time': time.time() - start}
         p.pub(topic, msg)  # topic msg
 
-        # geckopy.logdebug('[{}] published msg'.format(cnt))
-        print(cnt)
+        geckopy.logdebug('[{}] published msg'.format(cnt))
         cnt += 1
         rate.sleep()
     print('pub bye ...')
@@ -60,9 +52,10 @@ class Callback(object):
     """
     def __init__(self, name):
         self.name = name
+    def __del__(self):
+        self.bye()
     def callback(self, topic, msg):
-        # geckopy.loginfo("{}".format(msg))
-        print("{}".format(msg))
+        geckopy.loginfo("{}".format(msg))
         chew_up_cpu(.1)
     def bye(self):
         print("*"*30)
@@ -105,11 +98,11 @@ if __name__ == '__main__':
         }
 
         p = GeckoSimpleProcess()
-        p.start(func=publisher, name='publisher {}'.format(topic), kwargs=args)
+        p.start(func=publisher, name='pub_{}'.format(topic), kwargs=args)
         procs.append(p)
 
         s = GeckoSimpleProcess()
-        s.start(func=subscriber, name='subscriber {}'.format(topic), kwargs=args)
+        s.start(func=subscriber, name='sub_{}'.format(topic), kwargs=args)
         procs.append(s)
 
     while True:

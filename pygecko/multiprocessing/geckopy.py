@@ -4,20 +4,16 @@
 # see LICENSE for full details
 ##############################################
 # from pygecko.transport.zmq_base import ZMQError
-from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
+from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.srv import cService, cServiceProxy
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
 from pygecko.transport.helpers import GetIP
-# from pygecko.transport.beacon import BeaconFinder, get_host_key
-# from pygecko.multiprocessing.corefinder import CoreFinder
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
-# from pygecko.multiprocessing.delay import GeckoRate, Rate
-# import signal
+from colorama import Fore, Style
 import time
 import os
-# from colorama import Fore, Back, Style
 import multiprocessing as mp
 
 # Holly crap namespace and pickle use a lot of cpu!
@@ -85,6 +81,7 @@ class GeckoPy(SignalCatch):
         self.hooks = []  # functions to call on shutdown
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
+        self.logpub = None
 
         # hard code for now
         if 'host' in kwargs.keys():
@@ -136,6 +133,25 @@ class GeckoPy(SignalCatch):
         # request.close()
         return ans
 
+    def __format_print(self, topic, msg):
+        # print(msg.level)
+        # msg format: {proc_name, level, text}
+        if msg.level == 'DEBUG': color = Fore.CYAN
+        elif msg.level == 'WARN': color = Fore.YELLOW
+        elif msg.level == 'ERROR': color = Fore.RED
+        else: color = Fore.GREEN
+
+        # shorten proc names??
+        print(Style.BRIGHT + color + '>> {}:'.format(msg.name[:10]) + Style.RESET_ALL + msg.text)
+        # print(">> {}: {}".format(topic, msg))
+
+    def log(self, topic, msg):
+        if self.logpub is None:
+            self.__format_print(topic, msg)
+        else:
+            self.logpub.pub(topic, msg)
+
+
 def init_node(**kwargs):
     """
     Initializes the node and sets up some global variables.
@@ -150,25 +166,25 @@ def init_node(**kwargs):
 def loginfo(text, topic='log'):
     global g_geckopy
     msg = Log('INFO', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def logdebug(text, topic='log'):
     global g_geckopy
     msg = Log('DEBUG', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def logwarn(text, topic='log'):
     global g_geckopy
     msg = Log('WARN', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def logerror(text, topic='log'):
     global g_geckopy
     msg = Log('ERROR', g_geckopy.name, text)
-    g_geckopy.logpub.pub(topic, msg)
+    g_geckopy.log(topic, msg)
 
 
 def is_shutdown():
@@ -197,9 +213,6 @@ def Publisher(topics, addr=None, queue_size=5, bind=True):
 
     if bind:
         port = p.bind(addr, queue_size=queue_size, random=True)
-        # bf = BeaconFinder('local')
-        # msg = PubIPC('local',topic???,g_geckopy.pid,g_geckopy.name).msg
-        # ans = bf.send(msg)
         g_geckopy.register_publisher(topics, port)
     else:
         p.connect(addr, queue_size=queue_size)
@@ -207,7 +220,6 @@ def Publisher(topics, addr=None, queue_size=5, bind=True):
     return p
 
 
-# def Subscriber(self, topics, cb, host='localhost', uds_file=None):
 def Subscriber(topics, cb_func=None, addr=None, bind=False):
     """
     addr: either a valid tcp or uds address. If nothing is passed in, then
@@ -247,66 +259,66 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
     return s
 
 
-def Service(name, callback, addr):
-    """
-    name does nothing and i need to directly pass the address
-    """
-    global g_geckopy
-    s = cService(name, callback)
-    # bind or connect?
-    s.bind(addr)
-    # notify core??
-    # how do people find this?
-    g_gecko.srvs.append(s)
+# def Service(name, callback, addr):
+#     """
+#     name does nothing and i need to directly pass the address
+#     """
+#     global g_geckopy
+#     s = cService(name, callback)
+#     # bind or connect?
+#     s.bind(addr)
+#     # notify core??
+#     # how do people find this?
+#     g_gecko.srvs.append(s)
 
 
-def ServiceProxy(name, addr):
-    """
-    right now name does nothing and i need to pass an address
-
-    eventually name should be used in some manor to lookup the address
-    """
-    global g_geckopy
-    sp = cServiceProxy(name, addr)
-    # try:
-    #     sp = g_gecko.srvs[name]
-    # except KeyError:
-    #     logerror("ServiceProxy: {} not found".format(name))
-    #     sp = None
-    return sp
-
-
-def wait_for_service(name, timeout=None):
-    logerror("not sure wait_for_service is correct")
-    return True
-
-    global g_geckopy
-    # find service
-    # how???
-    start = time.time()
-    rate = Rate(10)
-    while name not in g_geckopy.srvs:
-        # ask core for service address?
-        # wait here for it ... how long?
-        rate.sleep()
-        if timeout:
-            if (start - time.time()) > timeout:
-                return False
-    return True
+# def ServiceProxy(name, addr):
+#     """
+#     right now name does nothing and i need to pass an address
+#
+#     eventually name should be used in some manor to lookup the address
+#     """
+#     global g_geckopy
+#     sp = cServiceProxy(name, addr)
+#     # try:
+#     #     sp = g_gecko.srvs[name]
+#     # except KeyError:
+#     #     logerror("ServiceProxy: {} not found".format(name))
+#     #     sp = None
+#     return sp
 
 
-def on_shutdown(hook):
-    """
-    Allows you to setup hooks for when eveything shuts down. Function accepts
-    no arguments.
+# def wait_for_service(name, timeout=None):
+#     logerror("not sure wait_for_service is correct")
+#     return True
+#
+#     global g_geckopy
+#     # find service
+#     # how???
+#     start = time.time()
+#     rate = Rate(10)
+#     while name not in g_geckopy.srvs:
+#         # ask core for service address?
+#         # wait here for it ... how long?
+#         rate.sleep()
+#         if timeout:
+#             if (start - time.time()) > timeout:
+#                 return False
+#     return True
 
-    hook = function()
 
-    This is an array, so functions are called in order they were put in:
-    FIFO.
-    """
-    global g_geckopy
-    g_geckopy.hooks.append(hook)
+# def on_shutdown(hook):
+#     """
+#     Allows you to setup hooks for when eveything shuts down. Function accepts
+#     no arguments.
+#
+#     hook = function()
+#
+#     This is an array, so functions are called in order they were put in:
+#     FIFO.
+#     """
+#     global g_geckopy
+#     g_geckopy.hooks.append(hook)
 
 
 def spin(hertz=50):

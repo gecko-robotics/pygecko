@@ -29,10 +29,10 @@ from pygecko.transport.helpers import zmqTCP
 # from pygecko.transport.helpers import zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
-# from pygecko.transport.geckocorefile import CoreFile
 from pygecko.multiprocessing.geckopy import Rate
 from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
 from pygecko.transport.helpers import GetIP
+from pygecko.transport.helpers import zmq_version
 import psutil
 import os
 # import pickle
@@ -159,29 +159,58 @@ class ProcPerformance(object):
         #     print('| {} {}:{} connected to {}:{}'.format(con.status, lip, lport, rip, rport))
 
         # process cpu and memory consumption
-        print('+', '-'*30, sep='')
+        # print('+', '-'*30, sep='')
+        print('+'+'='*40)
         print('| Processes Performance')
 
         procs = tuple(self.procs.values())
+        net = {}
         for ps, psname in procs:
             try:
                 if ps.is_running():
                     # faster or better?
                     # p.cpu_percent(interval=None)
                     # p.memory_percent(memtype="rss")
-                    pd = ps.as_dict(attrs=['cpu_percent','memory_percent'])
+                    pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+                    net[psname] = pd['connections']
+                    # print(psname, pd['connections'])
                     # cpu = ps.cpu_percent()
                     # cpu = cpu if cpu else -1
                     # mem = ps.memory_percent()
                     # mem = mem if mem else -1
                     label = '[{}] {}'.format(ps.pid, psname)
-                    print('| {:.<30} cpu: {:5.1f}%  mem: {:5.1f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+                    print('| {:.<30} cpu:{:5.1f}%  mem:{:5.1f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
                     # print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, cpu, mem))
                 else:
                     # print('*** remove {} ***'.format(ps.pid))
                     self.pop(ps.pid)
             except Exception:
                 self.pop(ps.pid)
+
+        print('+', '-'*30, sep='')
+        print('| ESTABLISHED Connections')
+        for name, p in net.items():
+            for c in p:
+                if c.status == 'ESTABLISHED':
+                    if c.raddr:
+                        rip, rport = c.raddr
+                    else:
+                        rip, rport = (None, None,)
+                    lip, lport = c.laddr
+                    print('| {:.<20} {}:{} --> {}:{}'.format(name, lip, lport, rip, rport))
+
+        print('+', '-'*30, sep='')
+        print('| LISTEN Connections')
+        for name, p in net.items():
+            for c in p:
+                if c.status == 'LISTEN':
+                    # if c.raddr:
+                    #     rip, rport = c.raddr
+                    # else:
+                    #     rip, rport = (None, None,)
+                    lip, lport = c.laddr
+                    print('| {:.<20} {}:{}'.format(name, lip, lport))
+
 
 
 class GeckoCore(SignalCatch, GProcess):
@@ -196,16 +225,13 @@ class GeckoCore(SignalCatch, GProcess):
         """
         self.ip = GetIP().get()
         self.pubs = {}
-
-        # self.pid = os.getpid()
-        # self.core = psutil.Process(self.pid)
-
         self.port = port
+        self.rep_addr = zmqTCP(self.ip, self.port)
+
         print('+'+'='*40)
         print('| GeckoCore')
         print('+'+'='*40)
-        # print("| {}:{}".format(self.ip, self.port))
-        self.rep_addr = zmqTCP(self.ip, self.port)
+        print("| {}".format(zmq_version()))
         print("| REP: {}".format(self.rep_addr))
         print('+'+'='*40)
 
@@ -213,21 +239,8 @@ class GeckoCore(SignalCatch, GProcess):
         self.hertz = hertz
         self.print_interval = 3  # seconds
 
-    # def __del__(self):
-    #     self.corefile.close()
-
-    # def socket_setup(self):
-    #     """
-    #     Setup sockets inside the new process
-    #     """
-    #     print(">> Core inputs {}".format(self.in_addr))
-    #     print(">> Core Outputs {}".format(self.out_addr))
-    #
-    #     self.ins = Sub()
-    #     self.ins.bind(self.in_addr)
-    #
-    #     self.outs = Pub()
-    #     self.outs.bind(self.out_addr)
+    def __del__(self):
+        pass
 
     def handle_reply(self, data):
         ret = {}
@@ -269,7 +282,6 @@ class GeckoCore(SignalCatch, GProcess):
         for k,v in self.pubs.items():
             print("|{:3}: {}@{}".format(i,k,v))
             i+=1
-        print('+'+'='*40)
 
     def run(self):
         """
