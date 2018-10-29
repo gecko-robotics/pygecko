@@ -20,7 +20,7 @@ import time
 # import json
 from pygecko.transport.zmq_base import Base
 from pygecko.transport.zmq_base import ZMQError
-from pygecko.transport.protocol import Pickle
+from pygecko.transport.protocols import Pickle
 
 
 class Pub(Base):
@@ -33,7 +33,7 @@ class Pub(Base):
 
         in: pack - function to serialize messages if needed
         """
-        Base.__init__(self, zmq.PUB, serialize)
+        Base.__init__(self, zmq.PUB, serialize=serialize)
 
         # try:
         #     # self.socket = self.ctx.socket(zmq.PUB)
@@ -94,7 +94,7 @@ class Sub(Base):
         topics: an array of topics, ex ['hello', 'cool messages'] or None to subscribe to all messages
         unpack: a function to deserialize messages if necessary
         """
-        Base.__init__(self, serialize)
+        Base.__init__(self, serialize=serialize)
         self.cb_func = cb_func
 
         try:

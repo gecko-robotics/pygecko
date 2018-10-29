@@ -5,5 +5,5 @@
 ##############################################
 from enum import IntFlag
 
-Status = IntFlag('Status''ok error topic_not_found core_not_found multiple_pub_error invalid_zmq_type')
+Status = IntFlag('Status','ok error topic_not_found core_not_found multiple_pub_error invalid_zmq_type')
 ZmqType = IntFlag('ZmqType', 'pub sub req rep')

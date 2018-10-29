@@ -5,11 +5,11 @@
 ##############################################
 # from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub
-from pygecko.transport.srv import cService, cServiceProxy
+# from pygecko.transport.srv import cService, cServiceProxy
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
 from pygecko.transport.helpers import GetIP
-from pygecko.transport.gecko_enums import ZmqType
+from pygecko.gecko_enums import ZmqType, Status
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 from colorama import Fore, Style
@@ -112,7 +112,7 @@ class GeckoPy(SignalCatch):
         request = Req()
         request.connect(self.req_addr)
         ans = request.get(msg)
-        if ans is None or ans['status'] != 0:
+        if ans is None or ans['status'] != Status.ok:
             print("*** {} ***".format(ans))
             raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
 

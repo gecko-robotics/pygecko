@@ -30,8 +30,8 @@ class Base(object):
     # topics = None
 
     def __init__(self, kind=None, serialize=Pickle):  # FIXME: kind is not used???
-        topics = None
-        pack = None  # ???
+        self.topics = None
+        self.pack = None  # ???
         self.ctx = zmq.Context()
         self.pickle = serialize()  # use pack or serialize??
         if kind:

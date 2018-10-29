@@ -55,10 +55,10 @@ class GeckoSimpleProcess(object):
 
         self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()
-        print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
+        # print('>> Simple Process Started: {}[{}]'.format(self.ps.name, self.ps.pid))
 
     def join(self, timeout=None):
-        print('>> Stopping Simple Process {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')
+        # print('>> Stopping Simple Process {}[{}] ...'.format(self.ps.name, self.ps.pid), end=' ')
         if self.ps:
             self.ps.join(timeout)
             if self.ps.is_alive():
