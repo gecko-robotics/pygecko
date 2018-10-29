@@ -102,18 +102,14 @@ def msg_zmq():
 
     def publisher(**kwargs):
         geckopy.init_node(**kwargs)
-        addr = kwargs.get('addr')
-        p = geckopy.Publisher(addr=addr)
+        p = geckopy.Publisher(topics=['test'])
         time.sleep(1)  # need this!!
 
         for msg in [msg1,msg2,msg3]:
             p.pub('test', msg)
             time.sleep(0.01)
-        # p.pub('test', msg2)
-        # time.sleep(0.01)
-        # p.pub('test', msg3)
 
-    args = {'addr': pub_addr}
+    args = {'host': 'localhost'}
     p = GeckoSimpleProcess()
     p.start(func=publisher, name='publisher', kwargs=args)
 
@@ -145,8 +141,7 @@ def py_zmq():
 
     def publisher(**kwargs):
         geckopy.init_node(**kwargs)
-        addr = kwargs.get('addr')
-        p = geckopy.Publisher(['test'])
+        p = geckopy.Publisher(topics=['test'])
         time.sleep(1)
         msg = {'a':1, 'b':[1,2,3], 'c':'hello cowboy'}
         p.pub('test', msg)  # topic msg
@@ -168,11 +163,11 @@ def py_zmq():
 
 
 def test_py_zmq_tcp():
-    py_zmq(tcp_pub, tcp_sub)
+    py_zmq()
 
 
-def test_py_zmq_uds():
-    py_zmq(uds_ifile, uds_ofile)
+# def test_py_zmq_uds():
+#     py_zmq(uds_ifile, uds_ofile)
 
 
 # def py_geckpy(pub_addr, sub_addr):

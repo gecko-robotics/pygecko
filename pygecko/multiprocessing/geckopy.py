@@ -265,6 +265,24 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
     return s
 
 
+def spin(hertz=50):
+    """
+    This will continue to loop at the given hertz until is_shutdown() returns
+    True.
+    """
+    global g_geckopy
+    rate = Rate(hertz)
+    while not g_geckopy.kill:
+        for sub in g_geckopy.subs:
+            sub.recv_nb()
+
+        for srv in g_geckopy.srvs:
+            srv.handle()
+
+        rate.sleep()
+
+###########################################################################
+
 # def Service(name, callback, addr):
 #     """
 #     name does nothing and i need to directly pass the address
@@ -325,20 +343,3 @@ def Subscriber(topics, cb_func=None, addr=None, bind=False):
 #     """
 #     global g_geckopy
 #     g_geckopy.hooks.append(hook)
-
-
-def spin(hertz=50):
-    """
-    This will continue to loop at the given hertz until is_shutdown() returns
-    True.
-    """
-    global g_geckopy
-    rate = Rate(hertz)
-    while not g_geckopy.kill:
-        for sub in g_geckopy.subs:
-            sub.recv_nb()
-
-        for srv in g_geckopy.srvs:
-            srv.handle()
-
-        rate.sleep()
