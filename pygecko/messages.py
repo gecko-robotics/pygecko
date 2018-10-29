@@ -5,7 +5,7 @@
 ##############################################
 from collections import namedtuple
 import time
-import numpy as np
+import numpy as np  # images
 import msgpack
 
 
@@ -89,33 +89,33 @@ class Lidar(namedtuple('Lidar', 'scan timestamp')):
         else:
             return cls.__bases__[0].__new__(cls, s, time.time())
 
-
-def image2msg(img, compressed=False):
-    if compressed:
-        # import cv2
-        # import msgpack
-        # jpg = cv2.imencode('.jpg', img)[1]
-        m = msgpack.dumps(img.tobytes())
-        msg = Image(img.shape, m, True)
-    else:
-        msg = Image(img.shape, img.tobytes(), False)
-    return msg
-
-
-def msg2image(msg):
-    if msg.compressed:
-        # import cv2
-        # import msgpack
-        # raw = nparr = np.fromstring(msg.bytes, np.uint8)
-        # img = np.frombuffer(raw, dtype=np.uint8)
-        # if len(msg.shape) == 3:
-        #     img = cv2.imdecode(img, cv2.IMREAD_COLOR)  # cv2.IMREAD_COLOR = 1
-        # else:
-        #     cv2.imdecode(img, cv2.IMREAD_GRAYSCALE)  # cv2.IMREAD_GRAYSCALE = 0
-        raw = msgpack.loads(msg.bytes)
-        img = np.frombuffer(raw, dtype=np.uint8)
-        img = img.reshape(msg.shape)
-    else:
-        img = np.frombuffer(msg.bytes, dtype=np.uint8)
-        img = img.reshape(msg.shape)
-    return img
+#
+# def image2msg(img, compressed=False):
+#     if compressed:
+#         # import cv2
+#         # import msgpack
+#         # jpg = cv2.imencode('.jpg', img)[1]
+#         m = msgpack.dumps(img.tobytes())
+#         msg = Image(img.shape, m, True)
+#     else:
+#         msg = Image(img.shape, img.tobytes(), False)
+#     return msg
+#
+#
+# def msg2image(msg):
+#     if msg.compressed:
+#         # import cv2
+#         # import msgpack
+#         # raw = nparr = np.fromstring(msg.bytes, np.uint8)
+#         # img = np.frombuffer(raw, dtype=np.uint8)
+#         # if len(msg.shape) == 3:
+#         #     img = cv2.imdecode(img, cv2.IMREAD_COLOR)  # cv2.IMREAD_COLOR = 1
+#         # else:
+#         #     cv2.imdecode(img, cv2.IMREAD_GRAYSCALE)  # cv2.IMREAD_GRAYSCALE = 0
+#         raw = msgpack.loads(msg.bytes)
+#         img = np.frombuffer(raw, dtype=np.uint8)
+#         img = img.reshape(msg.shape)
+#     else:
+#         img = np.frombuffer(msg.bytes, dtype=np.uint8)
+#         img = img.reshape(msg.shape)
+#     return img
