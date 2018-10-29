@@ -25,24 +25,18 @@
 #  cv............................   14.9 msgs/s   4467.5 kB/s
 # ^C>> GeckoCore[24295] is shutdown
 
-# from __future__ import print_function
-# from __future__ import division
-# import socket as Socket
 from pygecko.transport.helpers import zmqTCP
 # from pygecko.transport.helpers import zmqUDS
 from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
-from pygecko.transport.geckocorefile import CoreFile
+# from pygecko.transport.geckocorefile import CoreFile
 from pygecko.multiprocessing.geckopy import Rate
 from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
-from pygecko.transport.beacon import BeaconServer
-from pygecko.transport.beacon import GeckoService
-from pygecko.transport.beacon import get_host_key
-from pygecko.transport.beacon import GetIP
+from pygecko.transport.helpers import GetIP
 import psutil
 import os
-import pickle
-import zmq
+# import pickle
+# import zmq
 import multiprocessing as mp
 import time
 

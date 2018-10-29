@@ -95,12 +95,12 @@ if __name__ == '__main__':
     # until the program ends
     procs = []
 
-    for topic in ['ryan']:
+    for topic in ['ryan', 'mike', 'sammie']:
         # info to pass to processes
         args = {
             'topic': topic,
             "geckocore": {
-                "key": "logan"
+                "host": 'localhost'
             }
         }
 

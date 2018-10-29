@@ -8,7 +8,7 @@ from pygecko.transport.zmq_sub_pub import Pub, Sub  #, SubNB
 from pygecko.transport.srv import cService, cServiceProxy
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
-from pygecko.transport.beacon import GetIP
+from pygecko.transport.helpers import GetIP
 # from pygecko.transport.beacon import BeaconFinder, get_host_key
 # from pygecko.multiprocessing.corefinder import CoreFinder
 from pygecko.messages import Log
@@ -87,26 +87,14 @@ class GeckoPy(SignalCatch):
         self.pid = mp.current_process().pid
 
         # hard code for now
-        host = GetIP().get()  # FIXME: kwargs should provide this
+        if 'host' in kwargs.keys():
+            host = kwargs.pop('host')
+            if host == 'localhost':
+                host = GetIP().get()
+        else:
+            host = GetIP().get()  # FIXME: kwargs should provide this
         self.req_addr = zmqTCP(host, 11311)  # set/get topic addrs
         self.proc_ip = host  # this ip address
-
-        # find the core
-        # finder = CoreFinder(self.pid, self.name, **kwargs)
-        # self.core_inaddr = finder.core_inaddr
-        # self.core_outaddr = finder.core_outaddr
-
-        # print("<<< in: {} >>".format(self.core_inaddr))
-        # print("<<< out: {} >>".format(self.core_outaddr))
-
-        # publish log messages
-        # self.logpub = Pub()
-        # self.logpub.connect(self.core_inaddr, queue_size=1)
-
-        # here has to be a way to replace this with multicast ... I think
-        # I don't need the complexity above
-        # if self.core_inaddr:
-        #     self.notify_core(True, self.core_inaddr)
 
     def __del__(self):
         if len(self.hooks) > 0:
@@ -191,10 +179,9 @@ def is_shutdown():
     return g_geckopy.kill
 
 
-# def Publisher(self, uds_file=None, host='localhost', queue_size=10, bind=False):
 def Publisher(topics, addr=None, queue_size=5, bind=True):
     """
-    addr: either a valid tcp or uds address. If nothing is passed in, then
+    addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
           it is set to what geckopy defaults to
     queue_size: how many messages to queue up, default is 5
     bind: by default this connects to geckocore, but you can also have it bind
