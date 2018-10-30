@@ -1,6 +1,7 @@
 ---
 exclude_paths:
     - 'dev/**'
+    - 'retired/**'
     - 'old_version/**'
     - 'pygecko.egg-info/**/*'
     - '**/__init__.py'
