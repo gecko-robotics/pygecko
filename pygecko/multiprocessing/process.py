@@ -5,7 +5,7 @@
 ##############################################
 from __future__ import print_function
 import multiprocessing as mp
-from pygecko.transport.helpers import zmqTCP
+# from pygecko.transport.helpers import zmqTCP
 
 
 class GeckoSimpleProcess(object):
@@ -46,12 +46,7 @@ class GeckoSimpleProcess(object):
         if kwargs:
             kwargs = kwargs['kwargs']  # WTF???
         else:
-            kwargs = {"host": "localhost"}
-
-        # if 'core_inaddr' not in kwargs:
-        #     kwargs['core_inaddr'] = zmqTCP('localhost', 9998)  # FIXME: put in launch.json
-        # if 'core_outaddr' not in kwargs:
-        #     kwargs['core_outaddr'] = zmqTCP('localhost', 9999)  # FIXME: put in launch.json
+            kwargs = {"host": "localhost"}  # FIXME: is this really setting default ... if not, where is it done?
 
         self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()

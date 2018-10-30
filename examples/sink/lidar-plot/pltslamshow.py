@@ -100,7 +100,7 @@ class SlamShow(object):
 		try:
 			plt.pause(.01) # Arbitrary pause to force redraw
 			return True
-		except:
+		except Exception:
 			return False
 
 		return True

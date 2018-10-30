@@ -8,7 +8,6 @@
 
 from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
-import socket
 import time
 
 
@@ -55,7 +54,7 @@ class Callback(object):
     def __del__(self):
         self.bye()
     def callback(self, topic, msg):
-        geckopy.loginfo("{}".format(msg))
+        geckopy.loginfo("{}: {}".format(self.name, msg))
         chew_up_cpu(.1)
     def bye(self):
         print("*"*30)

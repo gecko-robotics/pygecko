@@ -7,7 +7,6 @@
 ##############################################
 # Basically a rostopic
 
-from __future__ import print_function
 import argparse
 import time
 # from pygecko import TopicSub
@@ -49,13 +48,13 @@ def handleArgs():
 def publisher(**kwargs):
     geckopy.init_node(**kwargs)
 
-    p = geckopy.Publisher()
-
-    hertz = kwargs.get('rate', 10)
-    rate = geckopy.Rate(hertz)
-
     topic = kwargs.get('topic')
     msg = kwargs.get('msg')
+    hertz = kwargs.get('rate', 10)
+
+    p = geckopy.Publisher([topic])
+
+    rate = geckopy.Rate(hertz)
 
     cnt = 0
     start = time.time()

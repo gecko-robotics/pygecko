@@ -6,6 +6,12 @@
 # see LICENSE for full details
 ##############################################
 
+import argparse
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 def valid_json(data):
     try:
         json.loads(data)
@@ -31,5 +37,5 @@ if __name__ == "__main__":
     val = valid_json(json)
 
     print("")
-    print(">> {} file is valid: {}".format(val))
+    print(">> {} file is valid: {}".format(args['file'], val))
     print("")

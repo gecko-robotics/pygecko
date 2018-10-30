@@ -9,12 +9,13 @@ from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
 from pygecko.transport.helpers import GetIP
-from pygecko.gecko_enums import ZmqType, Status
+from pygecko.gecko_enums import Status
+from pygecko.gecko_enums import ZmqType
 from pygecko.messages import Log
 from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
 from colorama import Fore, Style
 import time
-import os
+# import os
 import multiprocessing as mp
 
 # Holly crap namespace and pickle use a lot of cpu!

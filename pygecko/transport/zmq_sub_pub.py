@@ -155,7 +155,7 @@ class Sub(Base):
             # no message has arrived yet or not connected to server
             # print(e)
             time.sleep(0.01)
-        except Exception as e:
+        except Exception:
             # something else is wrong
             # print(e)
             raise

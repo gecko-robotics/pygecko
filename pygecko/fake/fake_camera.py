@@ -4,7 +4,7 @@
 # see LICENSE for full details
 ##############################################
 # if you don't have opencv installed and need to run a test that does
-import random
+# import random
 import numpy as np
 
 COLOR_BGR2GRAY = 0

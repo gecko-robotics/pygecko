@@ -44,30 +44,31 @@ class Pickle(object):
         return pickle.dumps(data)
     def unpack(self, data):
         return pickle.loads(data)
-#
-#
-# class Json(object):
-#     def pack(self, data):
-#         """
-#         json doesn't know how to handle namedtuples, so store class id for
-#         unpack
-#         """
-#         if type(data) in known_types:
-#             d = data._asdict()
-#             d['type'] = unpack_types[type(data)]
-#         else:
-#             d = data
-#         return json.dumps(d)
-#
-#     def unpack(self, data):
-#         """
-#         if data is an ordered dictionary AND it has class id, then create the
-#         message using the class id
-#         """
-#         d = json.loads(data)
-#         if type(data) is OrderedDict:
-#             if 'type' in d:
-#                 cls = unpack_types[d['type']]
-#                 d.pop('type', None)
-#                 d = cls(*d.values())
-#         return d
+
+
+class Json(object):
+    def pack(self, data):
+        """
+        json doesn't know how to handle namedtuples, so store class id for
+        unpack
+        """
+        raise Exception("Json protocol isn't ready yet!!!")
+        if type(data) in known_types:
+            d = data._asdict()
+            d['type'] = unpack_types[type(data)]
+        else:
+            d = data
+        return json.dumps(d)
+
+    def unpack(self, data):
+        """
+        if data is an ordered dictionary AND it has class id, then create the
+        message using the class id
+        """
+        d = json.loads(data)
+        if type(data) is OrderedDict:
+            if 'type' in d:
+                cls = unpack_types[d['type']]
+                d.pop('type', None)
+                d = cls(*d.values())
+        return d

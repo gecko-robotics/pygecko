@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 #
 
-from pygecko.multiprocessing import geckopy
+# from pygecko.multiprocessing import geckopy
 import pickle
-import simplejson as json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 class PickleJar(object):
     def __init__(self, fname, buffer_size=500):

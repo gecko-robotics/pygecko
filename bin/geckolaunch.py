@@ -11,7 +11,6 @@ So this is sort of a copy of roslaunch
 needs to move to bin
 """
 
-import sys
 import argparse
 from pygecko.multiprocessing import GeckoLauncher
 from pygecko.file_storage import FileYaml

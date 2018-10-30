@@ -25,7 +25,7 @@ class GetIP(object):
             # doesn't even have to be reachable
             s.connect(('10.255.255.255', 1))
             IP = s.getsockname()[0]
-        except:
+        except Exception:
             try:
                 n = socket.gethostname()
                 # make sure it has a zeroconfig .local or you end up

@@ -6,16 +6,12 @@
 # see LICENSE for full details
 ##############################################
 
-from __future__ import print_function
-from __future__ import division
 import argparse
 import sys
 import tty
 import termios
 # from pygecko.transport import zmqTCP, zmqUDS
 from pygecko.multiprocessing import geckopy
-from pygecko.test import GeckoSimpleProcess
-from pygecko.transport.beacon import get_host_key
 # import time
 
 ######################################################
@@ -42,7 +38,7 @@ def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(10)
 
-    p = geckopy.Publisher()
+    p = geckopy.Publisher(['twist_kb'])
 
     a = [0,0,0]
     l = [0,0,0]
@@ -91,7 +87,7 @@ def publisher(**kwargs):
 def handleArgs():
     parser = argparse.ArgumentParser(description='A simple zero MQ publisher for keyboard messages')
     # parser.add_argument('-p', '--publish', nargs=2, help='publish messages to addr:port, ex. js 10.1.1.1 9000', default=['localhost', '9000'])
-    parser.add_argument('-k', '--key', help='geckocore key, default is localhost name', default=None)
+    parser.add_argument('-g', '--geckocore', help='geckocore machine, default is localhost name', default=localhost)
     # parser.add_argument('-v', '--verbose', help='display info to screen', action='store_true')
     args = vars(parser.parse_args())
     return args
@@ -99,9 +95,7 @@ def handleArgs():
 
 def main():
     args = handleArgs()
-
-    if args['key'] is None:
-        args['key'] = get_host_key()
+    kwargs = {"host": args["geckocore"]}
 
     # print('Twist Keyboard on {}:{}'.format(args['publish'][0], args['publish'][1]))
 
@@ -114,7 +108,7 @@ def main():
     print(' s - stop')
     print('------------------------')
 
-    publisher(**args)
+    publisher(**kwargs)
 
 
 if __name__ == "__main__":
