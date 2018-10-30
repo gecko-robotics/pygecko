@@ -39,68 +39,14 @@ The file extension must be `*.json`
     ["process", "pcv", {"topic": "cv"}]
   ],
   "geckocore": {
-      "type": "tcp",
-      "in": ["localhost", 9998],
-      "out": ["localhost", 9999]
+      "host": "localhost"
   }
 }
 ```
 
-## Yaml
 
-The file extension must be `*.yaml` or `*.yml`. The nice
-
-```bash
----
-processes:
-- - process
-  - publish
-  - topic: hello
-- - process
-  - publish
-  - topic: hey there
-- - process
-  - subscribe2
-  - topic: hello
-- - process
-  - subscribe2
-  - topic: hello
-- - process
-  - subscribe2
-  - topic: hey there
-- - process
-  - subscribe2
-  - topic: hey there
-- - process
-  - subscribe2
-  - topic: cv
-- - process
-  - subscribe2
-  - topic: cv
-- - process
-  - pcv
-  - topic: cv
-geckocore:
-  type: tcp
-  in:
-  - localhost
-  - 9998
-  out:
-  - localhost
-  - 9999
-```
 
 ## Usage
 
-Open two windows, in one, run `geckocore.py` and the other run `geckolaunch.py`.
+Open two windows, in one, run `geckocore.py` and the other run `./run.sh`.
 You should see the performance and log messages printing to the two windows.
-
-## Alternatively
-
-You could use a bash script:
-
-```bash
-./run.sh
-```
-The only problem with the bash script is everything is going to print to *ONE*
-window and be really confusing and messy.

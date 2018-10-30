@@ -16,17 +16,16 @@ import numpy as np
 def chew_up_cpu(interval):
     # chew up some cpu
     start = time.time()
-    while (time.time() - start) < interval:
-        5*5
+    while (time.time() - start) < interval: 5*5
 
 
 def publish(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(1)
 
-    topic = kwargs.get('topic', 'test')
+    topic = kwargs.get('topic')
 
-    p = geckopy.Publisher()
+    p = geckopy.Publisher([topic])
     datumn = time.time()
     while not geckopy.is_shutdown():
         msg = {'time': time.time() - datumn, 'double': 3.14, 'int': 5, 'array': [1, 2, 3, 4, 5]}
@@ -52,7 +51,7 @@ def subscribe2(**kwargs):
             geckopy.logwarn('msg: {}'.format(m))
             chew_up_cpu(.2)
 
-    topic = kwargs.get('topic', 'test')
+    topic = kwargs.get('topic')
     geckopy.Subscriber([topic], f)  # array of topics to subscribe to
     geckopy.spin(20)
 

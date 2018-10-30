@@ -15,17 +15,14 @@ def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(5)
 
-    p = geckopy.Publisher()
+    p = geckopy.Publisher(['scan'])
 
     while not geckopy.is_shutdown():
-        scan = []
-        for angle in range(360):
-            r = 4000 + randint(0, 100)
-            scan.append((angle, r,))  # 5m
+        scan = [(a, 4000+randint(0,100)) for a in range(360)]
         msg = Lidar(scan)
         p.pub('scan', msg)  # topic msg
 
-        geckopy.log('[{}] published msg'.format(msg.timestamp))
+        geckopy.logdebug('[{}] published msg'.format(msg.timestamp))
         rate.sleep()
     print('pub bye ...')
 

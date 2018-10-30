@@ -22,7 +22,7 @@ def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(1)
 
-    p = geckopy.Publisher()
+    p = geckopy.Publisher(['data'])
 
     while not geckopy.is_shutdown():
         msg = {'a': 1}

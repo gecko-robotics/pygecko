@@ -6,6 +6,7 @@
 import pickle
 from pygecko.messages import Image
 from pygecko.messages import Joystick
+import numpy as np
 
 
 def image2msg(img, compressed=False, handler=pickle):
