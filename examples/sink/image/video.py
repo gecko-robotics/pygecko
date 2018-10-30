@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-from pygecko.transport.core import GeckoCore
 from pygecko.multiprocessing import geckopy
-from pygecko.multiprocessing import GeckoSimpleProcess
 import cv2
 from pygecko import image2msg
-import numpy as np
 import platform
-import time
 from imutils.video import VideoStream
 
 
@@ -32,7 +28,6 @@ def publisher(**kwargs):
         # img = cv2.resize(img, (320, 240))
         # img = cv2.resize(img, (640, 480))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # msg = Image(img.shape, img.tobytes())
         msg = image2msg(img)
         p.pub('camera', msg)
         rate.sleep()
