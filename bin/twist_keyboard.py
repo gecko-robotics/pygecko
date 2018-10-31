@@ -87,7 +87,7 @@ def publisher(**kwargs):
 def handleArgs():
     parser = argparse.ArgumentParser(description='A simple zero MQ publisher for keyboard messages')
     # parser.add_argument('-p', '--publish', nargs=2, help='publish messages to addr:port, ex. js 10.1.1.1 9000', default=['localhost', '9000'])
-    parser.add_argument('-g', '--geckocore', help='geckocore machine, default is localhost name', default=localhost)
+    parser.add_argument('-g', '--geckocore', help='geckocore machine, default is localhost name', default='localhost')
     # parser.add_argument('-v', '--verbose', help='display info to screen', action='store_true')
     args = vars(parser.parse_args())
     return args

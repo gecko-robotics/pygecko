@@ -3,10 +3,10 @@
 #
 from picklesave import PickleJar
 from pygecko.multiprocessing import geckopy
-from pygecko.multiprocessing import GeckoSimpleProcess
+# from pygecko.multiprocessing import GeckoSimpleProcess
 from pygecko import IMU, Vector
-import pickle
-from pprint import pprint
+# import pickle
+# from pprint import pprint
 
 
 def subscriber(**kwargs):

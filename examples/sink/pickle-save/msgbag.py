@@ -127,7 +127,7 @@ class BagWriter(object):
         self.buffer = []
 
     # @staticmethod  # FIXME: seed self.ext_unpack but this is static
-    def read(self.filename):
+    def read(self,filename):
         """
         Given a filename, it opens it and read all data into memory and return
         Inputs:

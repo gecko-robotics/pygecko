@@ -6,12 +6,12 @@
 # see LICENSE for full details
 ##############################################
 #
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
+# 
+# try:
+#     import simplejson as json
+# except ImportError:
+#     import json
+#
 
 # class MsgBox(object):
 #     def __init__(self, fname, buffer_size=500):
