@@ -4,7 +4,7 @@
 # see LICENSE for full details
 ##############################################
 # import pickle
-from pygecko.transport import Pickle
+from pygecko.transport.protocols import Pickle
 from pygecko.messages import Image
 # from pygecko.messages import Joystick
 import numpy as np
