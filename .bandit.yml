@@ -1,0 +1,3 @@
+[bandit]
+exclude: /dev,/examples,/retired
+skips: B102,B110,B301
