@@ -23,14 +23,14 @@ def publisher(**kwargs):
     rate = geckopy.Rate(2)
 
     topic = kwargs.get('topic')
-    p = geckopy.Publisher(topic)
+    p = geckopy.Publisher([topic])
     start = time.time()
     cnt = 0
     while not geckopy.is_shutdown():
         msg = cnt
         p.pub(topic, msg)  # topic msg
 
-        geckopy.logdebug('[{}] published msg'.format(cnt))
+        geckopy.logdebug('{}[{}] published msg'.format(topic,cnt))
         cnt += 1
         rate.sleep()
     print('pub bye ...')
@@ -48,25 +48,34 @@ class Callback(object):
         self.r = 0
         self.s = 0
 
-    def callback(self, topic, msg):
-        if topic == 'ryan': self.r = msg
-        elif topic == 'scott': self.s = msg
-        else: geckopy.logerror(topic)
-        chew_up_cpu(.1)
+    # def callback(self, topic, msg):
+    #     if topic == 'ryan': self.r = msg
+    #     elif topic == 'scott': self.s = msg
+    #     else: geckopy.logerror(topic)
+    #     chew_up_cpu(.1)
 
     def loop(self, **kwargs):
         geckopy.init_node(**kwargs)
         rate = geckopy.Rate(2)
 
-        for t in kwargs.get('topic'):
-            geckopy.Subscriber([t], self.callback)
+        # for t in kwargs.get('topic'):
+        sr = geckopy.Subscriber('ryan')
+        ss = geckopy.Subscriber('scott')
 
-        geckopy.spin(20) # wtf
+        # geckopy.spin(20) # wtf
 
         p = geckopy.Publisher(['ans'])
 
         start = time.time()
         while not geckopy.is_shutdown():
+            t,m = sr.recv_nb()
+            if t is not None:
+                self.r = msg
+
+            t,m = sr.recv_nb()
+            if t is not None:
+                self.r = msg
+
             ans = self.s + self.r
             msg = {'ans': ans}
             p.pub('ans', msg)  # topic msg
@@ -104,7 +113,7 @@ if __name__ == '__main__':
     for topic in ['ryan','scott']:
         # info to pass to processes
         args = {
-            'topic': [topic],
+            'topic': topic,
             "geckocore": {
                 "host": 'localhost'
             }
@@ -122,7 +131,8 @@ if __name__ == '__main__':
         }
     }
     s = GeckoSimpleProcess()
-    s.start(func=subscriber, name='sub_{}'.format(topic), kwargs=args)
+    c = Callback('class')
+    s.start(func=c.loop, name='sub', kwargs=args)
     procs.append(s)
 
     while True:

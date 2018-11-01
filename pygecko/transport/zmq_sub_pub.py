@@ -134,7 +134,7 @@ class Sub(Base):
         Calls recv(flags) with flags=zmq.NOBLOCK to implement non-blocking
         (or zmq.DONTWAIT)
         """
-        self.recv(flags=zmq.NOBLOCK)
+        return self.recv(flags=zmq.NOBLOCK)
 
     def recv(self, flags=0):
         """
