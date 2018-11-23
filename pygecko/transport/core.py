@@ -121,23 +121,26 @@ class ProcPerformance(object):
 
         print('+', '-'*30, sep='')
         print('| ESTABLISHED Connections')
-        for name, p in net.items():
-            for c in p:
-                if c.status == 'ESTABLISHED':
-                    if c.raddr:
-                        rip, rport = c.raddr  # remote ip/port number
-                    else:
-                        rip, rport = (None, None,)
-                    lip, lport = c.laddr
-                    print('| {:.<20} {}:{} --> {}:{}'.format(name, lip, lport, rip, rport))
+        try:
+            for name, p in net.items():
+                for c in p:
+                    if c.status == 'ESTABLISHED':
+                        if c.raddr:
+                            rip, rport = c.raddr  # remote ip/port number
+                        else:
+                            rip, rport = (None, None,)
+                        lip, lport = c.laddr
+                        print('| {:.<20} {}:{} --> {}:{}'.format(name, lip, lport, rip, rport))
 
-        print('+', '-'*30, sep='')
-        print('| LISTEN Connections')
-        for name, p in net.items():
-            for c in p:
-                if c.status == 'LISTEN':
-                    lip, lport = c.laddr  # local ip/port number
-                    print('| {:.<20} {}:{}'.format(name, lip, lport))
+            print('+', '-'*30, sep='')
+            print('| LISTEN Connections')
+            for name, p in net.items():
+                for c in p:
+                    if c.status == 'LISTEN':
+                        lip, lport = c.laddr  # local ip/port number
+                        print('| {:.<20} {}:{}'.format(name, lip, lport))
+        except Exception:
+            self.pop(ps.pid)
 
 
 
@@ -151,7 +154,7 @@ class GeckoCore(SignalCatch, GProcess):
         in/out_port: port on localhost
         in/out_addr: full address string
         """
-        self.ip = GetIP().get()
+        self.ip = '0.0.0.0'  # GetIP().get()
         self.pubs = {}
         self.port = port
         self.rep_addr = zmqTCP(self.ip, self.port)
