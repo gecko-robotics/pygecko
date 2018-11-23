@@ -152,7 +152,7 @@ class Req(Base):
 
     def get(self, msg, flags=0):
         """
-        Implements recv_multipart(flags) with flags=0 for non-blocking.
+        Implements recv_multipart(flags) with flags=0 for blocking.
         """
         jmsg = self.pickle.pack(msg)
         msg = None

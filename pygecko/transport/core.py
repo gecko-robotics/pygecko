@@ -121,8 +121,9 @@ class ProcPerformance(object):
 
         print('+', '-'*30, sep='')
         print('| ESTABLISHED Connections')
-        try:
-            for name, p in net.items():
+
+        for name, p in net.items():
+            try:
                 for c in p:
                     if c.status == 'ESTABLISHED':
                         if c.raddr:
@@ -131,17 +132,19 @@ class ProcPerformance(object):
                             rip, rport = (None, None,)
                         lip, lport = c.laddr
                         print('| {:.<20} {}:{} --> {}:{}'.format(name, lip, lport, rip, rport))
+            except:
+                continue
 
-            print('+', '-'*30, sep='')
-            print('| LISTEN Connections')
-            for name, p in net.items():
+        print('+', '-'*30, sep='')
+        print('| LISTEN Connections')
+        for name, p in net.items():
+            try:
                 for c in p:
                     if c.status == 'LISTEN':
                         lip, lport = c.laddr  # local ip/port number
                         print('| {:.<20} {}:{}'.format(name, lip, lport))
-        except Exception:
-            self.pop(ps.pid)
-
+            except:
+                continue
 
 
 class GeckoCore(SignalCatch, GProcess):

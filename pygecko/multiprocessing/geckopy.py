@@ -151,10 +151,14 @@ class GeckoPy(SignalCatch):
         }
         request = Req()
         request.connect(self.req_addr)
-        ans = request.get(msg)
-        if ans is None:
-            # raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
-            ans = {'status': Staus.core_not_found}
+        ans = None
+        for i in range(5):
+            ans = request.get(msg)
+            if ans is None:
+                # raise Exception("{}[{}]: Coundn't talk with core".format(self.name, self.pid))
+                ans = {'status': Staus.core_not_found}
+            else:
+                break
 
         # request.close()
         return ans
