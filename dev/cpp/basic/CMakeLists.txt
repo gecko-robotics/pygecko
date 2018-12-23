@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(tests/catch.cmake)
+# include(tests/catch.cmake)
 
 find_package(Protobuf REQUIRED)
 if ( Protobuf_FOUND )
@@ -56,7 +56,7 @@ target_link_libraries(core-test ${PROJECT_NAME})
 add_executable(zmq-test tests/zmq-test.cpp)
 target_link_libraries(zmq-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
-add_executable(msgpack-test tests/msgpack-test.cpp)
+# add_executable(msgpack-test tests/msgpack-test.cpp)
 
 add_executable(time-test tests/time-test.cpp)
 target_link_libraries(time-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
@@ -68,7 +68,7 @@ add_executable(proc-test tests/proc-test.cpp)
 target_link_libraries(proc-test ${PROJECT_NAME})
 
 add_executable(protobuf-test tests/protobuf-test.cpp ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(protobuf-test ${Protobuf_LIBRARIES})
+target_link_libraries(protobuf-test ${Protobuf_LIBRARIES} ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
 # add_executable(
 #     unit_test

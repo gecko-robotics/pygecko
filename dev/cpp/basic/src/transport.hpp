@@ -49,11 +49,11 @@ msg = sub.recv()
 
 
 
-class GeckoMsg {
-public:
-    zmq::message_t serialize();
-
-};
+// class GeckoMsg {
+// public:
+//     zmq::message_t serialize();
+//
+// };
 
 
 class Publisher {

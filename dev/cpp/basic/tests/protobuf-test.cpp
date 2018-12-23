@@ -2,6 +2,8 @@
 #include <string>
 #include <sys/time.h>
 
+#include "zmq.hpp"
+
 #include "test.pb.h"
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/time_util.h>
@@ -46,6 +48,13 @@ int main(){
 
     std::string serialized_update;
     imu.SerializeToString(&serialized_update);
+
+    cout << "length: " << serialized_update.length() << endl;
+
+    zmq::message_t message(serialized_update.length());
+    memcpy ((void *) message.data (), serialized_update.c_str(), serialized_update.size());
+
+    cout << "message: " << serialized_update << endl;
 
     google::protobuf::ShutdownProtobufLibrary();
     return 0;
