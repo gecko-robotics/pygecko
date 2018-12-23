@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package msg;
+
+import "google/protobuf/timestamp.proto";
+
+message Image {
+    uint32 width = 1;
+    uint32 height = 2;
+    bytes image_data = 3;
+}

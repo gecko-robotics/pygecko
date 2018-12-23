@@ -7,8 +7,11 @@
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
+
 // copy header from here
 // https://github.com/zeromq/cppzmq
+#include "zmq.hpp"
+
 #include "transport.hpp"
 #include <msgpack.hpp>
 

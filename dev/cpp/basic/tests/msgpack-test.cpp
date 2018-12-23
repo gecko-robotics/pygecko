@@ -10,6 +10,7 @@ class Vector {
 public:
     Vector(double,double,double);
     Vector(double*);
+    double &operator[] (int);
     double data[3];
 };
 
@@ -18,7 +19,19 @@ Vector::Vector(double x, double y, double z){
     data[1] = y;
     data[2] = z;
 }
+
 Vector::Vector(double *v){}
+
+double &Vector::operator[](int index){
+    // if (index > 2) || (index < 0) {
+    //     cout << "Array index out of bound, exiting" << endl;
+    // }
+    if (index == 0) return data[0];
+    else if (index == 1) return data[1];
+    else if (index == 2) return data[2];
+    else cout << "Vector[" << index <<"] is out of bounds" << endl;
+}
+
 
 class MsgBase {
 public:

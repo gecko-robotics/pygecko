@@ -1,4 +1,4 @@
-#include "src/core.hpp"
+#include "core.hpp"
 
 using namespace gecko;
 

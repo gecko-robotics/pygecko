@@ -1,5 +1,7 @@
 #include "core.hpp"
 #include <iostream>
+#include "network.hpp"
+#include "transport.hpp"
 
 using namespace gecko;
 using namespace std;
@@ -60,9 +62,10 @@ void SigCapture::my_handler(int s){
 ////////////////////////////////////////////////////////////////////////////////
 
 Core::Core(int port, int hertz){
-    string addr = "test";
+    HostInfo h = HostInfo();
+    string addr = h.addr;
     auto server = make_tuple(addr, port);
-    cout << addr << endl;
+    cout << h.hostname << "["<< addr << "]" << endl;
 }
 
 void Core::run(void){
