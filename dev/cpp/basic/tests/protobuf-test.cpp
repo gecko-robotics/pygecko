@@ -4,7 +4,7 @@
 
 #include "zmq.hpp"
 
-#include "test.pb.h"
+#include "imu.pb.h"
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/time_util.h>
 
