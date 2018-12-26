@@ -4,14 +4,18 @@
 using namespace std;
 
 
-zmq::context_t gContext(1);
+zmq::context_t zmqBase::gContext(1);
+// zmq::context_t gContext(1);
 
 
 // zmqBase::zmq::context_t gContext(1);
 
+// zmqBase::zmqBase():
+
 
 Publisher::Publisher(): sock(gContext, ZMQ_PUB)
 {
+    // zmqBase::sock(gContext, ZMQ_PUB);
     // publisher.bind(addr + std::string(":") + std::to_string(port));
 }
 
@@ -24,16 +28,15 @@ Publisher::Publisher(std::string addr, bool bind): sock(gContext, ZMQ_PUB)
 {
     if (bind){
         sock.bind(addr);
-        char port[1024]; //make this sufficiently large.
-                 //otherwise an error will be thrown because of invalid argument.
-        size_t size = sizeof(port);
-        sock.getsockopt( ZMQ_LAST_ENDPOINT, &port, &size );
-        port_number = port;
-        cout << "socket is bound at port " << port_number << endl;
     }
     else {
-        // sock.connect()
+        sock.connect(addr);
     }
+    char port[1024]; //make this sufficiently large to avoid invalid argument.
+    size_t size = sizeof(port);
+    sock.getsockopt( ZMQ_LAST_ENDPOINT, &port, &size );
+    port_number = port;
+    cout << "socket is bound at port " << port_number << endl;
 }
 
 void Publisher::pub(zmq::message_t& msg){
@@ -51,7 +54,7 @@ Subscriber::Subscriber(): sock(gContext, ZMQ_SUB)
     // subscriber.setsockopt(ZMQ_SUBSCRIBE, topic.c_str(), topic.length());
 }
 
-Subscriber::Subscriber(std::string addr, std::string topic, bool bind): sock(gContext, ZMQ_SUB)
+Subscriber::Subscriber(string addr, string topic, bool bind): sock(gContext, ZMQ_SUB)
 {
     sock.connect(addr);
     sock.setsockopt(ZMQ_SUBSCRIBE, topic.c_str(), topic.length());
@@ -67,8 +70,17 @@ zmq::message_t Subscriber::recv(){
 
 Reply::Reply(): sock(gContext, ZMQ_REP) {;}
 
-void Reply::listen(void (*callback)(std::string)){
-    ;
+void Reply::listen(void (*callback)(zmq::message_t&)){
+    zmq::message_t request;
+    sock.recv (&request);
+    callback(request);
+
+    string smsg;
+
+    //  create the reply
+    zmq::message_t reply (smsg.size());
+    memcpy ((void *) reply.data (), smsg.c_str(), smsg.size());
+    sock.send (reply);
 }
 
 ////////////////////////////////////////////////////
@@ -80,6 +92,9 @@ Request::Request(std::string addr): sock(gContext, ZMQ_REQ) {
 std::string Request::get(std::string s){
     zmq::message_t msg;
     sock.send(msg);
+
+    string ans;
+    return ans;
 }
 
 ////////////////////////////////////////////////////

@@ -39,3 +39,15 @@ protected:
     // static std::map<std::string, std::string> directory;
     // static bool ok;
 };
+
+namespace gecko {
+    /*
+    class Gecko {
+    public:
+        core_addr
+        host_addr
+        subs
+        initialized
+}
+    */
+}

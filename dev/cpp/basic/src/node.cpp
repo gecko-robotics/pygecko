@@ -1,8 +1,14 @@
 #include "node.hpp"
+#include <thread>
 
 using namespace gecko;
 using namespace std;
 
-Node::Node(std::string addr, int port){
+void Threaded::run(void(*f)(void)){
+    thread t(f);
+    t.join();
+}
+
+Node::Node(){
     ;
 }

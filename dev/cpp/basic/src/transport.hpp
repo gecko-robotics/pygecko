@@ -4,14 +4,14 @@
 #include "zmq.hpp"
 
 
-// class zmqBase {
-// protected:
-//     static zmq::context_t gContext;
-//     zmq::socket_t sock;
-// };
+class zmqBase {
+protected:
+    static zmq::context_t gContext;
+    // zmq::socket_t sock;
+};
 
 
-class Publisher {
+class Publisher: public zmqBase {
 public:
     Publisher();
     Publisher(std::string addr, bool bind=true);  // tcp://x.x.x.x:port
@@ -26,7 +26,7 @@ protected:
 };
 
 
-class Subscriber {
+class Subscriber: public zmqBase {
 public:
     Subscriber();
     Subscriber(std::string addr, std::string topic, bool bind=false);
@@ -35,15 +35,15 @@ protected:
     zmq::socket_t sock;
 };
 
-class Reply {
+class Reply: public zmqBase {
 public:
     Reply();
-    void listen(void(*)(std::string));
+    void listen(void(*)(zmq::message_t&));
 protected:
     zmq::socket_t sock;
 };
 
-class Request {
+class Request: public zmqBase {
 public:
     Request(std::string);
     std::string get(std::string);

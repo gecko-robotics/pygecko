@@ -51,6 +51,8 @@ message(STATUS "thread lib: ${CMAKE_THREAD_LIBS_INIT}")
 # Get gecko lib files ----------------------------------------------
 file(GLOB SOURCES src/*.cpp)
 
+set(ALL_LIBS ${Protobuf_LIBRARIES} ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+
 # Tests --------------------------------------------------------------
 include_directories(${ZMQ_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})
@@ -80,6 +82,9 @@ target_link_libraries(proc-test ${PROJECT_NAME})
 
 add_executable(protobuf-test tests/protobuf-test.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(protobuf-test ${Protobuf_LIBRARIES} ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+
+add_executable(node-test tests/node-test.cpp)
+target_link_libraries(node-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
 # add_executable(
 #     unit_test

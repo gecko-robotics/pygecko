@@ -15,10 +15,12 @@ high_resolution_clock– It provides the smallest possible tick period. It is
 #include <chrono>
 // #include <ctime>
 // #include <thread>
+#include <google/protobuf/util/time_util.h>
 
 class Time {
 public:
-    long now();
+    long now();  // chrono seconds since epic
+    google::protobuf::Timestamp unix();  // unix based timestamp
 };
 
 
@@ -30,5 +32,4 @@ protected:
     std::chrono::time_point<std::chrono::system_clock> last_time;
     // std::chrono::duration<double> dt;
     std::chrono::milliseconds dt;
-
 };
