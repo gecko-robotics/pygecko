@@ -26,6 +26,7 @@
 #ifndef __ZMQ_HPP_INCLUDED__
 #define __ZMQ_HPP_INCLUDED__
 
+
 #if (__cplusplus >= 201402L)
 #define ZMQ_DEPRECATED(msg) [[deprecated(msg)]]
 #elif defined(_MSC_VER)
@@ -63,8 +64,8 @@
 
 /*  Version macros for compile-time API version detection                     */
 #define CPPZMQ_VERSION_MAJOR 4
-#define CPPZMQ_VERSION_MINOR 3 
-#define CPPZMQ_VERSION_PATCH 1 
+#define CPPZMQ_VERSION_MINOR 3
+#define CPPZMQ_VERSION_PATCH 1
 
 #define CPPZMQ_VERSION                                                              \
     ZMQ_MAKE_VERSION(CPPZMQ_VERSION_MAJOR, CPPZMQ_VERSION_MINOR,                    \
@@ -521,11 +522,13 @@ class context_t
 
     inline void close() ZMQ_NOTHROW
     {
+        std::cout << "zmq close context" << std::endl;
         if (ptr == NULL)
             return;
 
         int rc = zmq_ctx_destroy(ptr);
-        ZMQ_ASSERT(rc == 0);
+        // ZMQ_ASSERT(rc == 0);
+        std::cout << "rc" << rc << std::endl;
         ptr = NULL;
     }
 

@@ -13,7 +13,7 @@
 #include "zmq.hpp"
 
 #include "transport.hpp"
-#include <msgpack.hpp>
+// #include <msgpack.hpp>
 
 using std::cout;
 using std::endl;

@@ -6,12 +6,16 @@
 
 namespace gecko {
 
-class Threaded {
+/*
+Spins off a thread for a given function
+*/
+class Threaded: protected SigCapture {
 public:
-    void run(void(*f)(void));
+    void run(void(*f)(void*));
 };
 
-class Node: protected SigCapture {
+// what is the value of this?
+class Node {
 public:
     Node();
 };

@@ -4,8 +4,10 @@
 using namespace gecko;
 using namespace std;
 
-void Threaded::run(void(*f)(void)){
-    thread t(f);
+
+// FIXME: pass other args
+void Threaded::run(void(*f)(void* args)){
+    thread t(f, &ok);
     t.join();
 }
 

@@ -43,3 +43,11 @@ void SigCapture::my_handler(int s){
     ok = false;
     // exit(1);
 }
+
+void SigCapture::shutdown(){
+    ok = false;
+}
+
+bool SigCapture::isOk(){
+    return ok;
+}

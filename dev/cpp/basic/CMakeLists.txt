@@ -35,12 +35,20 @@ link_directories(/usr/local/lib)
 
 # Add local directories -------------------------------------------
 include_directories(src)
-include_directories(./zmq)
+
+# ZeroMQ ----------------------------------------------------------
+# https://github.com/zeromq/cppzmq
+include_directories(zmq)
 
 # Load in pkg-config support --------------------------------------
 find_package(PkgConfig)
 find_package(Threads REQUIRED)
+
+# ZeroMQ ----------------------------------------------------------
 pkg_check_modules(ZMQ REQUIRED libzmq)
+# add_compile_definitions(ZMQ_BUILD_DRAFT_API)
+# add_compile_definitions(ZMQ_CPP11)
+include_directories(${ZMQ_INCLUDE_DIRS})
 
 # Messages --------------------------------------------------------
 message(STATUS "Project: ${PROJECT_NAME}")
@@ -48,16 +56,15 @@ message(STATUS "include: ${ZMQ_INCLUDE_DIRS}")
 message(STATUS "zmq lib: ${ZMQ_LIBRARIES}")
 message(STATUS "thread lib: ${CMAKE_THREAD_LIBS_INIT}")
 
-# Get gecko lib files ----------------------------------------------
+# Build library ----------------------------------------------
 file(GLOB SOURCES src/*.cpp)
 
 set(ALL_LIBS ${Protobuf_LIBRARIES} ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
-# Tests --------------------------------------------------------------
-include_directories(${ZMQ_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(${PROJECT_NAME} ${Protobuf_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
+# Tests --------------------------------------------------------------
 add_executable(core-test tests/core-test.cpp)
 target_link_libraries(core-test ${PROJECT_NAME})
 
@@ -65,8 +72,8 @@ add_executable(zmq-test tests/zmq-test.cpp)
 target_link_libraries(zmq-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
 
-add_executable(all-test tests/all-test.cpp ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(all-test ${PROJECT_NAME} ${Protobuf_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+# add_executable(all-test tests/all-test.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+# target_link_libraries(all-test ${PROJECT_NAME} ${Protobuf_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
 
 # add_executable(msgpack-test tests/msgpack-test.cpp)
@@ -85,6 +92,9 @@ target_link_libraries(protobuf-test ${Protobuf_LIBRARIES} ${PROJECT_NAME} ${CMAK
 
 add_executable(node-test tests/node-test.cpp)
 target_link_libraries(node-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+
+add_executable(gecko-test tests/gecko-test.cpp)
+target_link_libraries(gecko-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
 # add_executable(
 #     unit_test

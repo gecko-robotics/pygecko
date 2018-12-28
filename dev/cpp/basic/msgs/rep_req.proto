@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package msg;
 
-message Status {
-    string msg=1;  // ping or ok ... no need for enum
-}
+// message Status {
+//     string msg=1;  // ping or ok ... no need for enum
+// }
 
 // pub
 // - pub: topic
@@ -17,8 +17,17 @@ message Status {
 // - pid: 1234
 // - expected return: status w/ address
 message PubSub {
+    enum Info {
+        OK = 0;
+        ERROR = 1;
+    }
     string pub=1;  // check if field exists to determine msg type
     string sub=2;
     string address=3;  // 1.2.3.4
-    int32 pid=4;  // process pid
+    int32 pid=4;       // process pid
+    string status=5;
+    // bool status=5;
+    // Info status=5;
 }
+
+// rename CoreMsg
