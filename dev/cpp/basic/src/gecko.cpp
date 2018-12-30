@@ -15,8 +15,8 @@ using namespace msg;
 This holds the static info for this thread/process. User will never call this
 but just access it via the functions below.
 */
-// class GeckoCore: public SigCapture {
-class GeckoCore{
+class GeckoCore: public SigCapture {
+// class GeckoCore{
 public:
     GeckoCore();
     ~GeckoCore();
@@ -42,45 +42,47 @@ GeckoCore::~GeckoCore(){
 }
 
 // one static instance that holds all of the info
-static GeckoCore _geckocore;
+// static GeckoCore _geckocore;
+GeckoCore *_geckocore = nullptr;
 
 
 void gecko::init(int argc, char* argv[]){
-    if (_geckocore.initialized) return;
+    if (_geckocore == nullptr) _geckocore = new GeckoCore();
+    if (_geckocore->initialized) return;
 
     HostInfo h = HostInfo();
-    _geckocore.host_addr = h.addr;
+    _geckocore->host_addr = h.addr;
 
-    if(argc < 2) _geckocore.core_addr = string("tcp://") + _geckocore.host_addr + ":11311";
-    else _geckocore.core_addr = string("tcp://") + string(argv[1]) + ":11311";
+    if(argc < 2) _geckocore->core_addr = string("tcp://") + _geckocore->host_addr + ":11311";
+    else _geckocore->core_addr = string("tcp://") + string(argv[1]) + ":11311";
 
-    Request<PubSub> req(_geckocore.core_addr);
+    Request<PubSub> req(_geckocore->core_addr);
     PubSub reqmsg;
     // PubSub repmsg = req.get(reqmsg);
     PubSub repmsg = req.get(reqmsg);
     cout << "gecko::init " << sizeof(repmsg) << " " << repmsg.DebugString() << endl;
     cout << "ho " << false << true << endl;
 
-    if (repmsg.status() == "ok") _geckocore.initialized = true;
+    if (repmsg.status() == "ok") _geckocore->initialized = true;
     else {
-        cout << "*** Couldn't find GeckoCore [" << _geckocore.core_addr << "] ***" << endl;
+        cout << "*** Couldn't find GeckoCore [" << _geckocore->core_addr << "] ***" << endl;
         // exit(1);
     }
 
-    _geckocore.print();
+    _geckocore->print();
 }
 
 Publisher* gecko::advertise(string topic, int queue=10){
-    // Request<PubSub> req(_geckocore.core_addr);
+    // Request<PubSub> req(_geckocore->core_addr);
 
-    string addr = string("tcp://") + _geckocore.host_addr + string(":*");  // bind to next available port
+    string addr = string("tcp://") + _geckocore->host_addr + string(":*");  // bind to next available port
 
     Publisher *p = new Publisher(addr, true);
     return p;
 }
 
 void gecko::subscribe(string topic, int queue=10, void(*callback)(string)=NULL){
-    Request<PubSub> req(_geckocore.core_addr);
+    Request<PubSub> req(_geckocore->core_addr);
     // Subscriber *s = new Subscriber(addr, topic, false);
     // callbacks.push_back(s);
     // return Subscriber(core_addr, topic);
@@ -88,9 +90,9 @@ void gecko::subscribe(string topic, int queue=10, void(*callback)(string)=NULL){
 
 void gecko::spin(int hertz=50){
     Rate rate(hertz);
-    while(_geckocore.isOk()){
-        for(int i=0; i < _geckocore.subs.size(); ++i){
-            zmq::message_t msg = _geckocore.subs[i]->recv();
+    while(_geckocore->isOk()){
+        for(int i=0; i < _geckocore->subs.size(); ++i){
+            zmq::message_t msg = _geckocore->subs[i]->recv();
         }
         rate.sleep();
     }

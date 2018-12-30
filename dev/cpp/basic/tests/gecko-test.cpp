@@ -11,5 +11,6 @@ int main(int argc, char* argv[]){
     cout << "main" << endl;
     // gecko::loginfo(s);
 
+    // zmq_ctx_destroy holds up, still an open socket
     return 0;
 }

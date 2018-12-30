@@ -96,6 +96,13 @@ target_link_libraries(node-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_
 add_executable(gecko-test tests/gecko-test.cpp)
 target_link_libraries(gecko-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
+add_executable(zmq-message-test tests/zmq-message-test.cpp)
+target_link_libraries(zmq-message-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+
+add_executable(simple-zmq-test tests/simple-zmq-test.cpp)
+target_link_libraries(simple-zmq-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+
+
 # add_executable(
 #     unit_test
 #     tests/ctest-test.cpp

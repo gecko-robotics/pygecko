@@ -13,7 +13,7 @@
 #include "zmq.hpp"
 
 #include "transport.hpp"
-// #include <msgpack.hpp>
+#include <msgpack.hpp>
 
 using std::cout;
 using std::endl;
@@ -39,6 +39,11 @@ void server(int t){
         zmq::message_t message(20);
         snprintf ((char *) message.data(), 20 , "%s %d", "33", count);
         pub.pub(message);
+
+        zmq::message_t m1((void*)"33", 2);
+        pub.pub(m1);
+        zmq::message_t m2((void*)"test", 4);
+        pub.pub(m2);
 
         snprintf ((char *) message.data(), 20 , "hello %d", count);
         pub.pub(message);

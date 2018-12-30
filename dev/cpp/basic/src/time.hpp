@@ -20,7 +20,10 @@ high_resolution_clock– It provides the smallest possible tick period. It is
 class Time {
 public:
     long now();  // chrono seconds since epic
+    // google::protobuf::Timestamp unixNow();  // unix based timestamp
     google::protobuf::Timestamp unix();  // unix based timestamp
+    void msleep(int);
+    void sleep(int);
 };
 
 

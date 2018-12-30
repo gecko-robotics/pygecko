@@ -273,6 +273,7 @@ class message_t
 #ifdef ZMQ_HAS_RVALUE_REFS
     inline message_t(message_t &&rhs) : msg(rhs.msg)
     {
+        // std::cout << "msg_t &&" << std::endl;
         int rc = zmq_msg_init(&rhs.msg);
         if (rc != 0)
             throw error_t();
@@ -280,6 +281,7 @@ class message_t
 
     inline message_t &operator=(message_t &&rhs) ZMQ_NOTHROW
     {
+        // std::cout << "msg_t op= &&" << std::endl;
         std::swap(msg, rhs.msg);
         return *this;
     }
@@ -522,13 +524,13 @@ class context_t
 
     inline void close() ZMQ_NOTHROW
     {
-        std::cout << "zmq close context" << std::endl;
+        // std::cout << "zmq close context" << std::endl;
         if (ptr == NULL)
             return;
 
         int rc = zmq_ctx_destroy(ptr);
-        // ZMQ_ASSERT(rc == 0);
-        std::cout << "rc" << rc << std::endl;
+        ZMQ_ASSERT(rc == 0);
+        // std::cout << "zmq_ctx_destroy rc: " << rc << std::endl;
         ptr = NULL;
     }
 

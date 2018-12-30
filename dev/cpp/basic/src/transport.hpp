@@ -25,6 +25,12 @@ public:
     bool check(int retry=5);
 
     // ~zmqBase(){sock.close(); gContext.close();}
+    ~zmqBase(){
+        // any pending sends will block the context destructor
+        int msec = 5;
+        sock.setsockopt(ZMQ_LINGER, &msec, sizeof(msec));
+        sock.close();
+    }
     static zmq::context_t gContext;  // context
     zmq::socket_t sock;
     std::string endpoint;
@@ -89,7 +95,7 @@ template <typename T>
 class Request: public zmqBase {
 public:
     Request(std::string&);
-    ~Request(){sock.close();}
+    // ~Request(){sock.close();}
     T get(T&);
 protected:
     // zmq::socket_t sock;
@@ -116,8 +122,9 @@ T Request<T>::get(T& req){
 
     std::string s;
     req.SerializeToString(&s);
-    zmq::message_t msg(s.size());
-    memcpy((void*) msg.data(), s.c_str(), s.size());
+    // zmq::message_t msg(s.size());
+    // memcpy((void*) msg.data(), s.c_str(), s.size());
+    zmq::message_t msg((void*) s.c_str(), s.size());
     sock.send(msg);
 
     // zmq::poller_t<> poll;
