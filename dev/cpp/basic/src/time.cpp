@@ -26,12 +26,12 @@ google::protobuf::Timestamp Time::unix(){
     return timestamp;
 }
 
-void Time::msleep(int delay){
-    this_thread::sleep_for(chrono::milliseconds(delay));
+void Time::msleep(int msec){
+    this_thread::sleep_for(chrono::milliseconds(msec));
 }
 
-void Time::sleep(int delay){
-    this_thread::sleep_for(chrono::seconds(delay));
+void Time::sleep(int sec){
+    this_thread::sleep_for(chrono::seconds(sec));
 }
 
 //////////////////////////////////////////////////////////////////////

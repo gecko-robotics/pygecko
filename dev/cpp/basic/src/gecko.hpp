@@ -10,7 +10,9 @@
 
 namespace gecko {
     void init(int argc, char* argv[]);
+    void init(const std::string& c={});
     // void shutdown(void){ok = false;}
+    bool ok();
 
     // logging
     void loginfo(std::string msg);// , std::string topic);
@@ -19,9 +21,9 @@ namespace gecko {
     // void loginfo(std::string msg, std::string topic){}
 
     // pub/sub
-    Publisher* advertise(std::string topic, int queue);
-    void subscribe(std::string topic, int queue, void(*callback)(std::string));
-    void spin(int);
+    Publisher* advertise(std::string topic, int queue=5, bool bind=true);
+    Subscriber* subscribe(std::string topic, void(*callback)(zmq::message_t&)=nullptr, int queue=5, bool bind=false);
+    void spin(int=50);
 }
 
 /*

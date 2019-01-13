@@ -7,6 +7,13 @@
 #include <iostream>
 
 /*
+https://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event
+https://www.geeksforgeeks.org/inheritance-in-c/
+https://stackoverflow.com/questions/12662891/how-can-i-pass-a-member-function-where-a-free-function-is-expected
+
+http://www.yolinux.com/TUTORIALS/C++Signals.html
+*/
+/*
 kevin@Logan build $ kill -l
  1) SIGHUP	 2) SIGINT	 3) SIGQUIT	 4) SIGILL
  5) SIGTRAP	 6) SIGABRT	 7) SIGEMT	 8) SIGFPE

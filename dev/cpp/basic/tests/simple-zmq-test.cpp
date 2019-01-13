@@ -56,7 +56,7 @@ void msub(void){
     sock.connect(protocol);
     string topic = "bob";
     sock.setsockopt(ZMQ_SUBSCRIBE, topic.c_str(), topic.size());
-    // sock.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    // sock.setsockopt(ZMQ_SUBSCRIBE, "", 0);  // get everything
 
     zmq::multipart_t multi;
 
@@ -64,24 +64,22 @@ void msub(void){
         // zmq::message_t msg;
         // sock.recv(&msg, ZMQ_DONTWAIT); // non-blocking
         bool ok = multi.recv(sock, ZMQ_DONTWAIT);
-        if (ok) printf(">> [SUB] msg size: %zu\n", multi.size());
-        else printf("** [SUB] crap crackers\n");
-        // while(multi.size() > 0){
-        //     zmq::message_t msg = multi.pop();
-        //     string s(static_cast<char*>(msg.data()), msg.size());
-        //     printf(">> [SUB] msg[%zu]: %s\n", s.size(), s.c_str());
-        // }
-        // else printf("** No data found\n");
-        if(multi.size() == 2){
-            zmq::message_t m = multi.pop();
-            string msg(static_cast<char*>(m.data()), m.size());
-            zmq::message_t t = multi.pop();
-            string topic(static_cast<char*>(t.data()), t.size());
-            cout <<">> [SUB] "<< topic << ": " << msg << endl;
-        }
-        else printf("** [SUB] 2 crap crackers\n");
+        if (ok) {
+            printf(">> [MSUB] msg size: %zu\n", multi.size());
 
-        usleep(500000);
+            // while(multi.size() > 0)
+            if(multi.size() == 2){
+                zmq::message_t t = multi.pop();
+                string msg(static_cast<char*>(t.data()), t.size());
+                zmq::message_t m = multi.pop();
+                string topic(static_cast<char*>(m.data()), m.size());
+                cout <<">> [MSUB] "<< topic << ": " << msg << endl;
+            }
+            else printf("** [MSUB] 2 crap crackers, only saw %zu msgs\n", multi.size());
+        }
+        else printf("** [MSUB] crap crackers\n");
+
+        usleep(100000);
     }
     sock.close();
 }
@@ -98,8 +96,8 @@ void mpub(void){
         multi.push(zmq::message_t((void*)"kevin", 5));
         multi.push(zmq::message_t((void*)"bob", 3));
         bool ok = multi.send(sock);
-        if (ok) printf(">> [PUB] sent msg\n");
-        else printf("** [PUB] crap crackers!!\n");
+        if (ok) printf(">> [MPUB] sent msg\n");
+        else printf("** [MPUB] crap crackers!!\n");
         sleep(1);
     }
     sock.close();
@@ -107,8 +105,9 @@ void mpub(void){
 
 int main(void){
     thread s(msub);
-    thread s2(msub);
     thread p(mpub);
+    thread s2(sub);
+    thread p2(pub);
 
     s.join();
     s2.join();

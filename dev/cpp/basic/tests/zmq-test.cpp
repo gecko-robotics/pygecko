@@ -13,7 +13,7 @@
 #include "zmq.hpp"
 
 #include "transport.hpp"
-#include <msgpack.hpp>
+// #include <msgpack.hpp>
 
 using std::cout;
 using std::endl;
@@ -21,13 +21,13 @@ using std::endl;
 void server(int t){
 
     // serializes this object.
-    std::vector<std::string> vec;
-    vec.push_back("Hello");
-    vec.push_back("MessagePack");
+    // std::vector<std::string> vec;
+    // vec.push_back("Hello");
+    // vec.push_back("MessagePack");
 
     // serialize it into simple buffer.
-    msgpack::sbuffer sbuf;
-    msgpack::pack(sbuf, vec);
+    // msgpack::sbuffer sbuf;
+    // msgpack::pack(sbuf, vec);
 
     //  Prepare our context and publisher
     Publisher pub("tcp://0.0.0.0:5556");

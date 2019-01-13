@@ -1,85 +1,86 @@
 #include "core.hpp"
 #include <iostream>
+#include <thread>
+#include <string>
 #include "network.hpp"
-// #include "transport.hpp"
 #include "transport.hpp"
 #include "time.hpp"
+#include "helpers.hpp"
+#include "misc.hpp"
 
-using namespace gecko;
+// using namespace gecko;
 using namespace std;
 
-// using std::cout;
-// using std::endl;
-
-////////////////////////////////////////////////////////////////////////////////
-/*
-https://stackoverflow.com/questions/1641182/how-can-i-catch-a-ctrl-c-event
-https://www.geeksforgeeks.org/inheritance-in-c/
-https://stackoverflow.com/questions/12662891/how-can-i-pass-a-member-function-where-a-free-function-is-expected
-
-http://www.yolinux.com/TUTORIALS/C++Signals.html
-*/
-
-// #include <signal.h>
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <unistd.h>
-//
-// /*
-// kevin@Logan build $ kill -l
-//  1) SIGHUP	 2) SIGINT	 3) SIGQUIT	 4) SIGILL
-//  5) SIGTRAP	 6) SIGABRT	 7) SIGEMT	 8) SIGFPE
-//  9) SIGKILL	10) SIGBUS	11) SIGSEGV	12) SIGSYS
-// 13) SIGPIPE	14) SIGALRM	15) SIGTERM	16) SIGURG
-// 17) SIGSTOP	18) SIGTSTP	19) SIGCONT	20) SIGCHLD
-// 21) SIGTTIN	22) SIGTTOU	23) SIGIO	24) SIGXCPU
-// 25) SIGXFSZ	26) SIGVTALRM	27) SIGPROF	28) SIGWINCH
-// 29) SIGINFO	30) SIGUSR1	31) SIGUSR2
-// */
-//
-// bool SigCapture::shutdown = false;
-//
-// SigCapture::SigCapture(){
-//     struct sigaction sigIntHandler;
-//     // sigIntHandler.sa_handler = SigCapture::my_handler;
-//     // auto fp = std::bind(&SigCapture::my_handler, *this, std::placeholders::_1);
-//     // sigIntHandler.sa_handler = fp;
-//
-//     // sigIntHandler.sa_handler = static_cast<void (*)(int)> (&SigCapture::my_handler);
-//
-//     sigIntHandler.sa_handler = SigCapture::my_handler;
-//     sigemptyset(&sigIntHandler.sa_mask);
-//     sigIntHandler.sa_flags = 0;
-//
-//     sigaction(SIGINT, &sigIntHandler, NULL);
-// }
-//
-// void SigCapture::my_handler(int s){
-//     // printf("Caught signal %d\n",s);
-//     cout << " [signal caught: " << s << "] ";
-//     shutdown = true;
-//     // exit(1);
-// }
-
 ////////////////////////////////////////////////////////////////////////////////
 
-Core::Core(int port, int hertz){
-    HostInfo h = HostInfo();
-    string addr = h.addr;
-    auto server = make_tuple(addr, port);
-    cout << h.hostname << "["<< addr << "]" << endl;
+
+std::vector<std::string> split(const std::string& s, char delimiter){
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter))
+    {
+      tokens.push_back(token);
+    }
+    return tokens;
 }
 
-void Core::run(void){
-    Rate rate(100);
+////////////////////////////////////////////////////////////////////////////////
+
+Core::Core(int port): bindPort(port)
+{
+    // HostInfo h = HostInfo();
+    // string addr = zmqTCP(h.addr, to_string(port));
+    // auto server = make_tuple(addr, port);
+    // cout << h.hostname << "["<< addr << "]" << endl;
+
+    // Reply rep(fmtstr("tcp://*:%d", port));
+    // bindPort = port;
+}
+
+void Core::run(int hertz){
+    thread request(&Core::requestLoop, this);
+    request.join();
+
+    Rate rate(hertz);
     while(ok){
-        // usleep(100000);
         cout << "." << flush;
         rate.sleep();
     }
     cout << "bye" << endl;
 }
 
-int Core::handle_reply(){
-    return 0;
+void Core::requestLoop(void){
+    Rate rate(50);
+    // Reply rep(fmtstr("tcp://*:%d", bindPort));
+    Reply rep(std::string("tcp://*:") + std::to_string(bindPort));
+    // using namespace std::placeholders; // for `_1`
+    // auto cb = std::bind(&Core::handle_reply);
+    while(ok){
+        rep.listen_nb(&Core::handle_reply);
+        rate.sleep();
+    }
+}
+
+/*
+m: set/get:topic
+return: tcp://1.2.3.4:1234
+*/
+zmq::message_t Core::handle_reply(zmq::message_t& m){
+    printf(">> handle_reply\n");
+    if (m.size() == 0){
+        printf(">> no message\n");
+        return zmq::message_t();
+        // return zmq::message_t("hi",2);
+    }
+    string s(static_cast<char*>(m.data()), m.size());
+    vector<string> toks = split(s, ':');
+    if (toks[0] == "set"){
+        printf("set\n");
+    }
+    else if (toks[0] == "get"){
+        printf("get\n");
+    }
+    string a = zmqTCP("127.0.0.1","1000");
+    return zmq::message_t(a.c_str(), a.size());
 }

@@ -103,6 +103,9 @@ add_executable(simple-zmq-test tests/simple-zmq-test.cpp)
 target_link_libraries(simple-zmq-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
 
 
+add_executable(zmq-req-test tests/zmq-req-test.cpp)
+target_link_libraries(zmq-req-test ${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${ZMQ_LIBRARIES})
+
 # add_executable(
 #     unit_test
 #     tests/ctest-test.cpp

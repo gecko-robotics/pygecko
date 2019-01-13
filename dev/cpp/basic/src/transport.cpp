@@ -1,18 +1,11 @@
 #include "transport.hpp"
 #include "zmq.hpp"
-#include <iostream>
-// #include <unistd.h>  // usleep
+#include "time.hpp"
 
 using namespace std;
-// using zmq::context_t;
 
 zmq::context_t zmqBase::gContext(1);
-// zmq::context_t gContext(1);
-
-
-// zmq::context_t zmqBase::gContext(1);
-
-// zmqBase::zmqBase():
+zmqBase::zmqBase(int type): sock(gContext, type) {}
 
 /*
 typedef struct
@@ -30,21 +23,38 @@ bool zmqBase::check(int retry){
 
     for (int count = retry; count > 0; --count){
         int ret = zmq_poll(items, 1, 10);  // wait 10 msec
-        cout << count << endl;
+        // cout << count << endl;
         if (ret < 0){
-            cout << "zmqBase::checck failed: " << ret << endl;
+            cout << "zmqBase::check failed: " << ret << endl;
             return false;
         }
         if (ret > 0) return true;
+        // Time::msleep(1);
     }
     return false;
 }
 
-Publisher::Publisher(): zmqBase(ZMQ_PUB)
-{
-    // zmqBase::sock(gContext, ZMQ_PUB);
-    // publisher.bind(addr + string(":") + to_string(port));
+void zmqBase::update(){
+    std::array<char, 100> e;  // tcp://x.x.x.x:port
+    size_t e_size = e.size();
+    sock.getsockopt(ZMQ_LAST_ENDPOINT, e.data(), &e_size);
+
+    endpoint.assign(e.data(), e.size());
+    std::cout << ">> endpoint: " << endpoint << std::endl;
 }
+
+// ~zmqBase(){sock.close(); gContext.close();}
+zmqBase::~zmqBase(){
+    // any pending sends will block the context destructor
+    cout << ">> killing (ZMQ_LINGER): " << endpoint << endl;
+    int msec = 5;
+    sock.setsockopt(ZMQ_LINGER, &msec, sizeof(msec));
+    sock.close();
+}
+
+///////////////////////////////////////////////////////////////
+
+Publisher::Publisher(): zmqBase(ZMQ_PUB){}
 
 /*
 Will bind or connect to an address (tcp://x.x.x.x:*, where * can be replacced
@@ -59,18 +69,19 @@ Publisher::Publisher(string addr, bool bind): zmqBase(ZMQ_PUB)
     else {
         sock.connect(addr);
     }
-    char port[1024]; //make this sufficiently large to avoid invalid argument.
-    size_t size = sizeof(port);
-    sock.getsockopt( ZMQ_LAST_ENDPOINT, &port, &size );
-    port_number = port;
-    cout << "socket is bound at port " << port_number << endl;
+    update();
+    // char port[1024]; //make this sufficiently large to avoid invalid argument.
+    // size_t size = sizeof(port);
+    // sock.getsockopt( ZMQ_LAST_ENDPOINT, &port, &size );
+    // endpoint = port;
+    // cout << "socket is bound at port " << port_number << endl;
 }
 
 void Publisher::pub(zmq::message_t& msg){
     sock.send(msg);
 }
 
-void Publisher::serialize(){}
+// void Publisher::serialize(){}
 
 
 ///////////////////////////////////////////////////
@@ -79,70 +90,66 @@ Subscriber::Subscriber(): zmqBase(ZMQ_SUB)
 {
     // subscriber.connect(addr + string(":") + to_string(port));
     // subscriber.setsockopt(ZMQ_SUBSCRIBE, topic.c_str(), topic.length());
+    callback = nullptr;
 }
 
 Subscriber::Subscriber(string addr, string topic, bool bind): zmqBase(ZMQ_SUB)
 {
     sock.connect(addr);
     sock.setsockopt(ZMQ_SUBSCRIBE, topic.c_str(), topic.length());
+    callback = nullptr;
+    update();
 }
 
-zmq::message_t Subscriber::recv(){
+zmq::message_t Subscriber::recv(int flags){
     zmq::message_t msg;
-    sock.recv(&msg);
+    sock.recv(&msg, flags);
     return msg;
 }
 
-////////////////////////////////////////////////////
 
-Reply::Reply(): zmqBase(ZMQ_REP) {;}
-
-void Reply::listen(void (*callback)(zmq::message_t&)){
-    zmq::message_t request;
-    sock.recv (&request);
-    callback(request);
-
-    string smsg;
-
-    //  create the reply
-    zmq::message_t reply (smsg.size());
-    memcpy ((void *) reply.data (), smsg.c_str(), smsg.size());
-    sock.send (reply);
+void Subscriber::setCallback(void(*cb)(zmq::message_t&)){
+    callback = cb;
 }
 
 ////////////////////////////////////////////////////
 
-// template <typename T>
-// Request<T>::Request(string& addr): sock(gContext, ZMQ_REQ) {
-//     sock.connect(addr);
-// }
-//
-// template <typename T>
-// T Request<T>::get(T& req){
-//     string s;
-//     req.SerializeToString(&s);
-//     zmq::message_t msg(s.size());
-//     memcpy((void*) msg.data(), s.c_str(), s.size());
-//     sock.send(msg);
-//
-//     zmq::message_t rep;
-//     sock.recv(&rep);
-//     T preply;
-//     preply.ParseFromArray(rep.data(), rep.size());
-//     return preply;
-// }
+Reply::Reply(std::string addr): zmqBase(ZMQ_REP) {
+    sock.bind(addr);
+    update();
+}
+
+void Reply::listen(zmq::message_t (*callback)(zmq::message_t&), int flags){
+    zmq::message_t request;
+
+    if (zmqBase::check(1) == false) return;
+
+    sock.recv (&request, flags);
+
+    // if (request.size() == 0) return;
+
+    //  create the reply
+    zmq::message_t reply = callback(request);
+    printf(">> sending reply\n");
+    cout << reply << endl;
+    if (reply.size() > 0) sock.send(reply);
+}
+
 
 ////////////////////////////////////////////////////
 
-// template <typename T>
-// Publisher2<T>::Publisher(string addr, int port): publisher(gContext, ZMQ_PUB)
-// {
-//     publisher.bind(addr + string(":") + to_string(port));
-// }
-//
-// template <typename T>
-// void Publisher2<T>::pub(T& msg){
-//     publisher.send(msg);
-// }
-//
-// void Publisher2::serialize(){}
+Request::Request(std::string addr): zmqBase(ZMQ_REQ)  {
+    sock.connect(addr);
+    update();
+}
+
+zmq::message_t Request::get(zmq::message_t& msg, int flags){
+    sock.send(msg);
+
+    bool msg_ready = zmqBase::check(1);
+
+    zmq::message_t rep;
+    if (msg_ready) sock.recv(&rep, flags);
+
+    return rep;
+}

@@ -1,6 +1,6 @@
 #include "core.hpp"
 
-using namespace gecko;
+// using namespace gecko;
 
 int main(void){
     Core c = Core(1234);

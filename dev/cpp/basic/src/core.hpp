@@ -2,38 +2,31 @@
 
 #include <map>
 #include <string>
-// #include <tuple>
-// // #include <transport.hpp>
-// #include "transport.hpp"
-// #include "time.hpp"
+#include <vector>
 #include "signals.hpp"
+#include "zmq.hpp"
 
-namespace gecko {
-
-// class SigCapture {
-// public:
-//     SigCapture();
-//     static void my_handler(int s);
-//
-// protected:
-//     static bool shutdown;
-// };
+// namespace gecko {
 
 class Core: protected SigCapture {
     /*
     GeckoCore
     */
 public:
-    Core(int port, int hertz=100);
-    void run(void);
+    Core(int port=11311);
+    void run(int hertz=100);
+    void requestLoop(void);
     // static void init(int argc, char* argv[]);
     // static void shutdown(void){shutdown = true;}
 
 protected:
-    int handle_reply();
+    static zmq::message_t handle_reply(zmq::message_t&);
     // static std::string core_addr;
     static std::map<std::string, std::string> directory;
     // bool shutdown;
+    const int bindPort;
 };
 
-}
+std::vector<std::string> split(const std::string& s, char delimiter);
+
+// }

@@ -22,8 +22,8 @@ public:
     long now();  // chrono seconds since epic
     // google::protobuf::Timestamp unixNow();  // unix based timestamp
     google::protobuf::Timestamp unix();  // unix based timestamp
-    void msleep(int);
-    void sleep(int);
+    static void msleep(int msec);
+    void sleep(int sec);
 };
 
 
