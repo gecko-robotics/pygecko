@@ -14,7 +14,7 @@ import zmq
 # import time
 # import socket as Socket
 from pygecko.transport.protocols import Pickle
-# from pygecko.transport.protocols import MsgPack
+from pygecko.transport.protocols import MsgPack,MsgPackCustom
 
 class ZMQError(Exception):
     pass
@@ -29,7 +29,7 @@ class Base(object):
     # pack = None
     # topics = None
 
-    def __init__(self, kind=None, serialize=Pickle):  # FIXME: kind is not used???
+    def __init__(self, kind=None, serialize=MsgPack):  # FIXME: kind is not used???
         self.topics = None
         self.pack = None  # ???
         self.ctx = zmq.Context()

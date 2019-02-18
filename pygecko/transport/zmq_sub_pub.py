@@ -20,14 +20,14 @@ import time
 # import json
 from pygecko.transport.zmq_base import Base
 from pygecko.transport.zmq_base import ZMQError
-from pygecko.transport.protocols import Pickle
+from pygecko.transport.protocols import Pickle, MsgPackCustom,MsgPack
 
 
 class Pub(Base):
     """
     Simple publisher
     """
-    def __init__(self, serialize=Pickle):
+    def __init__(self, serialize=MsgPack):
         """
         Publishes messages on a topic.
 
@@ -50,13 +50,14 @@ class Pub(Base):
     def __del__(self):
         self.socket.close()
 
-    def pub(self, topic, msg):
+
+    def publish(self, msg):
         """
         in: topic, message
         out: none
         """
-        if topic not in self.topics:
-            raise Exception("Pub.pub: {} is an invalide topic".format(topic))
+        # if topic not in self.topics:
+        #     raise Exception("Pub.pub: {} is an invalide topic".format(topic))
         # jmsg = serialize(msg)
 
         # if self.pack:
@@ -65,6 +66,7 @@ class Pub(Base):
         #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
 
         jmsg = self.pickle.pack(msg)
+        print(">> msg pub: [{}] {}".format(len(jmsg), jmsg))
 
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
         # done = True
@@ -73,7 +75,8 @@ class Pub(Base):
         #     done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
         #     # done = self.socket.send(jmsg)
         # print('pub >>', topic.encode('ascii'))
-        self.socket.send_multipart([topic.encode('utf-8'), jmsg])
+        # self.socket.send_multipart([jmsg])
+        self.socket.send(jmsg)
 
     # def raw_pub(self, topic, msg):
     #     # done = True
@@ -89,7 +92,7 @@ class Sub(Base):
     """
     unpack = None
 
-    def __init__(self, topics=None, unpack=None, cb_func=None, serialize=Pickle):
+    def __init__(self, topics=None, unpack=None, cb_func=None, serialize=MsgPack):
         """
         topics: an array of topics, ex ['hello', 'cool messages'] or None to subscribe to all messages
         unpack: a function to deserialize messages if necessary
@@ -143,14 +146,15 @@ class Sub(Base):
         topic = None
         msg = None
         try:
-            topic, jmsg = self.socket.recv_multipart(flags=flags)
+            # topic, jmsg = self.socket.recv_multipart(flags=flags)
+            jmsg = self.socket.recv(flags=flags)
             # if self.unpack:
             #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
             # else:
             #     msg = msgpack.unpackb(jmsg, raw=False)
             msg = self.pickle.unpack(jmsg)
-            if self.cb_func:
-                self.cb_func(topic, msg)
+            # if self.cb_func:
+            #     self.cb_func(topic, msg)
         except zmq.Again:
             # no message has arrived yet or not connected to server
             # print(e)
@@ -159,12 +163,36 @@ class Sub(Base):
             # something else is wrong
             # print(e)
             raise
-        return topic, msg
+        # return topic, msg
+        return msg
 
 
 
 ############################################################################
-
+# def pub(self, topic, msg):
+#     """
+#     in: topic, message
+#     out: none
+#     """
+#     if topic not in self.topics:
+#         raise Exception("Pub.pub: {} is an invalide topic".format(topic))
+#     # jmsg = serialize(msg)
+#
+#     # if self.pack:
+#     #     jmsg = msgpack.packb(msg, default=self.pack, use_bin_type=True, strict_types=True)
+#     # else:
+#     #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
+#
+#     jmsg = self.pickle.pack(msg)
+#
+#     # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
+#     # done = True
+#     # while done:
+#     #     # done = self.socket.send_multipart([topic.encode('ascii'), jmsg])
+#     #     done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
+#     #     # done = self.socket.send(jmsg)
+#     # print('pub >>', topic.encode('ascii'))
+#     self.socket.send_multipart([topic.encode('utf-8'), jmsg])
 
     # def raw_recv(self, flags=0):
     #     return self.socket.recv_multipart(flags=flags)
