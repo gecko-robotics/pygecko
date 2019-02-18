@@ -29,15 +29,15 @@ class Base(object):
     # pack = None
     # topics = None
 
-    def __init__(self, kind=None, serialize=MsgPack):  # FIXME: kind is not used???
+    def __init__(self, kind, serialize=MsgPack):
         self.topics = None
         self.pack = None  # ???
         self.ctx = zmq.Context()
-        self.pickle = serialize()  # use pack or serialize??
-        if kind:
-            self.socket = self.ctx.socket(kind)
-        else:
-            self.socket = None
+        self.packer = serialize()  # use pack or serialize??
+        # if kind:
+        self.socket = self.ctx.socket(kind)
+        # else:
+        #     self.socket = None
 
     def __del__(self):
         """Calls close()"""
