@@ -34,7 +34,7 @@ def sub(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
 
-    s = geckopy.connectTCP("local", "bob")
+    s = geckopy.subConnectTCP("local", "bob2")
     if (s == None):
         print("ERROR setting up subscriber")
         return
@@ -47,3 +47,4 @@ def sub(**kwargs):
 
 if __name__ == '__main__':
     sub()
+    # pub()

@@ -14,6 +14,7 @@ from __future__ import division
 import zmq
 # from zmq.devices import ProcessProxy
 import time
+import zlib
 # import socket as Socket
 # import msgpack
 # import pickle
@@ -148,11 +149,18 @@ class Sub(Base):
         try:
             # topic, jmsg = self.socket.recv_multipart(flags=flags)
             jmsg = self.socket.recv(flags=flags)
+
+
+            print(">> sub.recv compressed: [{}] {}".format(len(jmsg), jmsg))
+
+            jmsg = zlib.decompress(jmsg)
             # if self.unpack:
             #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
             # else:
             #     msg = msgpack.unpackb(jmsg, raw=False)
+            print(">> sub.recv packed: [{}] {}".format(len(jmsg), jmsg))
             msg = self.packer.unpack(jmsg)
+            print(">> sub.recv unpacked:", msg)
             # if self.cb_func:
             #     self.cb_func(topic, msg)
         except zmq.Again:
