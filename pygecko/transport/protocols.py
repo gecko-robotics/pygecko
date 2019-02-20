@@ -49,13 +49,31 @@ class Json(object):
 
 try:
     import msgpack
+    def ext_pack(x):
+        name = x.__class__.__name__
+        if name in ['Vector', 'IMU']:
+            if name == 'Vector': id = 0
+            elif name == 'IMU': id = 2
+            return msgpack.ExtType(1, msgpack.packb([id,] + list(x[:]), default=ext_pack, strict_types=True))
+        return x
+
+    def ext_unpack(code, data):
+        if code == 1:
+            # you call this again to unpack and ext_hook for nested
+            d = msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
+
+            # print d[0]   # holds class name
+            # print d[1:]  # holds data inorder
+            # finds constructor in namespace and calls it
+            return globals()[d[0]](*d[1:])
+        return msgpack.ExtType(code, data)
 
     class MsgPack(object):
         def pack(self, data):
-            return msgpack.packb(data, use_bin_type=True, strict_types=True)
+            return msgpack.packb(data, use_bin_type=True, strict_types=True,default=ext_pack)
 
         def unpack(self, data):
-            return msgpack.unpackb(data, raw=False)
+            return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
 
 
     class MsgPackCustom(object):

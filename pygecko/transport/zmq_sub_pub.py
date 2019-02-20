@@ -67,7 +67,9 @@ class Pub(Base):
         #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
 
         jmsg = self.packer.pack(msg)
-        print(">> msg pub: [{}] {}".format(len(jmsg), jmsg))
+        print(">> packed msg pub: [{}] {}".format(len(jmsg), jmsg))
+        jmsg = zlib.compress(jmsg, -1)  # set to default level
+        print(">> compressed msg pub: [{}] {}".format(len(jmsg), jmsg))
 
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
         # done = True
