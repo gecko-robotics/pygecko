@@ -25,6 +25,12 @@ Log = namedtuple('Log', 'level name text')
 # Lidar = namedtuple('Lidar', 'len data timestamp')
 # Path = namedtuple("Path", 'path')
 
+# class vec_t(namedtuple('vec_t', 'x y z')):
+#     __slots__ = ()
+#
+#     def __new__(cls, p, o, ts=None):
+#         return cls.__bases__[0].__new__(cls, x,y,z)
+
 
 class Image(namedtuple('Image', 'shape bytes compressed timestamp')):
     """
