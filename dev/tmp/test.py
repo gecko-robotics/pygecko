@@ -79,13 +79,13 @@ class MsgPacker(object):
     def ext_pack2(self, x):
         try:
             return msgpack.ExtType(x.id, msgpack.packb(list(x[:]), default=self.ext_pack2, strict_types=True))
+            # return msgpack.ExtType(x.id, msgpack.packb(x[:], default=self.ext_pack2, strict_types=True))
         except:
             return x
 
     def ext_unpack2(self, code, data):
-        # print(">>", code)
         if code in self.msgs.keys():
-            d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, raw=False)
+            d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
             return self.msgs[code](*d)
         return msgpack.ExtType(code, data)
 
@@ -93,24 +93,31 @@ class MsgPacker(object):
         return msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.ext_pack2)
 
     def unpack(self, data):
-        return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack2)
+        return msgpack.unpackb(data, use_list=False,raw=False, ext_hook=self.ext_unpack2)
+
 
 mp = MsgPacker()
 
-v = vec_t(1,2,3)
-print(v)
-print(v.id)
 
-mv = mp.pack(v)
-print(mv)
-print("packed",len(mv))
+def printMsg(m):
+    mc = mp.pack(m)
+    print(">> {}[{}] packed {} ... {}".format(
+            m.__class__.__name__,
+            m.id,
+            len(mc),
+            m == mp.unpack(mc)
+        )
+    )
+    # print(">>", mp.unpack(mc))
 
-i = imu_st(v,v,vec_t(-1,2000,1e-3))
-print(i)
-mi = mp.pack(i)
-print("packed",len(mi))
 
-print(mi)
-
-ii = mp.unpack(mi)
-print(ii)
+v = vec_t(1000.123456789,-2.3456789,0.00003)
+print(v[:])
+# print(list(v[:]))
+printMsg(v)
+printMsg(quaternion_t(1,2,3,4))
+printMsg(wrench_t(v,v))
+printMsg(pose_t(v,v))
+printMsg(twist_t(v,v))
+printMsg(joystick_t(v,[1,2,3,4,5],0))
+printMsg(imu_st(v,v,vec_t(-1,2000,1e-3)))

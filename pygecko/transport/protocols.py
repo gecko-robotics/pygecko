@@ -7,6 +7,7 @@
 #
 
 import pickle
+from pygecko.messages import vec_t,quaternion_t,wrench_t,pose_t,joystick_t,twist_t,imu_st
 
 class Pickle(object):
     def pack(self, data):
@@ -49,33 +50,64 @@ class Json(object):
 
 try:
     import msgpack
-    def ext_pack(x):
-        name = x.__class__.__name__
-        if name in ['Vector', 'IMU']:
-            if name == 'Vector': id = 0
-            elif name == 'IMU': id = 2
-            return msgpack.ExtType(1, msgpack.packb([id,] + list(x[:]), default=ext_pack, strict_types=True))
-        return x
-
-    def ext_unpack(code, data):
-        if code == 1:
-            # you call this again to unpack and ext_hook for nested
-            d = msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
-
-            # print d[0]   # holds class name
-            # print d[1:]  # holds data inorder
-            # finds constructor in namespace and calls it
-            return globals()[d[0]](*d[1:])
-        return msgpack.ExtType(code, data)
 
     class MsgPack(object):
+        msgs = {
+            0: vec_t,
+            1: quaternion_t,
+            2: wrench_t,
+            3: pose_t,
+            4: joystick_t,
+            5: twist_t,
+            10: imu_st
+        }
+
+        def ext_pack2(self, x):
+            try:
+                return msgpack.ExtType(x.id, msgpack.packb(list(x[:]), default=self.ext_pack2, strict_types=True))
+                # return msgpack.ExtType(x.id, msgpack.packb(x[:], default=self.ext_pack2, strict_types=True))
+            except:
+                return x
+
+        def ext_unpack2(self, code, data):
+            if code in self.msgs.keys():
+                d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
+                return self.msgs[code](*d)
+            return msgpack.ExtType(code, data)
+
         def pack(self, data):
-            return msgpack.packb(data, use_bin_type=True, strict_types=True,default=ext_pack)
+            return msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.ext_pack2)
 
         def unpack(self, data):
-            return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
+            return msgpack.unpackb(data, use_list=False,raw=False, ext_hook=self.ext_unpack2)
 
-
+    # def ext_pack(x):
+    #     name = x.__class__.__name__
+    #     if name in ['Vector', 'IMU']:
+    #         if name == 'Vector': id = 0
+    #         elif name == 'IMU': id = 2
+    #         return msgpack.ExtType(1, msgpack.packb([id,] + list(x[:]), default=ext_pack, strict_types=True))
+    #     return x
+    #
+    # def ext_unpack(code, data):
+    #     if code == 1:
+    #         # you call this again to unpack and ext_hook for nested
+    #         d = msgpack.unpackb(data, ext_hook=ext_unpack, raw=False)
+    #
+    #         # print d[0]   # holds class name
+    #         # print d[1:]  # holds data inorder
+    #         # finds constructor in namespace and calls it
+    #         return globals()[d[0]](*d[1:])
+    #     return msgpack.ExtType(code, data)
+    #
+    # class MsgPack(object):
+    #     def pack(self, data):
+    #         return msgpack.packb(data, use_bin_type=True, strict_types=True,default=ext_pack)
+    #
+    #     def unpack(self, data):
+    #         return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
+    #
+    #
     class MsgPackCustom(object):
         def __init__(self, packer, unpacker):
             self.packer = packer

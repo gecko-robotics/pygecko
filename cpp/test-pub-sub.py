@@ -8,9 +8,10 @@
 
 from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
-from pygecko.transport.protocols import MsgPack, MsgPackCustom
+from pygecko.transport.protocols import MsgPack
 import time
-from pygecko import Vector, IMU
+# from pygecko import Vector, IMU
+from pygecko.messages import vec_t, imu_st
 
 
 
@@ -24,8 +25,8 @@ def pub(**kwargs):
         print("ERROR setting up publisher")
         return
     cnt = 0
-    v = Vector(1,2,3)
-    m = IMU(v,v,v)
+    v = vec_t(1,2,3)
+    m = imu_st(v,v,v)
     while not geckopy.is_shutdown():
         p.publish(m)
         print("sent")
