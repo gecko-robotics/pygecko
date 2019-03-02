@@ -23,12 +23,12 @@ def publisher(**kwargs):
     rate = geckopy.Rate(2)
 
     topic = kwargs.get('topic')
-    p = geckopy.Publisher([topic])
+    p = geckopy.pubBinderTCP(kwargs.get('key'),topic)
     start = time.time()
     cnt = 0
     while not geckopy.is_shutdown():
         msg = cnt
-        p.pub(topic, msg)  # topic msg
+        p.publish(msg)  # topic msg
 
         geckopy.logdebug('{}[{}] published msg'.format(topic,cnt))
         cnt += 1
@@ -48,53 +48,30 @@ class Callback(object):
         self.r = 0
         self.s = 0
 
-    # def callback(self, topic, msg):
-    #     if topic == 'ryan': self.r = msg
-    #     elif topic == 'scott': self.s = msg
-    #     else: geckopy.logerror(topic)
-    #     chew_up_cpu(.1)
-
     def loop(self, **kwargs):
         geckopy.init_node(**kwargs)
         rate = geckopy.Rate(2)
 
-        # for t in kwargs.get('topic'):
-        sr = geckopy.Subscriber('ryan')
-        ss = geckopy.Subscriber('scott')
-
-        # geckopy.spin(20) # wtf
-
-        p = geckopy.Publisher(['ans'])
+        sr = geckopy.subConnectTCP(kwargs.get('key'),'ryan')
+        ss = geckopy.subConnectTCP(kwargs.get('key'),'scott')
+        p = geckopy.pubBinderTCP(kwargs.get('key'),'ans')
 
         start = time.time()
         while not geckopy.is_shutdown():
-            t,m = sr.recv_nb()
-            if t is not None:
-                self.r = msg
+            m = sr.recv_nb()
+            if m:
+                self.r = m
 
-            t,m = sr.recv_nb()
-            if t is not None:
-                self.r = msg
+            m = ss.recv_nb()
+            if m:
+                self.s = m
 
-            ans = self.s + self.r
-            msg = {'ans': ans}
-            p.pub('ans', msg)  # topic msg
+            msg = {'ans': self.s + self.r}
+            p.publish(msg)  # topic msg
 
-            geckopy.logdebug('ans msg: {}'.format(ans))
+            geckopy.logdebug('ans msg: {}'.format(msg))
             rate.sleep()
         print('pub bye ...')
-
-# def subscriber(**kwargs):
-#     geckopy.init_node(**kwargs)
-#
-#
-#     topic = kwargs.get('topic')
-#     c = Callback('class')
-#     geckopy.Subscriber([topic], c.callback)
-#     # geckopy.on_shutdown(c.bye)
-#
-#     geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
-#     print('sub bye ...')
 
 
 if __name__ == '__main__':
@@ -113,10 +90,8 @@ if __name__ == '__main__':
     for topic in ['ryan','scott']:
         # info to pass to processes
         args = {
-            'topic': topic,
-            "geckocore": {
-                "host": 'localhost'
-            }
+            'key': "local",
+            'topic': topic
         }
 
         p = GeckoSimpleProcess()
@@ -125,10 +100,7 @@ if __name__ == '__main__':
 
 
     args = {
-        'topic': ['ryan','scott'],
-        "geckocore": {
-            "host": 'localhost'
-        }
+        'key': "local"
     }
     s = GeckoSimpleProcess()
     c = Callback('class')

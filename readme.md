@@ -1,5 +1,9 @@
 # :lizard:  pyGecko
 
+
+**WARNIMG:** Broke messages temporarily for compatilibility between c++ and
+python code. Will fix on c++ end first, then python.
+
 ## My robot software.
 
 - Doesn't use [ROS](http://ros.org), ROS is a pain to install and maintain
@@ -47,7 +51,7 @@ on macOS and various linux systems
     1. If topic is *not* found, returns a topic not found status
 1. Subscriber connects to the publisher with the given address/port
 
-This is the main message hub. GeckoCore also is passed the PIDs for processes on the 
+This is the main message hub. GeckoCore also is passed the PIDs for processes on the
 local machine and prints performance data on each process:
 
 ```bash
@@ -150,6 +154,7 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2019-Mar-02 | 1.2.0 | set multicast as the default method to find nodes
 2018-Oct-28 | 1.1.0 | simplified and removed geckocore as the main hub
 2018-Sep-16 | 1.0.3 | implemented a multicast connection process
 2018-Sep-16 | 1.0.2 | dropping python 2.7 support, only 3.7+

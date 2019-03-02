@@ -76,16 +76,32 @@ class MsgPacker(object):
         10: imu_st
     }
 
+    def rec(self,x):
+        if isinstance(x,tuple):
+            # print(">> tuple")
+            return list(self.rec(i) for i in x)
+        # print("*** not tuple ***")
+        return x
+
     def ext_pack2(self, x):
         try:
-            return msgpack.ExtType(x.id, msgpack.packb(list(x[:]), default=self.ext_pack2, strict_types=True))
-            # return msgpack.ExtType(x.id, msgpack.packb(x[:], default=self.ext_pack2, strict_types=True))
-        except:
+            # print("pack id", x.id)
+            xx = self.rec(x)
+            # print(">>", xx)
+            xx = msgpack.ExtType(x.id, msgpack.packb(xx, use_bin_type=True, strict_types=True))
+            return xx
+        except Exception as e:
+            print(e)
+            # print("wtf:", x[:])
+            # print("wtf:", x)
             return x
 
     def ext_unpack2(self, code, data):
         if code in self.msgs.keys():
-            d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
+            # d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
+            # d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
+            d = msgpack.unpackb(data, use_list=False,raw=False)
+            # print("code:",code,"unpack data:", d)
             return self.msgs[code](*d)
         return msgpack.ExtType(code, data)
 
@@ -100,24 +116,30 @@ mp = MsgPacker()
 
 
 def printMsg(m):
+    # print("msg:", m[:], " len:", len(m))
     mc = mp.pack(m)
+    rm = mp.unpack(mc)
+    # print(m)
+    # print(rm)
     print(">> {}[{}] packed {} ... {}".format(
             m.__class__.__name__,
             m.id,
             len(mc),
-            m == mp.unpack(mc)
+            m == rm
         )
     )
+    if 'timestamp' in m._fields:
+        assert m.timestamp == rm.timestamp
+    assert m == rm
     # print(">>", mp.unpack(mc))
 
 
 v = vec_t(1000.123456789,-2.3456789,0.00003)
-print(v[:])
-# print(list(v[:]))
+# print(v[:])
 printMsg(v)
 printMsg(quaternion_t(1,2,3,4))
 printMsg(wrench_t(v,v))
 printMsg(pose_t(v,v))
 printMsg(twist_t(v,v))
-printMsg(joystick_t(v,[1,2,3,4,5],0))
+printMsg(joystick_t(v,(1,2,3,4,5),0))
 printMsg(imu_st(v,v,vec_t(-1,2000,1e-3)))

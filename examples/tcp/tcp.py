@@ -22,55 +22,41 @@ def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
 
-    topic = kwargs.get('topic')
-    p = geckopy.Publisher(topic)
+    # topic = kwargs.get('topic')
+    p = geckopy.pubBinderTCP(
+        kwargs.get('key'),
+        kwargs.get('topic')
+
+    )
     start = time.time()
     cnt = 0
     while not geckopy.is_shutdown():
         msg = {'time': time.time() - start}
-        p.pub(topic, msg)  # topic msg
+        p.publish(msg)  # topic msg
 
         geckopy.logdebug('[{}] published msg'.format(cnt))
         cnt += 1
         rate.sleep()
     print('pub bye ...')
 
-
-
-# def f(topic, msg):
-#     # print("recv[{}]: {}".format(topic, msg))
-#     geckopy.log(msg)
-#     chew_up_cpu(.1)
-
-class Callback(object):
-    """
-    So the idea here is instead of using a simple callback function
-    like what is commented out above, I need to setup some stuff
-    and have it available during the callback. A simple class
-    allows me to do this
-    """
-    def __init__(self, name):
-        self.name = name
-    def __del__(self):
-        self.bye()
-    def callback(self, topic, msg):
-        geckopy.loginfo("{}: {}".format(self.name, msg))
-        chew_up_cpu(.1)
-    def bye(self):
-        print("*"*30)
-        print(" {} shutting down ...".format(self.name))
-        print("*"*30)
-
 def subscriber(**kwargs):
     geckopy.init_node(**kwargs)
-
+    rate = geckopy.Rate(2)
 
     topic = kwargs.get('topic')
-    c = Callback(topic)
-    geckopy.Subscriber([topic], c.callback)
+    # c = Callback(topic)
+    s = geckopy.subConnectTCP(
+        kwargs.get('key'),
+        kwargs.get('topic')
+    )
     # geckopy.on_shutdown(c.bye)
+    while not geckopy.is_shutdown():
+        msg = s.recv_nb()
+        if msg:
+            geckopy.loginfo("{}: {}".format(topic,msg))
+        chew_up_cpu(.1)
 
-    geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
+    # geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
 
 
@@ -90,10 +76,11 @@ if __name__ == '__main__':
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
         # info to pass to processes
         args = {
+            "key": "local",
             'topic': topic,
-            "geckocore": {
-                "host": 'localhost'
-            }
+            # "geckocore": {
+            #     "host": 'localhost'
+            # }
         }
 
         p = GeckoSimpleProcess()

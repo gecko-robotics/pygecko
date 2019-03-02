@@ -63,6 +63,7 @@ setup(
     },
     scripts=[
         'bin/geckocore.py',
+        'bin/pycore.py',
         'bin/geckolaunch.py',
     #     # 'bin/mjpeg_server.py',  # why? use opencvutils instead
     #     # 'bin/bag_play.py',

@@ -70,8 +70,11 @@ try:
                 return x
 
         def ext_unpack2(self, code, data):
+            # print(">> code:", code)
+            # print("> data:", data)
             if code in self.msgs.keys():
                 d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
+                # print("> d:", d)
                 return self.msgs[code](*d)
             return msgpack.ExtType(code, data)
 
@@ -79,7 +82,7 @@ try:
             return msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.ext_pack2)
 
         def unpack(self, data):
-            return msgpack.unpackb(data, use_list=False,raw=False, ext_hook=self.ext_unpack2)
+            return msgpack.unpackb(data, use_list=False, raw=False, ext_hook=self.ext_unpack2)
 
     # def ext_pack(x):
     #     name = x.__class__.__name__

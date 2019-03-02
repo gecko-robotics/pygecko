@@ -28,6 +28,7 @@ def pub(**kwargs):
     v = vec_t(1,2,3)
     m = imu_st(v,v,v)
     while not geckopy.is_shutdown():
+        # m = imu_st(v,v,v)
         p.publish(m)
         print("sent")
         rate.sleep()
@@ -46,6 +47,7 @@ def sub(**kwargs):
     while not geckopy.is_shutdown():
         data = s.recv_nb()
         print("sub:", data)
+        print('-'*40)
         rate.sleep()
 
 

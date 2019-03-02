@@ -67,9 +67,9 @@ class Pub(Base):
         #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
 
         jmsg = self.packer.pack(msg)
-        print(">> packed msg pub: [{}] {}".format(len(jmsg), jmsg))
-        jmsg = zlib.compress(jmsg, -1)  # set to default level
-        print(">> compressed msg pub: [{}] {}".format(len(jmsg), jmsg))
+        # print(">> packed msg pub: [{}] {}".format(len(jmsg), jmsg))
+        # jmsg = zlib.compress(jmsg, -1)  # set to default level
+        # print(">> compressed msg pub: [{}] {}".format(len(jmsg), jmsg))
 
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
         # done = True
@@ -153,16 +153,16 @@ class Sub(Base):
             jmsg = self.socket.recv(flags=flags)
 
 
-            print(">> sub.recv compressed: [{}] {}".format(len(jmsg), jmsg))
+            # print(">> sub.recv compressed: [{}] {}".format(len(jmsg), jmsg))
 
-            jmsg = zlib.decompress(jmsg)
+            # jmsg = zlib.decompress(jmsg)
             # if self.unpack:
             #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
             # else:
             #     msg = msgpack.unpackb(jmsg, raw=False)
-            print(">> sub.recv packed: [{}] {}".format(len(jmsg), jmsg))
+            # print(">> sub.recv packed: [{}] {}".format(len(jmsg), jmsg))
             msg = self.packer.unpack(jmsg)
-            print(">> sub.recv unpacked:", msg)
+            # print(">> sub.recv unpacked:", msg)
             # if self.cb_func:
             #     self.cb_func(topic, msg)
         except zmq.Again:
