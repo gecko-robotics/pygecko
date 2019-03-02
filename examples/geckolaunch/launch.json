@@ -1,14 +1,11 @@
 {
     "processes":
     [
-        ["process", "publish", {"topic": "hello"}],
-        ["process", "publish", {"topic": "hey there"}],
-        ["process", "subscribe2", {"topic": "hello"}],
-        ["process", "subscribe2", {"topic": "hello"}],
-        ["process", "subscribe2", {"topic": "hey there"}],
-        ["process", "subscribe2", {"topic": "hey there"}]
-    ],
-    "geckocore": {
-        "host": "localhost"
-    }
+        ["process", "publish", {"key":"local","topic": "hello"}],
+        ["process", "publish", {"key":"local","topic": "hey there"}],
+        ["process", "subscribe2", {"key":"local","topic": "hello"}],
+        ["process", "subscribe2", {"key":"local","topic": "hello"}],
+        ["process", "subscribe2", {"key":"local","topic": "hey there"}],
+        ["process", "subscribe2", {"key":"local","topic": "hey there"}]
+    ]
 }

@@ -22,7 +22,6 @@ def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
 
-    # topic = kwargs.get('topic')
     p = geckopy.pubBinderTCP(
         kwargs.get('key'),
         kwargs.get('topic')
@@ -49,14 +48,13 @@ def subscriber(**kwargs):
         kwargs.get('key'),
         kwargs.get('topic')
     )
-    # geckopy.on_shutdown(c.bye)
+
     while not geckopy.is_shutdown():
         msg = s.recv_nb()
         if msg:
             geckopy.loginfo("{}: {}".format(topic,msg))
         chew_up_cpu(.1)
 
-    # geckopy.spin(20) # it defaults to 100hz, this is just to slow it down
     print('sub bye ...')
 
 
@@ -77,10 +75,7 @@ if __name__ == '__main__':
         # info to pass to processes
         args = {
             "key": "local",
-            'topic': topic,
-            # "geckocore": {
-            #     "host": 'localhost'
-            # }
+            'topic': topic
         }
 
         p = GeckoSimpleProcess()

@@ -17,7 +17,6 @@ def chew_up_cpu(interval):
     while (time.time() - start) < interval: 5*5
 
 
-
 def publisher(**kwargs):
     geckopy.init_node(**kwargs)
     rate = geckopy.Rate(2)
