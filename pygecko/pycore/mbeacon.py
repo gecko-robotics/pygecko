@@ -39,6 +39,7 @@ class BeaconBase(object):
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_TTL, ttl)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
         self.key = key
+        self.host_ip = GetIP().get()
 
 
 class BeaconCoreServer(BeaconBase):
@@ -89,11 +90,16 @@ class BeaconCoreServer(BeaconBase):
     def print(self):
         print(" ")
         print("="*40)
+        print(" Geckocore")
+        print("-------------")
+        print(" Key: {}".format(self.key))
+        print(" Host IP: {}".format(self.host_ip))
         print(" Listening on: {}:{}".format(self.mcast_addr, self.mcast_port))
-        print('Known Services', '-'*40)
+        print("-------------")
+        print('Known Services [{}]'.format(len(self.services)), '-'*40)
         for k,v in self.services.items():
             print(" * {}: {}".format(k,v))
-        print('\nPerformance', '-'*40)
+        print('\nPerformance [{}]'.format(len(self.perf)), '-'*40)
         for k,v in self.perf.items():
             print(" * {}: {}".format(k,v))
         print(" ")
@@ -140,8 +146,8 @@ class BeaconCoreServer(BeaconBase):
     def run(self):
         # self.sock.setblocking(0)
 
-        ip = GetIP().get()
-        print("<<< beacon ip: {} >>>".format(ip))
+        # ip = GetIP().get()
+        # print("<<< beacon ip: {} >>>".format(ip))
 
         while True:
             try:
