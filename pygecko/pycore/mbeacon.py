@@ -14,6 +14,8 @@ import time
 from .ip import GetIP
 from .transport import Ascii, Json, Pickle
 import os
+import psutil
+import multiprocessing as mp
 
 
 class BeaconBase(object):
@@ -40,12 +42,15 @@ class BeaconBase(object):
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
         self.key = key
         self.host_ip = GetIP().get()
+        self.pid = mp.current_process().pid
 
 
 class BeaconCoreServer(BeaconBase):
     services = {}  # services
     perf = {}
     exit = False
+    pubs = {}
+    subs = {}
 
     def __init__(self, key, handler=Ascii, ttl=1, addr=None):
         BeaconBase.__init__(self, key=key, ttl=ttl)
@@ -87,33 +92,83 @@ class BeaconCoreServer(BeaconBase):
         """Stop the listener thread"""
         self.exit = True
 
+    def printProcess(self,pids, bind=False):
+        # grab a snapshot of the values
+        procs = tuple(pids.values())
+        for ps, topic in procs:
+            # print(pid)
+            # print(ps)
+            # print(topic)
+            
+            try:
+                if ps.is_running():
+                    # faster or better?
+                    # p.cpu_percent(interval=None)
+                    # p.memory_percent(memtype="rss")
+                    pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+                    # net[psname] = pd['connections']
+                    # print(psname, pd['connections'])
+                    # cpu = ps.cpu_percent()
+                    # cpu = cpu if cpu else -1
+                    # mem = ps.memory_percent()
+                    # mem = mem if mem else -1
+                    label = '[{:>5}] {}'.format(ps.pid, topic)
+                    print(' {:.<30} cpu:{:5.1f}%  mem:{:5.1f}%'.format(label, pd['cpu_percent'], pd['memory_percent']))
+                    # print('| {:.<30} cpu: {:5}%    mem: {:6.2f}%'.format(label, cpu, mem))
+                else:
+                    # print('*** remove {} ***'.format(ps.pid))
+                    pids.pop(ps.pid)
+                    if bind: self.services.pop(topic)
+            except Exception as e:
+                print("***", e)
+                pids.pop(ps.pid)
+                if bind: self.services.pop(topic)
+        # except:
+        #     pids.pop(pid)
+        #     pass
+
     def print(self):
         print(" ")
         print("="*40)
-        print(" Geckocore")
+        print(" Geckocore [{}]".format(self.pid))
         print("-------------")
         print(" Key: {}".format(self.key))
         print(" Host IP: {}".format(self.host_ip))
         print(" Listening on: {}:{}".format(self.mcast_addr, self.mcast_port))
         print("-------------")
-        print('Known Services [{}]'.format(len(self.services)), '-'*40)
+        print('Known Services [{}]'.format(len(self.services)))
         for k,v in self.services.items():
-            print(" * {}: {}".format(k,v))
-        print('\nPerformance [{}]'.format(len(self.perf)), '-'*40)
-        for k,v in self.perf.items():
-            print(" * {}: {}".format(k,v))
+            print(" * {:.<30} {}".format(k+':',v))
+
+        print("\nBinders [{}]".format(len(self.pubs)))
+        self.printProcess(self.pubs, True)
+
+        print("\nConnections [{}]".format(len(self.subs)))
+        self.printProcess(self.subs)
+
         print(" ")
 
+
     def handle_sub(self, data):
+        # print("handle_sub")
+        # print(data)
+        # print(self.services.keys())
         ret = None
         topic = data[1]
-        pid = data[2]
+        pid = int(data[2])
         if topic in self.services.keys():
             endpt = self.services[topic]
             ret = (self.key, topic, endpt,)
-            self.perf[topic] = pid
+            # self.perf[topic] = pid
+            # self.subs.append((topic,pid,))
+            # self.subs[pid] = topic
+            self.subs[pid] = (psutil.Process(pid), topic,)
 
-            print(">> SUB[{}] {}:{}".format(pid, topic, endpt))
+            print(">> CONN[{}] {}:{}".format(pid, topic, endpt))
+        # else:
+        #     print("*** handle_sub FAILURE ***")
+
+        # print(">> handle_sub:", ret)
 
         return ret
 
@@ -123,13 +178,17 @@ class BeaconCoreServer(BeaconBase):
         endpt = data[3]
 
         self.services[topic] = endpt
-        self.perf[topic] = pid
+        # self.perf[topic] = pid
+        # self.pubs.append((topic,pid,))
+        # self.pubs[pid] = topic
+        self.pubs[pid] = (psutil.Process(pid), topic,)
 
-        print(">> PUB[{}] {}:{}".format(pid,topic,endpt))
+        print(">> BIND[{}] {}:{}".format(pid,topic,endpt))
 
         return (self.key,topic,endpt,"ok",)
 
     def callback(self, data, address):
+        # print(">> Key: {}".format(self.key))
         # print(">> Address: {}".format(address))
         # print(">> Data: {} size: {}".format(data, len(data)))
 
@@ -138,16 +197,14 @@ class BeaconCoreServer(BeaconBase):
         if self.key == data[0]:
             if len(data) == 3: ret = self.handle_sub(data)
             elif len(data) == 4: ret = self.handle_pub(data)
-        else:
-            printf("** Invalid key:", data)
+            else: print("*** wtf ***")
+        # else:
+        #     printf("** Invalid key:", data)
 
         return ret
 
     def run(self):
         # self.sock.setblocking(0)
-
-        # ip = GetIP().get()
-        # print("<<< beacon ip: {} >>>".format(ip))
 
         while True:
             try:
@@ -165,7 +222,8 @@ class BeaconCoreServer(BeaconBase):
                 print("ctrl-z")
                 self.exit = True
                 return
-            except Exception:
+            except Exception as e:
+                print("***",e,"***")
                 continue
 
 

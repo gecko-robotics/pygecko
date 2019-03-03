@@ -27,6 +27,9 @@ def publisher(**kwargs):
         kwargs.get('topic')
 
     )
+    if p is None:
+        raise Exception("publisher is None")
+
     start = time.time()
     cnt = 0
     while not geckopy.is_shutdown():
@@ -48,12 +51,15 @@ def subscriber(**kwargs):
         kwargs.get('key'),
         kwargs.get('topic')
     )
+    if s is None:
+        raise Exception("subscriber is None")
 
     while not geckopy.is_shutdown():
         msg = s.recv_nb()
         if msg:
             geckopy.loginfo("{}: {}".format(topic,msg))
         chew_up_cpu(.1)
+        rate.sleep()
 
     print('sub bye ...')
 

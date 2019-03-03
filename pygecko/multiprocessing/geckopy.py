@@ -188,7 +188,8 @@ def Binder(key, topic,Conn,Proto, queue_size=5):
     port = p.bind(addr, queue_size=queue_size, random=True)
     # g_geckopy.register_publisher(topics, port)
     bf = BeaconFinder(key)
-    msg = (key, topic, "1234", zmqTCP(g_geckopy.proc_ip, port))
+    pid = mp.current_process().pid
+    msg = (key, topic, str(pid), zmqTCP(g_geckopy.proc_ip, port))
     retry = 5
 
     for _ in range(retry):
@@ -227,9 +228,9 @@ def subConnectTCP(key, topic, queue_size=5):
     """
     global g_geckopy
 
-    pid = "12345"
     bf = BeaconFinder(key)
-    msg = (key, topic, pid)
+    pid = mp.current_process().pid
+    msg = (key, topic, str(pid))
     retry = 5
     data = None
 
