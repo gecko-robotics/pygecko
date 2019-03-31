@@ -7,7 +7,7 @@
 #
 
 import pickle
-from pygecko.messages import vec_t,quaternion_t,wrench_t,pose_t,joystick_t,twist_t,imu_st, lidar_st
+from pygecko.messages import vec_t,quaternion_t,wrench_t,pose_t,joystick_st,twist_t,imu_st, lidar_st
 from pygecko.messages import GeckoMsgs, GeckoMsgFlags as gmf
 
 class Pickle(object):
@@ -55,11 +55,11 @@ try:
     class MsgPack(object):
 
         def ext_unpack2(self, code, data):
-            print(">> code:", code)
-            print("> data:", data)
+            # print(">> code:", code)
+            # print("> data:", data)
             if code in GeckoMsgs:
                 d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
-                print("> d:", d)
+                # print("> d:", d)
 
                 if code == gmf.vector:
                     return vec_t(*d)
@@ -75,6 +75,8 @@ try:
                     return imu_st(vec_t(*d[0]),vec_t(*d[1]),vec_t(*d[2]),d[3])
                 elif code == gmf.lidar:
                     return lidar_st(d[0], d[1])
+                elif code == gmf.joystick:
+                    return joystick_st(d[0],d[1],d[2],d[3])
                 else:
                     raise Exception("MsgPack::ext_unpack: UNKNOW MSG {}  {}".format(code, d))
             return msgpack.ExtType(code, data)
@@ -84,7 +86,7 @@ try:
                 if data.id in [gmf.vector, gmf.quaternion]:
                     # vector, quaternion
                     m = data[:]
-                elif data.id in [gmf.wrench, gmf.pose, gmf.twist, gmf.lidar, gmf.imu]:
+                elif data.id in [gmf.wrench, gmf.pose, gmf.twist, gmf.lidar, gmf.imu, gmf.joystick]:
                     # this should get everything else
                     m = tuple(data)
                 else:

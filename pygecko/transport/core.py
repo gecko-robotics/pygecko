@@ -31,7 +31,7 @@ from pygecko.transport.helpers import zmqTCP
 # from pygecko.transport.helpers import zmqUDS
 # from pygecko.transport.zmq_sub_pub import Pub, Sub
 from pygecko.transport.zmq_req_rep import Rep, Req
-from pygecko.multiprocessing.geckopy import Rate
+# from pygecko.multiprocessing import Rate
 from pygecko.multiprocessing.sig import SignalCatch  # this one causes import problems!!
 from pygecko.transport.helpers import GetIP
 from pygecko.transport.helpers import zmq_version

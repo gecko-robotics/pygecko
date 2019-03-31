@@ -11,19 +11,19 @@ from pygecko.transport import GeckoCore
 from pygecko.multiprocessing import GeckoSimpleProcess
 
 from pygecko import FileJson, FileYaml
-from pygecko import Quaternion
-from pygecko import Vector
-from pygecko import IMU
-from pygecko import Twist
+# from pygecko import Quaternion
+# from pygecko import Vector
+# from pygecko import IMU
+# from pygecko import Twist
 # from pygecko import Wrench
-from pygecko import Pose
+# from pygecko import Pose
 # from pygecko import Joystick
-from pygecko import Image, image2msg, msg2image
+# from pygecko import Image, image2msg, msg2image
 # from pygecko import PoseStamped
 # from pygecko import Lidar
 
 from pygecko.transport.protocols import MsgPack
-from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t, imu_st, lidar_st
+from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t, imu_st, lidar_st, joystick_st
 
 # Fake cv2 things for testing
 import pygecko.fake.fake_camera as pcv2
@@ -44,7 +44,8 @@ def test_messages():
         pose_t(vec_t(1,2,3), vec_t(4,5,6)),
         twist_t(vec_t(1,2,3), vec_t(4,5,6)),
         imu_st(vec_t(1,2,3), vec_t(4,5,6), vec_t(7,8,9)),
-        lidar_st(((1,2),(3,4),(5,6),(7,8)))
+        lidar_st(((1,2),(3,4),(5,6),(7,8))),
+        joystick_st((1,2,3),(0,0,0,1),"ps4")
     ]
 
     for t in tests:

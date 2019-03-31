@@ -164,6 +164,9 @@ def is_shutdown():
     global g_geckopy
     return g_geckopy.kill
 
+def shutdown():
+    print("*** geckopy::shutdown: not implemented now ***")
+
 def ok():
     """
     Returns true if it is time to shutdown.

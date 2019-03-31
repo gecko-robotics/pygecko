@@ -11,8 +11,8 @@ import struct
 import threading
 import time
 # import ipaddress  # kjw
-from .ip import GetIP
-from .transport import Ascii, Json, Pickle
+from pygecko.pycore.ip import GetIP # dup?
+from pygecko.pycore.transport import Ascii, Json, Pickle # dup?
 import os
 import psutil
 import multiprocessing as mp
@@ -99,7 +99,7 @@ class BeaconCoreServer(BeaconBase):
             # print(pid)
             # print(ps)
             # print(topic)
-            
+
             try:
                 if ps.is_running():
                     # faster or better?
