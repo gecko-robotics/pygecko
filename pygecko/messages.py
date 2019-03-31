@@ -4,8 +4,24 @@
 # see LICENSE for full details
 ##############################################
 from collections import namedtuple
+from enum import Enum, IntFlag
 import time
 
+GeckoMsgFlags = IntFlag(
+    'GeckoMsgFlags',
+    {
+        'vector':    0,
+        'quaternion': 1,
+        'twist':     4,
+        'wrench':    2,
+        'pose':      3,
+        'imu':       10,
+        'joystick':  11,
+        'lidar':     20
+    }
+)
+
+GeckoMsgs = list(GeckoMsgFlags)
 
 # simple ones, no stamp, wouldn't just send these. They are datatypes that
 # get put into a messages
@@ -122,18 +138,11 @@ class pose_t(namedtuple('pose_t', 'position orientation')):
         cls.id = 3
         return cls.__bases__[0].__new__(cls,p,o)
 
-class joystick_t(namedtuple('joystick_t', 'axes buttons type')):
-    __slots__ = ()
-
-    def __new__(cls, a,b,t):
-        cls.id = 4
-        return cls.__bases__[0].__new__(cls,a,b,t)
-
 class twist_t(namedtuple('twist_t', 'linear angular')):
     __slots__ = ()
 
     def __new__(cls, l,a):
-        cls.id = 5
+        cls.id = 4
         return cls.__bases__[0].__new__(cls,l,a)
 
 class imu_st(namedtuple('imu_st', 'linear_accel angular_vel magnetic_field timestamp')):
@@ -148,3 +157,24 @@ class imu_st(namedtuple('imu_st', 'linear_accel angular_vel magnetic_field times
             return cls.__bases__[0].__new__(cls, a, g, m, ts)
         else:
             return cls.__bases__[0].__new__(cls, a, g, m, time.time())
+
+
+class joystick_t(namedtuple('joystick_t', 'axes buttons type')):
+    __slots__ = ()
+
+    def __new__(cls, a,b,t):
+        cls.id = 11
+        return cls.__bases__[0].__new__(cls,a,b,t)
+
+class lidar_st(namedtuple('lidar_st', 'data timestamp')):
+    """
+    Inertial measurement unit
+    """
+    __slots__ = ()
+
+    def __new__(cls, s, ts=None):
+        cls.id = 20
+        if ts:
+            return cls.__bases__[0].__new__(cls, s, ts)
+        else:
+            return cls.__bases__[0].__new__(cls, s, time.time())

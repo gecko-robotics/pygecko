@@ -164,6 +164,12 @@ def is_shutdown():
     global g_geckopy
     return g_geckopy.kill
 
+def ok():
+    """
+    Returns true if it is time to shutdown.
+    """
+    global g_geckopy
+    return not g_geckopy.kill
 
 def Binder(key, topic,Conn,Proto, queue_size=5):
     """

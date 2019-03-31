@@ -21,7 +21,7 @@ import zlib
 # import json
 from pygecko.transport.zmq_base import Base
 from pygecko.transport.zmq_base import ZMQError
-from pygecko.transport.protocols import Pickle, MsgPackCustom,MsgPack
+from pygecko.transport.protocols import Pickle,MsgPack
 
 
 class Pub(Base):

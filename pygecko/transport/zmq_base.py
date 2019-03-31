@@ -14,7 +14,7 @@ import zmq
 # import time
 # import socket as Socket
 from pygecko.transport.protocols import Pickle
-from pygecko.transport.protocols import MsgPack,MsgPackCustom
+from pygecko.transport.protocols import MsgPack
 
 class ZMQError(Exception):
     pass
@@ -59,6 +59,10 @@ class Base(object):
 
         args:
           addr as tcp or uds
+            uds: ipc://<file_path>
+            tcp:
+                known: tcp://x.x.x.x:port
+                random: tcp://x.x.x.x:*
           hwm (high water mark) a int that limits buffer length
           queue_size is the same as hwm
           random: select a random port to bind to
@@ -69,8 +73,15 @@ class Base(object):
             # https://pyzmq.readthedocs.io/en/latest/api/zmq.html#zmq.Socket.bind_to_random_port
             port = self.socket.bind_to_random_port(addr)  # tcp://* ???
         else:
-            port = int(addr.split(':')[2])  # tcp://ip:port
-            self.socket.bind(addr)
+            uds = False
+            if addr.find("ipc") >= 0:
+                uds = True
+            if uds:
+                self.socket.bind(addr)
+                port = None
+            else:
+                port = int(addr.split(':')[2])  # tcp://ip:port
+                self.socket.bind(addr)
 
         if hwm:
             self.socket.set_hwm(hwm)

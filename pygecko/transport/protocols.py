@@ -7,7 +7,8 @@
 #
 
 import pickle
-from pygecko.messages import vec_t,quaternion_t,wrench_t,pose_t,joystick_t,twist_t,imu_st
+from pygecko.messages import vec_t,quaternion_t,wrench_t,pose_t,joystick_t,twist_t,imu_st, lidar_st
+from pygecko.messages import GeckoMsgs, GeckoMsgFlags as gmf
 
 class Pickle(object):
     def pack(self, data):
@@ -52,34 +53,49 @@ try:
     import msgpack
 
     class MsgPack(object):
-        msgs = {
-            0: vec_t,
-            1: quaternion_t,
-            2: wrench_t,
-            3: pose_t,
-            4: joystick_t,
-            5: twist_t,
-            10: imu_st
-        }
-
-        def ext_pack2(self, x):
-            try:
-                return msgpack.ExtType(x.id, msgpack.packb(list(x[:]), default=self.ext_pack2, strict_types=True))
-                # return msgpack.ExtType(x.id, msgpack.packb(x[:], default=self.ext_pack2, strict_types=True))
-            except:
-                return x
 
         def ext_unpack2(self, code, data):
-            # print(">> code:", code)
-            # print("> data:", data)
-            if code in self.msgs.keys():
+            print(">> code:", code)
+            print("> data:", data)
+            if code in GeckoMsgs:
                 d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
-                # print("> d:", d)
-                return self.msgs[code](*d)
+                print("> d:", d)
+
+                if code == gmf.vector:
+                    return vec_t(*d)
+                elif code == gmf.quaternion:
+                    return quaternion_t(*d)
+                elif code == gmf.wrench:
+                    return wrench_t(vec_t(*d[0]), vec_t(*d[1]))
+                elif code == gmf.pose:
+                    return pose_t(vec_t(*d[0]), vec_t(*d[1]))
+                elif code == gmf.twist:
+                    return twist_t(vec_t(*d[0]), vec_t(*d[1]))
+                elif code == gmf.imu:
+                    return imu_st(vec_t(*d[0]),vec_t(*d[1]),vec_t(*d[2]),d[3])
+                elif code == gmf.lidar:
+                    return lidar_st(d[0], d[1])
+                else:
+                    raise Exception("MsgPack::ext_unpack: UNKNOW MSG {}  {}".format(code, d))
             return msgpack.ExtType(code, data)
 
         def pack(self, data):
-            return msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.ext_pack2)
+            try:
+                if data.id in [gmf.vector, gmf.quaternion]:
+                    # vector, quaternion
+                    m = data[:]
+                elif data.id in [gmf.wrench, gmf.pose, gmf.twist, gmf.lidar, gmf.imu]:
+                    # this should get everything else
+                    m = tuple(data)
+                else:
+                    raise Exception("MsgPack::pack: unknown ExtType {}".format(data))
+
+                m = msgpack.ExtType(data.id, msgpack.packb(m, use_bin_type=True, strict_types=False))
+                m = msgpack.packb(m, use_bin_type=True, strict_types=True)
+                # print(">> m:", m)
+                return m
+            except AttributeError:
+                return msgpack.packb(data, use_bin_type=True, strict_types=False)
 
         def unpack(self, data):
             return msgpack.unpackb(data, use_list=False, raw=False, ext_hook=self.ext_unpack2)
@@ -111,16 +127,16 @@ try:
     #         return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
     #
     #
-    class MsgPackCustom(object):
-        def __init__(self, packer, unpacker):
-            self.packer = packer
-            self.ext_unpack = unpacker
-
-        def pack(self, data):
-            return msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.packer)
-
-        def unpack(self, data):
-            return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
+    # class MsgPackCustom(object):
+    #     def __init__(self, packer, unpacker):
+    #         self.packer = packer
+    #         self.ext_unpack = unpacker
+    #
+    #     def pack(self, data):
+    #         return msgpack.packb(data, use_bin_type=True, strict_types=True,default=self.packer)
+    #
+    #     def unpack(self, data):
+    #         return msgpack.unpackb(data, raw=False, ext_hook=self.ext_unpack)
 
 except ImportError:
     class MsgPack():
