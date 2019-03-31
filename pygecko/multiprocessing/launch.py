@@ -81,10 +81,10 @@ class GeckoLauncher(object):
         # args['python'] = tuple(platform.sys.version_info)[:3]
         args['os'] = platform.system()
 
-        if 'geckocore' in self.ps:
-            args['geckocore'] = self.ps['geckocore']
-        else:
-            raise Exception("GeckoLauncher: launch file needs to have geckocore section")
+        # if 'geckocore' in self.ps:
+        #     args['geckocore'] = self.ps['geckocore']
+        # else:
+        #     raise Exception("GeckoLauncher: launch file needs to have geckocore section")
 
         # if 'start_core' in self.ps:
         #     # start core here

@@ -45,12 +45,12 @@ class Rep(Base):
         ret = False
         try:
             jmsg = self.socket.recv_multipart(flags=flags)[0]
-            msg = self.pickle.unpack(jmsg)
+            msg = self.packer.unpack(jmsg)
             # print("*** {} ***".format(msg))
 
             msg = callback(msg)
 
-            jmsg = self.pickle.pack(msg)
+            jmsg = self.packer.pack(msg)
             self.socket.send(jmsg)
             ret = True
 
@@ -72,11 +72,11 @@ class Rep(Base):
         return self.listen(callback=callback, flags=zmq.NOBLOCK)
         # while True:
         #     jmsg = self.socket.recv_multipart()[0]
-        #     msg = self.pickle.unpack(jmsg)
+        #     msg = self.packer.unpack(jmsg)
         #
         #     msg = callback(msg)
         #
-        #     jmsg = self.pickle.pack(msg)
+        #     jmsg = self.packer.pack(msg)
         #     self.socket.send(jmsg)
 
     # def listen_nb(self, callback):
@@ -95,12 +95,12 @@ class Rep(Base):
     #     ret = False
     #     try:
     #         jmsg = self.socket.recv_multipart(flags=zmq.NOBLOCK)[0]
-    #         msg = self.pickle.unpack(jmsg)
+    #         msg = self.packer.unpack(jmsg)
     #         # print("*** {} ***".format(msg))
     #
     #         msg = callback(msg)
     #
-    #         jmsg = self.pickle.pack(msg)
+    #         jmsg = self.packer.pack(msg)
     #         self.socket.send(jmsg)
     #         ret = True
     #
@@ -123,11 +123,11 @@ class Rep(Base):
     #     """
     #     while True:
     #         jmsg = self.socket.recv_multipart()[0]
-    #         msg = self.pickle.unpack(jmsg)
+    #         msg = self.packer.unpack(jmsg)
     #
     #         msg = callback(msg)
     #
-    #         jmsg = self.pickle.pack(msg)
+    #         jmsg = self.packer.pack(msg)
     #         self.socket.send(jmsg)
 
 
@@ -154,12 +154,12 @@ class Req(Base):
         """
         Implements recv_multipart(flags) with flags=0 for blocking.
         """
-        jmsg = self.pickle.pack(msg)
+        jmsg = self.packer.pack(msg)
         msg = None
         self.socket.send(jmsg)
         try:
             jmsg = self.socket.recv_multipart(flags=flags)[0]
-            msg = self.pickle.unpack(jmsg)
+            msg = self.packer.unpack(jmsg)
         except zmq.Again as e:
             # no response yet or server not up and running yet
             time.sleep(0.001)

@@ -1,5 +1,9 @@
 # :lizard:  pyGecko
 
+
+**WARNIMG:** Broke messages temporarily for compatilibility between c++ and
+python code. Will fix on c++ end first, then python.
+
 ## My robot software.
 
 - Doesn't use [ROS](http://ros.org), ROS is a pain to install and maintain
@@ -9,8 +13,7 @@ on macOS and various linux systems
 - Uses [Zero MQ](http://http://zeromq.org/) as the inter-process communication
 (uses both TCP and UDS) instead of RPC-XML
     - looked at Google's protobuf, but was more complex than I needed
-    - looked at [`msgpack`](https://msgpack.org/index.html) to serialize data but it was slower for `namedtuples`
-    - right now using `pickle` to serialize data
+    - using [`msgpack`](https://msgpack.org/index.html) to serialize data
     - instead of `roscore` use `geckocore.py` as the message hub
         - produces performance data (see below)
     - instead of `roslaunch` use `geckolaunch.py`
@@ -26,28 +29,27 @@ on macOS and various linux systems
     - Actually, when gecko processes start up, they tell geckocore their pid numbers so it can track usage using `psutil` library
     - Obviously this only works on processes located on the same machine as geckocore
     - GeckoCore really just displays info and keeps track of publisher topics/addresses
-    - There is only **one** core per machine
 - Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship
 - Pubs/Subs can exist on remote machines
     - If a Pub/Sub is on a remote machine, then it's performance data is not displayed
     - There currently is no mechanism to get the remote performance data
-- Subscriber can subscribe to one topic **(TBD)**
-- Publishers can also publish to multiple topics
 
 ## `geckocore.py`
 
 ![](pics/multiprocess-3.png)
 
-1. Publisher opens a random port and publishes data on a topic
-1. Publisher tells GeckoCore the topic and address/port
-1. GeckoCore acknowledges the publisher
-1. A subscriber wants to listen to a topic and asks GeckoCore for the address/port
+1. Binder opens a random port and publishes data on a topic
+1. Binder tells GeckoCore the topic and address/port
+1. GeckoCore acknowledges the binder
+1. A connector wants to listen to a topic and asks GeckoCore for the address/port
 1. GeckoCore:
     1. If topic is found, return the address/port and an ok status
-    1. If topic is *not* found, returns a topic not found status
-1. Subscriber connects to the publisher with the given address/port
+    1. If topic is *not* found, returns None
+1. Connector connects to the binder with the given address/port
+    1. *Binder:* only 1 per port, can be either pub or sub
+    1. *Connecter:* can be many per port, can be pub or sub
 
-This is the main message hub. GeckoCore also is passed the PIDs for processes on the 
+This is the main message hub. GeckoCore also is passed the PIDs for processes on the
 local machine and prints performance data on each process:
 
 ```bash
@@ -77,6 +79,41 @@ local machine and prints performance data on each process:
 |  2: mike@tcp://192.168.86.22:50551
 |  3: sammie@tcp://192.168.86.22:50554
 +========================================
+```
+
+```bash
+========================================
+ Geckocore [65975]
+-------------
+ Key: local
+ Host IP: 10.0.1.57
+ Listening on: 224.3.29.110:11311
+-------------
+Known Services [6]
+ * hello:........................ tcp://10.0.1.57:65303
+ * hey there:.................... tcp://10.0.1.57:65304
+ * ryan:......................... tcp://10.0.1.57:65310
+ * mike:......................... tcp://10.0.1.57:65311
+ * sammie:....................... tcp://10.0.1.57:65312
+ * scott:........................ tcp://10.0.1.57:65313
+
+Binders [6]
+ [65993] hello................. cpu:  0.0%  mem:  0.0%
+ [65994] hey there............. cpu:  0.0%  mem:  0.0%
+ [66008] ryan.................. cpu:  0.1%  mem:  0.0%
+ [66010] mike.................. cpu:  0.1%  mem:  0.0%
+ [66012] sammie................ cpu:  0.1%  mem:  0.0%
+ [66014] scott................. cpu:  0.1%  mem:  0.0%
+
+Connections [8]
+ [65995] hello................. cpu: 20.7%  mem:  0.0%
+ [65996] hello................. cpu: 20.9%  mem:  0.0%
+ [65997] hey there............. cpu: 21.0%  mem:  0.0%
+ [65998] hey there............. cpu: 20.8%  mem:  0.0%
+ [66011] mike.................. cpu: 19.0%  mem:  0.0%
+ [66013] sammie................ cpu: 19.0%  mem:  0.0%
+ [66015] scott................. cpu: 19.4%  mem:  0.0%
+ [66009] ryan.................. cpu: 18.7%  mem:  0.0%
 ```
 
 ## `geckolaunch.py`
@@ -150,6 +187,7 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2019-Mar-02 | 1.2.0 | set multicast as the default method to find nodes
 2018-Oct-28 | 1.1.0 | simplified and removed geckocore as the main hub
 2018-Sep-16 | 1.0.3 | implemented a multicast connection process
 2018-Sep-16 | 1.0.2 | dropping python 2.7 support, only 3.7+

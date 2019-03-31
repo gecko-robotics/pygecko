@@ -22,26 +22,53 @@ from pygecko import Image, image2msg, msg2image
 # from pygecko import PoseStamped
 # from pygecko import Lidar
 
+from pygecko.transport.protocols import MsgPack
+from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t, imu_st, lidar_st
+
 # Fake cv2 things for testing
 import pygecko.fake.fake_camera as pcv2
 
 
-def test_images():
-    img = pcv2.cvImage(6, 4)
-    msg = image2msg(img)
-    print(msg)
-    ret = msg2image(msg)
-    print(ret)
-    assert img.all() == ret.all()
+def test_messages():
+    buffer = MsgPack()
+
+    tests = [
+        22,
+        "hello world",
+        (1,2,3),
+        # [1,2,3,4],  # lists always => tuples
+        {'a':1, 'b':3},
+        vec_t(1,2,3),
+        quaternion_t(1,2,3,4),
+        wrench_t(vec_t(1,2,3), vec_t(4,5,6)),
+        pose_t(vec_t(1,2,3), vec_t(4,5,6)),
+        twist_t(vec_t(1,2,3), vec_t(4,5,6)),
+        imu_st(vec_t(1,2,3), vec_t(4,5,6), vec_t(7,8,9)),
+        lidar_st(((1,2),(3,4),(5,6),(7,8)))
+    ]
+
+    for t in tests:
+        m = buffer.pack(t)
+        m = buffer.unpack(m)
+        assert t == m, "{} == {}".format(t,m)
 
 
-def test_compressed_images():
-    img = pcv2.cvImage(6, 4)
-    msg = image2msg(img, compressed=True)
-    print(msg)
-    ret = msg2image(msg)
-    print(ret)
-    assert img.all() == ret.all()
+# def test_images():
+#     img = pcv2.cvImage(6, 4)
+#     msg = image2msg(img)
+#     print(msg)
+#     ret = msg2image(msg)
+#     print(ret)
+#     assert img.all() == ret.all()
+
+
+# def test_compressed_images():
+#     img = pcv2.cvImage(6, 4)
+#     msg = image2msg(img, compressed=True)
+#     print(msg)
+#     ret = msg2image(msg)
+#     print(ret)
+#     assert img.all() == ret.all()
 
 
 
@@ -73,19 +100,10 @@ def test_rate():
     assert (stop - start) + 0.05 > 1.0
 
 
-# # tcp setup
-# tcp_pub = zmqTCP('localhost', 9998)
-# tcp_sub = zmqTCP('localhost', 9999)
-#
-# # unix domain setup
-# uds_ifile = zmqUDS('/tmp/uds_ifile')
-# uds_ofile = zmqUDS('/tmp/uds_ofile')
-
-
-def msg_zmq():
+def msg_zmq(args):
     # start message hub
-    core = GeckoCore()
-    core.start()
+    # core = GeckoCore()
+    # core.start()
 
     msg1 = IMU(
         Vector(1,2,3),
@@ -102,68 +120,95 @@ def msg_zmq():
 
     def publisher(**kwargs):
         geckopy.init_node(**kwargs)
-        p = geckopy.Publisher(topics=['test'])
+        # p = geckopy.Publisher(topics=['test'])
+        # uds = kwargs.get('path')
+        p = Pub()
+        p.bind(kwargs.get('path'))
         time.sleep(1)  # need this!!
 
         for msg in [msg1,msg2,msg3]:
-            p.pub('test', msg)
+            p.publish(msg)
             time.sleep(0.01)
 
-    args = {'host': 'localhost'}
     p = GeckoSimpleProcess()
     p.start(func=publisher, name='publisher', kwargs=args)
 
     # subscriber
-    s = Sub(topics=['test'])
-    s.connect(sub_addr)
+    s = Sub()
+    s.topics = args.get('topics')
+    s.connect(args.get('path'))
 
     for msg in [msg1,msg2,msg3]:
-        t, m = s.recv()
-        assert t == b'test'  # FIXME: fix stupid binary string crap!
+        m = s.recv()
+        # assert t == b'test'  # FIXME: fix stupid binary string crap!
         assert msg == m
 
-    core.join(0.1)
+    # core.join(0.1)
     time.sleep(1)  # if I run these too fast, I get errors on bind()
 
 
+# def test_msg_zmq_tcp():
+#     args = {
+#         'path': zmqTCP('localhost', 9999),
+#         'topics': 'bob'
+#     }
+#     msg_zmq(args)
+#
 # def test_msg_zmq_uds():
-#     msg_zmq(uds_ifile, uds_ofile)
+#     args = {
+#         'path': zmqUDS('/tmp/udstest'),
+#         'topics': 'bob'
+#     }
+#     msg_zmq(args)
 
 
-def test_msg_zmq_tcp():
-    msg_zmq()
 
 
-def py_zmq():
-    # start message hub
-    core = GeckoCore()
-    core.start()
-
-    def publisher(**kwargs):
-        geckopy.init_node(**kwargs)
-        p = geckopy.Publisher(topics=['test'])
-        time.sleep(1)
-        msg = {'a':1, 'b':[1,2,3], 'c':'hello cowboy'}
-        p.pub('test', msg)  # topic msg
-
-    args = {'host': "localhost"}
-    p = GeckoSimpleProcess()
-    p.start(func=publisher, name='publisher', kwargs=args)
-
-    # subscriber
-    s = Sub(topics=['test'])
-    s.connect(sub_addr)
-    t, msg = s.recv()
-
-    assert t == b'test'
-    assert msg == {'a':1, 'b':[1,2,3], 'c':'hello cowboy'}
-
-    core.join(0.1)
-    time.sleep(1)  # if I run these too fast, I get errors on bind()
 
 
-def test_py_zmq_tcp():
-    py_zmq()
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def py_zmq():
+#     # start message hub
+#     core = GeckoCore()
+#     core.start()
+#
+#     def publisher(**kwargs):
+#         geckopy.init_node(**kwargs)
+#         p = geckopy.Publisher(topics=['test'])
+#         time.sleep(1)
+#         msg = {'a':1, 'b':[1,2,3], 'c':'hello cowboy'}
+#         p.pub('test', msg)  # topic msg
+#
+#     args = {'host': "localhost"}
+#     p = GeckoSimpleProcess()
+#     p.start(func=publisher, name='publisher', kwargs=args)
+#
+#     # subscriber
+#     s = Sub(topics=['test'])
+#     s.connect(sub_addr)
+#     t, msg = s.recv()
+#
+#     assert t == b'test'
+#     assert msg == {'a':1, 'b':[1,2,3], 'c':'hello cowboy'}
+#
+#     core.join(0.1)
+#     time.sleep(1)  # if I run these too fast, I get errors on bind()
+#
+#
+# def test_py_zmq_tcp():
+#     py_zmq()
 
 
 # def test_py_zmq_uds():

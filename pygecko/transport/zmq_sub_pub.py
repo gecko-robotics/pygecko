@@ -14,20 +14,21 @@ from __future__ import division
 import zmq
 # from zmq.devices import ProcessProxy
 import time
+import zlib
 # import socket as Socket
 # import msgpack
 # import pickle
 # import json
 from pygecko.transport.zmq_base import Base
 from pygecko.transport.zmq_base import ZMQError
-from pygecko.transport.protocols import Pickle
+from pygecko.transport.protocols import Pickle,MsgPack
 
 
 class Pub(Base):
     """
     Simple publisher
     """
-    def __init__(self, serialize=Pickle):
+    def __init__(self, serialize=MsgPack):
         """
         Publishes messages on a topic.
 
@@ -50,13 +51,14 @@ class Pub(Base):
     def __del__(self):
         self.socket.close()
 
-    def pub(self, topic, msg):
+
+    def publish(self, msg):
         """
         in: topic, message
         out: none
         """
-        if topic not in self.topics:
-            raise Exception("Pub.pub: {} is an invalide topic".format(topic))
+        # if topic not in self.topics:
+        #     raise Exception("Pub.pub: {} is an invalide topic".format(topic))
         # jmsg = serialize(msg)
 
         # if self.pack:
@@ -64,7 +66,10 @@ class Pub(Base):
         # else:
         #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
 
-        jmsg = self.pickle.pack(msg)
+        jmsg = self.packer.pack(msg)
+        # print(">> packed msg pub: [{}] {}".format(len(jmsg), jmsg))
+        # jmsg = zlib.compress(jmsg, -1)  # set to default level
+        # print(">> compressed msg pub: [{}] {}".format(len(jmsg), jmsg))
 
         # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
         # done = True
@@ -73,7 +78,8 @@ class Pub(Base):
         #     done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
         #     # done = self.socket.send(jmsg)
         # print('pub >>', topic.encode('ascii'))
-        self.socket.send_multipart([topic.encode('utf-8'), jmsg])
+        # self.socket.send_multipart([jmsg])
+        self.socket.send(jmsg)
 
     # def raw_pub(self, topic, msg):
     #     # done = True
@@ -89,12 +95,12 @@ class Sub(Base):
     """
     unpack = None
 
-    def __init__(self, topics=None, unpack=None, cb_func=None, serialize=Pickle):
+    def __init__(self, topics=None, unpack=None, cb_func=None, serialize=MsgPack):
         """
         topics: an array of topics, ex ['hello', 'cool messages'] or None to subscribe to all messages
         unpack: a function to deserialize messages if necessary
         """
-        Base.__init__(self, serialize=serialize)
+        Base.__init__(self, zmq.SUB, serialize=serialize)
         self.cb_func = cb_func
 
         try:
@@ -143,14 +149,22 @@ class Sub(Base):
         topic = None
         msg = None
         try:
-            topic, jmsg = self.socket.recv_multipart(flags=flags)
+            # topic, jmsg = self.socket.recv_multipart(flags=flags)
+            jmsg = self.socket.recv(flags=flags)
+
+
+            # print(">> sub.recv compressed: [{}] {}".format(len(jmsg), jmsg))
+
+            # jmsg = zlib.decompress(jmsg)
             # if self.unpack:
             #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
             # else:
             #     msg = msgpack.unpackb(jmsg, raw=False)
-            msg = self.pickle.unpack(jmsg)
-            if self.cb_func:
-                self.cb_func(topic, msg)
+            # print(">> sub.recv packed: [{}] {}".format(len(jmsg), jmsg))
+            msg = self.packer.unpack(jmsg)
+            # print(">> sub.recv unpacked:", msg)
+            # if self.cb_func:
+            #     self.cb_func(topic, msg)
         except zmq.Again:
             # no message has arrived yet or not connected to server
             # print(e)
@@ -159,12 +173,36 @@ class Sub(Base):
             # something else is wrong
             # print(e)
             raise
-        return topic, msg
+        # return topic, msg
+        return msg
 
 
 
 ############################################################################
-
+# def pub(self, topic, msg):
+#     """
+#     in: topic, message
+#     out: none
+#     """
+#     if topic not in self.topics:
+#         raise Exception("Pub.pub: {} is an invalide topic".format(topic))
+#     # jmsg = serialize(msg)
+#
+#     # if self.pack:
+#     #     jmsg = msgpack.packb(msg, default=self.pack, use_bin_type=True, strict_types=True)
+#     # else:
+#     #     jmsg = msgpack.packb(msg, use_bin_type=True, strict_types=True)
+#
+#     jmsg = self.packer.pack(msg)
+#
+#     # self.socket.send_multipart([topic.encode('ascii'), jmsg.encode('ascii')])
+#     # done = True
+#     # while done:
+#     #     # done = self.socket.send_multipart([topic.encode('ascii'), jmsg])
+#     #     done = self.socket.send_multipart([topic.encode('utf-8'), jmsg])
+#     #     # done = self.socket.send(jmsg)
+#     # print('pub >>', topic.encode('ascii'))
+#     self.socket.send_multipart([topic.encode('utf-8'), jmsg])
 
     # def raw_recv(self, flags=0):
     #     return self.socket.recv_multipart(flags=flags)
@@ -207,11 +245,11 @@ class Sub(Base):
 #         try:
 #             jmsg = self.socket.recv_multipart(flags=zmq.NOBLOCK)[0]
 #             print("*** {} ***".format(jmsg))
-#             msg = self.pickle.unpack(jmsg)
+#             msg = self.packer.unpack(jmsg)
 #
 #             msg = callback(msg)
 #
-#             jmsg = self.pickle.pack(msg)
+#             jmsg = self.packer.pack(msg)
 #             self.socket.send(jmsg)
 #             ret = True
 #
@@ -235,11 +273,11 @@ class Sub(Base):
 #         while True:
 #             # try:
 #             jmsg = self.socket.recv_multipart()[0]
-#             msg = self.pickle.unpack(jmsg)
+#             msg = self.packer.unpack(jmsg)
 #
 #             msg = callback(msg)
 #
-#             jmsg = self.pickle.pack(msg)
+#             jmsg = self.packer.pack(msg)
 #             self.socket.send(jmsg)
 #             # except zmq.Again as e:
 #             #     # no response yet or server not up and running yet
@@ -272,12 +310,12 @@ class Sub(Base):
 #
 #         If no flags are set, this blocks until a returned message is received.
 #         """
-#         jmsg = self.pickle.pack(msg)
+#         jmsg = self.packer.pack(msg)
 #         msg = None
 #         self.socket.send(jmsg)
 #         try:
 #             jmsg = self.socket.recv_multipart(flags=flags)[0]
-#             msg = self.pickle.unpack(jmsg)
+#             msg = self.packer.unpack(jmsg)
 #         except zmq.Again as e:
 #             # no response yet or server not up and running yet
 #             time.sleep(0.001)
@@ -355,7 +393,7 @@ class Sub(Base):
 #             #     msg = msgpack.unpackb(jmsg, ext_hook=self.unpack, raw=False)
 #             # else:
 #             #     msg = msgpack.unpackb(jmsg, raw=False)
-#             msg = self.pickle.unpack(jmsg)
+#             msg = self.packer.unpack(jmsg)
 #
 #             self.cb_func(topic, msg)
 #         except zmq.Again as e:
@@ -523,7 +561,7 @@ class Sub(Base):
 #
 #     def __init__(self, kind=None):
 #         self.ctx = zmq.Context()
-#         self.pickle = Pickle()
+#         self.packer = Pickle()
 #         self.socket = None
 #         # self.socket = self.ctx.socket(kind)
 #
