@@ -13,11 +13,12 @@ on macOS and various linux systems
 - Uses [Zero MQ](http://http://zeromq.org/) as the inter-process communication
 (uses both TCP and UDS) instead of RPC-XML
     - looked at Google's protobuf, but was more complex than I needed
-    - using [`msgpack`](https://msgpack.org/index.html) to serialize data
+    - using [`msgpack`](https://msgpack.org/index.html) to serialize data currently, 
+    but could be changed to something different  
     - instead of `roscore` use `geckocore.py` as the message hub
         - produces performance data (see below)
     - instead of `roslaunch` use `geckolaunch.py`
-- `simplejson`/`pyyaml` - config and launch files
+- `json` - config and launch files
 - All of this runs on [Raspberry Pi 3](http://www.raspberrypi.org)
     - Also runs on macOS (UNIX)
 
