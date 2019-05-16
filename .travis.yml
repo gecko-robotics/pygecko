@@ -66,7 +66,7 @@ install:
     - pip install -U pip setuptools wheel
     # - pip install -U pyzmq pyyaml opencvutils simplejson wit quaternions numdifftools pyrk
     - pip install -U pyzmq pyyaml simplejson msgpack build_utils colorama
-    - pip install .
+    - pip install -e .
     # - pip install -U -r requirements.txt
     - pip list
 
