@@ -106,18 +106,18 @@ def msg_zmq(args):
     # core = GeckoCore()
     # core.start()
 
-    msg1 = IMU(
-        Vector(1,2,3),
-        Vector(11,12,13),
-        Vector(21,22,23))
+    msg1 = imu_st(
+        vec_t(1, 2, 3),
+        vec_t(11, 12, 13),
+        vec_t(21, 22, 23))
 
-    msg2 = Twist(
-        Vector(1,2,3),
-        Vector(11,12,13))
+    msg2 = twist_t(
+        vec_t(1, 2, 3),
+        vec_t(11, 12, 13))
 
-    msg3 = Pose(
-        Vector(1,2,3),
-        Quaternion(1,2,3,4))
+    msg3 = pose_t(
+        vec_t(1, 2, 3),
+        quaternion_t(1, 2, 3, 4))
 
     def publisher(**kwargs):
         geckopy.init_node(**kwargs)
@@ -127,7 +127,7 @@ def msg_zmq(args):
         p.bind(kwargs.get('path'))
         time.sleep(1)  # need this!!
 
-        for msg in [msg1,msg2,msg3]:
+        for msg in [msg1, msg2, msg3]:
             p.publish(msg)
             time.sleep(0.01)
 
@@ -139,7 +139,7 @@ def msg_zmq(args):
     s.topics = args.get('topics')
     s.connect(args.get('path'))
 
-    for msg in [msg1,msg2,msg3]:
+    for msg in [msg1, msg2, msg3]:
         m = s.recv()
         # assert t == b'test'  # FIXME: fix stupid binary string crap!
         assert msg == m
@@ -155,12 +155,12 @@ def msg_zmq(args):
 #     }
 #     msg_zmq(args)
 #
-# def test_msg_zmq_uds():
-#     args = {
-#         'path': zmqUDS('/tmp/udstest'),
-#         'topics': 'bob'
-#     }
-#     msg_zmq(args)
+def test_msg_zmq_uds():
+    args = {
+        'path': zmqUDS('/tmp/udstest'),
+        'topics': 'bob'
+    }
+    msg_zmq(args)
 
 
 

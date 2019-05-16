@@ -58,8 +58,8 @@ try:
             # print(">> code:", code)
             # print("> data:", data)
             if code in GeckoMsgs:
-                d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False,raw=False)
-                # print("> d:", d)
+                d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False, raw=False)
+                print("> d[{}]: {}".format(code,d))
 
                 if code == gmf.vector:
                     return vec_t(*d)
@@ -68,15 +68,15 @@ try:
                 elif code == gmf.wrench:
                     return wrench_t(vec_t(*d[0]), vec_t(*d[1]))
                 elif code == gmf.pose:
-                    return pose_t(vec_t(*d[0]), vec_t(*d[1]))
+                    return pose_t(vec_t(*d[0]), quaternion_t(*d[1]))
                 elif code == gmf.twist:
                     return twist_t(vec_t(*d[0]), vec_t(*d[1]))
                 elif code == gmf.imu:
-                    return imu_st(vec_t(*d[0]),vec_t(*d[1]),vec_t(*d[2]),d[3])
+                    return imu_st(vec_t(*d[0]), vec_t(*d[1]), vec_t(*d[2]), d[3])
                 elif code == gmf.lidar:
                     return lidar_st(d[0], d[1])
                 elif code == gmf.joystick:
-                    return joystick_st(d[0],d[1],d[2],d[3])
+                    return joystick_st(d[0], d[1], d[2], d[3])
                 else:
                     raise Exception("MsgPack::ext_unpack: UNKNOW MSG {}  {}".format(code, d))
             return msgpack.ExtType(code, data)

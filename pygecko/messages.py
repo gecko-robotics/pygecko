@@ -4,17 +4,18 @@
 # see LICENSE for full details
 ##############################################
 from collections import namedtuple
-from enum import Enum, IntFlag
+from enum import IntFlag
+# from enum import Enum
 import time
 
 GeckoMsgFlags = IntFlag(
     'GeckoMsgFlags',
     {
-        'vector':    0,
+        'vector':     0,
         'quaternion': 1,
-        'twist':     4,
-        'wrench':    2,
-        'pose':      3,
+        'wrench':     2,
+        'pose':       3,
+        'twist':      4,
         'imu':       10,
         'joystick':  11,
         'lidar':     20
@@ -112,38 +113,38 @@ Log = namedtuple('Log', 'level name text')
 class vec_t(namedtuple('vec_t', 'x y z')):
     __slots__ = ()
 
-    def __new__(cls, x,y,z):
-        cls.id = 0
-        return cls.__bases__[0].__new__(cls,x,y,z)
+    def __new__(cls, x, y, z):
+        cls.id = GeckoMsgFlags.vector
+        return cls.__bases__[0].__new__(cls, x, y, z)
 
 class quaternion_t(namedtuple('quaternion_t', 'w x y z')):
     __slots__ = ()
 
-    def __new__(cls, w,x,y,z):
-        cls.id = 1
-        return cls.__bases__[0].__new__(cls,w,x,y,z)
+    def __new__(cls, w, x, y, z):
+        cls.id = GeckoMsgFlags.quaternion
+        return cls.__bases__[0].__new__(cls, w, x, y, z)
 
 
 class wrench_t(namedtuple('wrench_t', 'force torque')):
     __slots__ = ()
 
-    def __new__(cls, f,t):
-        cls.id = 2
-        return cls.__bases__[0].__new__(cls,f,t)
+    def __new__(cls, f, t):
+        cls.id = GeckoMsgFlags.wrench
+        return cls.__bases__[0].__new__(cls, f, t)
 
 class pose_t(namedtuple('pose_t', 'position orientation')):
     __slots__ = ()
 
-    def __new__(cls, p,o):
-        cls.id = 3
-        return cls.__bases__[0].__new__(cls,p,o)
+    def __new__(cls, p, o):
+        cls.id = GeckoMsgFlags.pose
+        return cls.__bases__[0].__new__(cls, p, o)
 
 class twist_t(namedtuple('twist_t', 'linear angular')):
     __slots__ = ()
 
-    def __new__(cls, l,a):
-        cls.id = 4
-        return cls.__bases__[0].__new__(cls,l,a)
+    def __new__(cls, l, a):
+        cls.id = GeckoMsgFlags.twist
+        return cls.__bases__[0].__new__(cls, l, a)
 
 class imu_st(namedtuple('imu_st', 'linear_accel angular_vel magnetic_field timestamp')):
     """
@@ -152,7 +153,7 @@ class imu_st(namedtuple('imu_st', 'linear_accel angular_vel magnetic_field times
     __slots__ = ()
 
     def __new__(cls, a, g, m, ts=None):
-        cls.id = 10
+        cls.id = GeckoMsgFlags.imu
         if ts:
             return cls.__bases__[0].__new__(cls, a, g, m, ts)
         else:
@@ -162,12 +163,12 @@ class imu_st(namedtuple('imu_st', 'linear_accel angular_vel magnetic_field times
 class joystick_st(namedtuple('joystick_t', 'axes buttons type timestamp')):
     __slots__ = ()
 
-    def __new__(cls, a,b,t, ts=None):
-        cls.id = 11
+    def __new__(cls, a, b, t, ts=None):
+        cls.id = GeckoMsgFlags.joystick
         if ts:
-            return cls.__bases__[0].__new__(cls,a,b,t,ts)
+            return cls.__bases__[0].__new__(cls, a, b, t, ts)
         else:
-            return cls.__bases__[0].__new__(cls,a,b,t,time.time())
+            return cls.__bases__[0].__new__(cls, a, b, t, time.time())
 
 class lidar_st(namedtuple('lidar_st', 'data timestamp')):
     """
@@ -176,7 +177,7 @@ class lidar_st(namedtuple('lidar_st', 'data timestamp')):
     __slots__ = ()
 
     def __new__(cls, s, ts=None):
-        cls.id = 20
+        cls.id = GeckoMsgFlags.lidar
         if ts:
             return cls.__bases__[0].__new__(cls, s, ts)
         else:
