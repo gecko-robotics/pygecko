@@ -154,6 +154,7 @@ def test_msg_zmq_tcp():
     }
     msg_zmq(args)
 
+
 def test_msg_zmq_uds():
     args = {
         'path': zmqUDS('/tmp/udstest'),
