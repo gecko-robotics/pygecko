@@ -7,47 +7,53 @@
 #
 
 import pickle
-from pygecko.messages import vec_t,quaternion_t,wrench_t,pose_t,joystick_st,twist_t,imu_st, lidar_st
+# from collections import OrderedDict
+from pygecko.messages import vec_t, quaternion_t, wrench_t, pose_t, twist_t
+from pygecko.messages import joystick_st, imu_st, lidar_st
 from pygecko.messages import GeckoMsgs, GeckoMsgFlags as gmf
+
 
 class Pickle(object):
     def pack(self, data):
         return pickle.dumps(data)
+
     def unpack(self, data):
         return pickle.loads(data)
 
 
-try:
-    import simplejson as json
-except ImportError:
-    import json
+# try:
+#     import simplejson as json
+# except ImportError:
+#     import json
+#
+#
+# class Json(object):
+#     def pack(self, data):
+#         """
+#         json doesn't know how to handle namedtuples, so store class id for
+#         unpack
+#         """
+#         raise Exception("Json protocol isn't ready yet!!!")
+#         if type(data) in known_types:
+#             d = data._asdict()
+#             d['type'] = unpack_types[type(data)]
+#         else:
+#             d = data
+#         return json.dumps(d)
+#
+#     def unpack(self, data):
+#         """
+#         if data is an ordered dictionary AND it has class id, then create the
+#         message using the class id
+#         """
+#         d = json.loads(data)
+#         if type(data) is OrderedDict:
+#             if 'type' in d:
+#                 cls = unpack_types[d['type']]
+#                 d.pop('type', None)
+#                 d = cls(*d.values())
+#         return d
 
-class Json(object):
-    def pack(self, data):
-        """
-        json doesn't know how to handle namedtuples, so store class id for
-        unpack
-        """
-        raise Exception("Json protocol isn't ready yet!!!")
-        if type(data) in known_types:
-            d = data._asdict()
-            d['type'] = unpack_types[type(data)]
-        else:
-            d = data
-        return json.dumps(d)
-
-    def unpack(self, data):
-        """
-        if data is an ordered dictionary AND it has class id, then create the
-        message using the class id
-        """
-        d = json.loads(data)
-        if type(data) is OrderedDict:
-            if 'type' in d:
-                cls = unpack_types[d['type']]
-                d.pop('type', None)
-                d = cls(*d.values())
-        return d
 
 try:
     import msgpack
@@ -59,7 +65,7 @@ try:
             # print("> data:", data)
             if code in GeckoMsgs:
                 d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False, raw=False)
-                print("> d[{}]: {}".format(code,d))
+                # print("> d[{}]: {}".format(code, d))
 
                 if code == gmf.vector:
                     return vec_t(*d)
@@ -143,5 +149,6 @@ try:
 except ImportError:
     class MsgPack():
         pass
+
     class MsgPackCustom():
         pass

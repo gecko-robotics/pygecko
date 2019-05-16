@@ -1,32 +1,23 @@
 from __future__ import print_function
 import time
 import os
-import time
+# import time
 from math import pi
 
 from pygecko.multiprocessing import geckopy
 from pygecko.transport import Pub, Sub
-from pygecko.transport import zmqTCP, zmqUDS
-from pygecko.transport import GeckoCore
+from pygecko.transport import zmqTCP
+from pygecko.transport import zmqUDS
+# from pygecko.transport import GeckoCore
 from pygecko.multiprocessing import GeckoSimpleProcess
 
 from pygecko import FileJson, FileYaml
-# from pygecko import Quaternion
-# from pygecko import Vector
-# from pygecko import IMU
-# from pygecko import Twist
-# from pygecko import Wrench
-# from pygecko import Pose
-# from pygecko import Joystick
-# from pygecko import Image, image2msg, msg2image
-# from pygecko import PoseStamped
-# from pygecko import Lidar
 
 from pygecko.transport.protocols import MsgPack
 from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t, imu_st, lidar_st, joystick_st
 
 # Fake cv2 things for testing
-import pygecko.fake.fake_camera as pcv2
+# import pygecko.fake.fake_camera as pcv2
 
 
 def test_messages():
@@ -35,23 +26,23 @@ def test_messages():
     tests = [
         22,
         "hello world",
-        (1,2,3),
+        (1, 2, 3),
         # [1,2,3,4],  # lists always => tuples
-        {'a':1, 'b':3},
-        vec_t(1,2,3),
-        quaternion_t(1,2,3,4),
-        wrench_t(vec_t(1,2,3), vec_t(4,5,6)),
-        pose_t(vec_t(1,2,3), vec_t(4,5,6)),
-        twist_t(vec_t(1,2,3), vec_t(4,5,6)),
-        imu_st(vec_t(1,2,3), vec_t(4,5,6), vec_t(7,8,9)),
-        lidar_st(((1,2),(3,4),(5,6),(7,8))),
-        joystick_st((1,2,3),(0,0,0,1),"ps4")
+        {'a': 1, 'b': 3},
+        vec_t(1, 2, 3),
+        quaternion_t(1, 2, 3, 4),
+        wrench_t(vec_t(1, 2, 3), vec_t(4, 5, 6)),
+        pose_t(vec_t(1, 2, 3), quaternion_t(4, 5, 6, 7)),
+        twist_t(vec_t(1, 2, 3), vec_t(4, 5, 6)),
+        imu_st(vec_t(1, 2, 3), vec_t(4, 5, 6), vec_t(7, 8, 9)),
+        lidar_st(((1, 2), (3, 4), (5, 6), (7, 8))),
+        joystick_st((1, 2, 3), (0, 0, 0, 1), "ps4")
     ]
 
     for t in tests:
         m = buffer.pack(t)
         m = buffer.unpack(m)
-        assert t == m, "{} == {}".format(t,m)
+        assert t == m, "{} == {}".format(t, m)
 
 
 # def test_images():
@@ -72,9 +63,8 @@ def test_messages():
 #     assert img.all() == ret.all()
 
 
-
 def file_func(Obj, fname):
-    data = {'a':1, 'bob':[1,2,3,4], 'c':"hello cowboy", 'd': {'a':pi}}
+    data = {'a': 1, 'bob': [1, 2, 3, 4], 'c': "hello cowboy", 'd': {'a': pi}}
     f = Obj()
     f.set(data)
     f.write(fname)
@@ -119,6 +109,14 @@ def msg_zmq(args):
         vec_t(1, 2, 3),
         quaternion_t(1, 2, 3, 4))
 
+    msg4 = lidar_st(
+        (
+            (1, 1),
+            (2, 2),
+            (3, 3)
+        )
+    )
+
     def publisher(**kwargs):
         geckopy.init_node(**kwargs)
         # p = geckopy.Publisher(topics=['test'])
@@ -127,7 +125,8 @@ def msg_zmq(args):
         p.bind(kwargs.get('path'))
         time.sleep(1)  # need this!!
 
-        for msg in [msg1, msg2, msg3]:
+        for msg in [msg1, msg2, msg3, msg4]:
+            # for msg in [msg1, msg2]:
             p.publish(msg)
             time.sleep(0.01)
 
@@ -139,7 +138,7 @@ def msg_zmq(args):
     s.topics = args.get('topics')
     s.connect(args.get('path'))
 
-    for msg in [msg1, msg2, msg3]:
+    for msg in [msg1, msg2, msg3, msg4]:
         m = s.recv()
         # assert t == b'test'  # FIXME: fix stupid binary string crap!
         assert msg == m
@@ -148,13 +147,13 @@ def msg_zmq(args):
     time.sleep(1)  # if I run these too fast, I get errors on bind()
 
 
-# def test_msg_zmq_tcp():
-#     args = {
-#         'path': zmqTCP('localhost', 9999),
-#         'topics': 'bob'
-#     }
-#     msg_zmq(args)
-#
+def test_msg_zmq_tcp():
+    args = {
+        'path': zmqTCP('localhost', 9999),
+        'topics': 'bob'
+    }
+    msg_zmq(args)
+
 def test_msg_zmq_uds():
     args = {
         'path': zmqUDS('/tmp/udstest'),

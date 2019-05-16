@@ -11,9 +11,9 @@ import struct
 import threading
 import time
 # import ipaddress  # kjw
-from pygecko.pycore.ip import GetIP # dup?
-from pygecko.pycore.transport import Ascii, Json, Pickle # dup?
-import os
+from pygecko.pycore.ip import GetIP  # dup?
+from pygecko.pycore.transport import Ascii, Json, Pickle  # dup?
+# import os
 import psutil
 import multiprocessing as mp
 
@@ -37,7 +37,7 @@ class BeaconBase(object):
 
     def __init__(self, key, ttl=1):
         self.group = (self.mcast_addr, self.mcast_port)
-        self.sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM,socket.IPPROTO_UDP)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_TTL, ttl)
         self.sock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
         self.key = key
@@ -92,7 +92,7 @@ class BeaconCoreServer(BeaconBase):
         """Stop the listener thread"""
         self.exit = True
 
-    def printProcess(self,pids, bind=False):
+    def printProcess(self, pids, bind=False):
         # grab a snapshot of the values
         procs = tuple(pids.values())
         for ps, topic in procs:
@@ -105,7 +105,7 @@ class BeaconCoreServer(BeaconBase):
                     # faster or better?
                     # p.cpu_percent(interval=None)
                     # p.memory_percent(memtype="rss")
-                    pd = ps.as_dict(attrs=['connections','cpu_percent','memory_percent'])
+                    pd = ps.as_dict(attrs=['connections', 'cpu_percent', 'memory_percent'])
                     # net[psname] = pd['connections']
                     # print(psname, pd['connections'])
                     # cpu = ps.cpu_percent()
@@ -137,8 +137,8 @@ class BeaconCoreServer(BeaconBase):
         print(" Listening on: {}:{}".format(self.mcast_addr, self.mcast_port))
         print("-------------")
         print('Known Services [{}]'.format(len(self.services)))
-        for k,v in self.services.items():
-            print(" * {:.<30} {}".format(k+':',v))
+        for k, v in self.services.items():
+            print(" * {:.<30} {}".format(k+':', v))
 
         print("\nBinders [{}]".format(len(self.pubs)))
         self.printProcess(self.pubs, True)
@@ -147,7 +147,6 @@ class BeaconCoreServer(BeaconBase):
         self.printProcess(self.subs)
 
         print(" ")
-
 
     def handle_sub(self, data):
         # print("handle_sub")
@@ -183,9 +182,9 @@ class BeaconCoreServer(BeaconBase):
         # self.pubs[pid] = topic
         self.pubs[pid] = (psutil.Process(pid), topic,)
 
-        print(">> BIND[{}] {}:{}".format(pid,topic,endpt))
+        print(">> BIND[{}] {}:{}".format(pid, topic, endpt))
 
-        return (self.key,topic,endpt,"ok",)
+        return (self.key, topic, endpt, "ok",)
 
     def callback(self, data, address):
         # print(">> Key: {}".format(self.key))
@@ -223,7 +222,7 @@ class BeaconCoreServer(BeaconBase):
                 self.exit = True
                 return
             except Exception as e:
-                print("***",e,"***")
+                print("***", e, "***")
                 continue
 
 
