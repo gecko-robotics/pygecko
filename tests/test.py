@@ -163,23 +163,6 @@ def test_msg_zmq_uds():
     msg_zmq(args)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # def py_zmq():
 #     # start message hub
 #     core = GeckoCore()
