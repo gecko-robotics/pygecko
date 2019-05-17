@@ -101,14 +101,12 @@ if __name__ == '__main__':
     # if  args['info'] is not None:
     #     args['host_port'] = (args['info'][0], args['info'][1])
 
-
     if args['mode'][0] == 'pub':
         p = GeckoSimpleProcess()
         p.start(func=publisher, name='publisher', kwargs=args)
     elif args['mode'][0] == 'echo':
         p = GeckoSimpleProcess()
         p.start(func=subscriber, name='subscriber', kwargs=args)
-
 
     while True:
         try:

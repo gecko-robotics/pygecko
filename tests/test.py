@@ -14,7 +14,8 @@ from pygecko.multiprocessing import GeckoSimpleProcess
 from pygecko import FileJson, FileYaml
 
 from pygecko.transport.protocols import MsgPack
-from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t, imu_st, lidar_st, joystick_st
+from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t
+from pygecko.messages import imu_st, lidar_st, joystick_st
 
 # Fake cv2 things for testing
 # import pygecko.fake.fake_camera as pcv2

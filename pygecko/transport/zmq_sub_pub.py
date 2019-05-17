@@ -12,13 +12,7 @@
 from __future__ import print_function
 from __future__ import division
 import zmq
-# from zmq.devices import ProcessProxy
 import time
-import zlib
-# import socket as Socket
-# import msgpack
-# import pickle
-# import json
 from pygecko.transport.zmq_base import Base
 from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.protocols import MsgPack
@@ -50,7 +44,6 @@ class Pub(Base):
 
     def __del__(self):
         self.socket.close()
-
 
     def publish(self, msg):
         """
@@ -93,15 +86,15 @@ class Sub(Base):
     """
     Simple subscriber that read messages on a topic(s)
     """
-    unpack = None
+    # unpack = None
 
-    def __init__(self, topics=None, unpack=None, cb_func=None, serialize=MsgPack):
+    def __init__(self, topics=None, serialize=MsgPack):
         """
         topics: an array of topics, ex ['hello', 'cool messages'] or None to subscribe to all messages
         unpack: a function to deserialize messages if necessary
         """
         Base.__init__(self, zmq.SUB, serialize=serialize)
-        self.cb_func = cb_func
+        # self.cb_func = cb_func
 
         try:
             self.socket = self.ctx.socket(zmq.SUB)
@@ -146,12 +139,11 @@ class Sub(Base):
         """
         Implements a recv_multipart(flags). By default, this blocks.
         """
-        topic = None
+        # topic = None
         msg = None
         try:
             # topic, jmsg = self.socket.recv_multipart(flags=flags)
             jmsg = self.socket.recv(flags=flags)
-
 
             # print(">> sub.recv compressed: [{}] {}".format(len(jmsg), jmsg))
 

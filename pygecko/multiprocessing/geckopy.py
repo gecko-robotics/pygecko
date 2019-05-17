@@ -6,13 +6,14 @@
 # from pygecko.transport.zmq_base import ZMQError
 from pygecko.transport.zmq_sub_pub import Pub, Sub
 # from pygecko.transport.srv import cService, cServiceProxy
-from pygecko.transport.zmq_req_rep import Req
+# from pygecko.transport.zmq_req_rep import Req
 from pygecko.transport.helpers import zmqTCP
+from pygecko.transport.helpers import zmqUDS
 from pygecko.transport.helpers import GetIP
-from pygecko.gecko_enums import Status
-from pygecko.gecko_enums import ZmqType
+# from pygecko.gecko_enums import Status
+# from pygecko.gecko_enums import ZmqType
 from pygecko.messages import Log
-from pygecko.multiprocessing.sig import SignalCatch # capture signals in processes
+from pygecko.multiprocessing.sig import SignalCatch  # capture signals in processes
 from colorama import Fore, Style
 import time
 # import os
@@ -102,7 +103,6 @@ class GeckoPy(SignalCatch):
             for h in self.hooks:
                 h()
 
-
     def __format_print(self, topic, msg):
         # print(msg.level)
         # msg format: {proc_name, level, text}
@@ -164,8 +164,10 @@ def is_shutdown():
     global g_geckopy
     return g_geckopy.kill
 
+
 def shutdown():
     print("*** geckopy::shutdown: not implemented now ***")
+
 
 def ok():
     """
@@ -174,7 +176,8 @@ def ok():
     global g_geckopy
     return not g_geckopy.kill
 
-def Binder(key, topic,Conn,Proto, queue_size=5):
+
+def Binder(key, topic, Conn, Proto, fname=None, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
 
@@ -188,17 +191,29 @@ def Binder(key, topic,Conn,Proto, queue_size=5):
     p = Conn()
     p.topics = topic  # need to keep track
     # if (addr is None) and (bind):
-    addr = g_geckopy.proc_ip
-    addr = Proto(addr)
+    # addr = g_geckopy.proc_ip
+    # addr = Proto(addr)
     # print('>> pub', addr)
     # addr = g_geckopy.core_inaddr
 
     # if bind:
-    port = p.bind(addr, queue_size=queue_size, random=True)
+    # port = p.bind(addr, queue_size=queue_size, random=True)
     # g_geckopy.register_publisher(topics, port)
     bf = BeaconFinder(key)
     pid = mp.current_process().pid
-    msg = (key, topic, str(pid), zmqTCP(g_geckopy.proc_ip, port))
+
+    if fname:
+        p.bind(zmqUDS(fname), queue_size=queue_size)
+        msg = (key, topic, str(pid), zmqUDS(fname))
+
+        # print(p)
+        # print(msg)
+    else:
+        addr = g_geckopy.proc_ip
+        addr = Proto(addr)
+        port = p.bind(addr, queue_size=queue_size, random=True)
+        msg = (key, topic, str(pid), zmqTCP(g_geckopy.proc_ip, port))
+
     retry = 5
 
     for _ in range(retry):
@@ -213,17 +228,23 @@ def Binder(key, topic,Conn,Proto, queue_size=5):
             return p
     return None
 
-def pubBinderTCP(key, topic, queue_size=5):
-    return Binder(key,topic,Pub,zmqTCP,queue_size)
 
-def pubBinderUDS(key, topic, queue_size=5):
-    return Binder(key,topic,Pub,zmqUDS,queue_size)
+def pubBinderTCP(key, topic, queue_size=5):
+    return Binder(key, topic, Pub, zmqTCP, queue_size=queue_size)
+
+
+def pubBinderUDS(key, topic, fname, queue_size=5):
+    # FIXME: don't i need the file path?
+    return Binder(key, topic, Pub, zmqUDS, fname, queue_size)
+
 
 def subBinderTCP(key, topic, queue_size=5):
-    return Binder(key,topic,Sub,zmqTCP,queue_size)
+    return Binder(key, topic, Sub, zmqTCP, queue_size=queue_size)
+
 
 def subBinderUDS(key, topic, queue_size=5):
-    return Binder(key,topic,Sub,zmqUDS,queue_size)
+    return Binder(key, topic, Sub, zmqUDS, queue_size=queue_size)
+
 
 def subConnectTCP(key, topic, queue_size=5):
     """
@@ -257,6 +278,42 @@ def subConnectTCP(key, topic, queue_size=5):
             return s
 
     return None
+
+
+def subConnectUDS(key, topic, queue_size=5):
+    return subConnectTCP(key, topic, queue_size)
+    # """
+    # Creates a publisher that can either connect or bind to an address.
+    #
+    # addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
+    #       it is set to what geckopy defaults to
+    # queue_size: how many messages to queue up, default is 5
+    # bind: by default this connects to geckocore, but you can also have it bind
+    #       to a different port
+    # """
+    # global g_geckopy
+    #
+    # bf = BeaconFinder(key)
+    # pid = mp.current_process().pid
+    # msg = (key, topic, str(pid))
+    # retry = 5
+    # data = None
+    #
+    # for _ in range(retry):
+    #     data = bf.send(msg)
+    #     print(data)
+    #
+    #     if data is None:
+    #         time.sleep(0.5)
+    #         continue
+    #
+    #     if (len(data) == 3) and (data[0] == key) and (data[1] == topic):
+    #         s = Sub()
+    #         s.connect(data[2])
+    #         return s
+    #
+    # return None
+
 
 def spin(hertz=50):
     """

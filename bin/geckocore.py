@@ -18,12 +18,13 @@
 #             time.sleep(1)
 #     except KeyboardInterrupt:
 #         pass
-import threading
-import time
+# import threading
+# import time
 import argparse
 import socket
 from pygecko.pycore.mbeacon import BeaconCoreServer
 from pygecko.pycore.transport import Ascii
+
 
 def handleArgs():
     parser = argparse.ArgumentParser(description='geckocore is a conneciton server for gecko apps')
@@ -33,6 +34,7 @@ def handleArgs():
     args = vars(parser.parse_args())
     return args
 
+
 if __name__ == "__main__":
     args = handleArgs()
 
@@ -41,6 +43,6 @@ if __name__ == "__main__":
     else:
         key = args['key']
 
-    bs = BeaconCoreServer(key=key,handler=Ascii)
+    bs = BeaconCoreServer(key=key, handler=Ascii)
     bs.start()
     bs.run()

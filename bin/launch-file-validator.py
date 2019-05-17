@@ -12,6 +12,7 @@ try:
 except ImportError:
     import json
 
+
 def valid_json(data):
     try:
         json.loads(data)

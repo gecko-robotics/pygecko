@@ -13,8 +13,9 @@ from __future__ import division
 import zmq
 # import time
 # import socket as Socket
-from pygecko.transport.protocols import Pickle
+# from pygecko.transport.protocols import Pickle
 from pygecko.transport.protocols import MsgPack
+
 
 class ZMQError(Exception):
     pass
@@ -73,10 +74,11 @@ class Base(object):
             # https://pyzmq.readthedocs.io/en/latest/api/zmq.html#zmq.Socket.bind_to_random_port
             port = self.socket.bind_to_random_port(addr)  # tcp://* ???
         else:
-            uds = False
+            # uds = False
+            # print(">>", addr)
             if addr.find("ipc") >= 0:
-                uds = True
-            if uds:
+                # uds = True
+                # if uds:
                 self.socket.bind(addr)
                 port = None
             else:
