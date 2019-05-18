@@ -109,6 +109,26 @@ class image_st(namedtuple('image_st', 'shape bytes compressed timestamp')):
             return cls.__bases__[0].__new__(cls, s, b, c, time.time())
 
 
+# class image2_st(namedtuple('image_st', 'shape bytes timestamp')):
+#     __slots__ = ()
+#
+#     def __new__(cls, img, ts=None, compressed=False):
+#         cls.id = GeckoMsgFlags.image
+#
+#         if compressed:
+#             jpg = cv2.imencode('.jpg', img)[1]
+#             # m = handler.dumps(img.tobytes())
+#             msg = image_st(img.shape, jpg, True)
+#         else:
+#             msg = image_st(img.shape, img.tobytes(), False)
+#         return msg
+#
+#         if ts:
+#             return cls.__bases__[0].__new__(cls, s, b, c, ts)
+#         else:
+            return cls.__bases__[0].__new__(cls, s, b, c, time.time())
+
+
 class lidar_st(namedtuple('lidar_st', 'data timestamp')):
     """
     Inertial measurement unit
