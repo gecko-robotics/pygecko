@@ -119,7 +119,7 @@ class GeckoPy(SignalCatch):
         if self.logpub is None:
             self.__format_print(topic, msg)
         else:
-            self.logpub.pub(topic, msg)
+            self.logpub.publish(msg)
 
 
 def init_node(**kwargs):
@@ -177,15 +177,14 @@ def ok():
     return not g_geckopy.kill
 
 
-def Binder(key, topic, Conn, Proto, fname=None, queue_size=5):
+def Binder(key, topic, Conn, fname=None, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
 
-    addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
-          it is set to what geckopy defaults to
+    topic: pub/sub topic name
+    Conn: either Pub or Sub
+    fname: file path for UDS
     queue_size: how many messages to queue up, default is 5
-    bind: by default this connects to geckocore, but you can also have it bind
-          to a different port
     """
     global g_geckopy
     p = Conn()
@@ -211,7 +210,7 @@ def Binder(key, topic, Conn, Proto, fname=None, queue_size=5):
         # print(msg)
     else:
         addr = g_geckopy.proc_ip
-        addr = Proto(addr)
+        addr = zmqTCP(addr)
         port = p.bind(addr, queue_size=queue_size, random=True)
         msg = (key, topic, str(pid), zmqTCP(g_geckopy.proc_ip, port))
 
@@ -231,20 +230,19 @@ def Binder(key, topic, Conn, Proto, fname=None, queue_size=5):
 
 
 def pubBinderTCP(key, topic, queue_size=5):
-    return Binder(key, topic, Pub, zmqTCP, queue_size=queue_size)
+    return Binder(key, topic, Pub, queue_size=queue_size)
 
 
 def pubBinderUDS(key, topic, fname, queue_size=5):
-    # FIXME: don't i need the file path?
-    return Binder(key, topic, Pub, zmqUDS, fname, queue_size)
+    return Binder(key, topic, Pub, fname=fname, queue_size=queue_size)
 
 
 def subBinderTCP(key, topic, queue_size=5):
-    return Binder(key, topic, Sub, zmqTCP, queue_size=queue_size)
+    return Binder(key, topic, Sub, queue_size=queue_size)
 
 
-def subBinderUDS(key, topic, queue_size=5):
-    return Binder(key, topic, Sub, zmqUDS, queue_size=queue_size)
+def subBinderUDS(key, topic, fname, queue_size=5):
+    return Binder(key, topic, Sub, fname=fname, queue_size=queue_size)
 
 
 def Connector(key, topic, Proto, queue_size=5):

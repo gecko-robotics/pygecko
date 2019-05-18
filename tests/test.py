@@ -243,7 +243,7 @@ def zmq_pub_sub(args):
         s = geckopy.subBinderUDS(key, topic, "/tmp/pygecko_test_2")
 
     for _ in range(5):
-        m = s.recv_nb()
+        m = s.recv()
 
         if m:
             exit.set()
@@ -284,13 +284,13 @@ def test_pub_sub():
     }
     zmq_pub_sub(args)
 
-    # args = {
-    #     'key': 'test',
-    #     'topic': "test-uds-2",
-    #     'pub': 'connectuds',
-    #     'sub': 'binduds'
-    # }
-    # zmq_pub_sub(args)
+    args = {
+        'key': 'test',
+        'topic': "test-uds-2",
+        'pub': 'connectuds',
+        'sub': 'binduds'
+    }
+    zmq_pub_sub(args)
 
     bs.stop()
     core.join(0.1)
