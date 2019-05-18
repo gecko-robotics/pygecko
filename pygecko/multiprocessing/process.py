@@ -45,8 +45,10 @@ class GeckoSimpleProcess(object):
     def start(self, func, name='simple_process', **kwargs):
         if kwargs:
             kwargs = kwargs['kwargs']  # WTF???
+            self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         else:
-            kwargs = {"host": "localhost"}  # FIXME: is this really setting default ... if not, where is it done?
+            self.ps = mp.Process(name=name, target=func)
+        #     kwargs = {"host": "localhost"}  # FIXME: is this really setting default ... if not, where is it done?
 
         self.ps = mp.Process(name=name, target=func, kwargs=kwargs)
         self.ps.start()

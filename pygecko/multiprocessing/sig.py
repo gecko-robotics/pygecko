@@ -13,6 +13,7 @@ class SignalCatch(object):
     https://stackoverflow.com/questions/18499497/how-to-process-sigterm-signal-gracefully
     """
     kill = False
+    
     def kill_signals(self):
         signal.signal(signal.SIGINT, self.exit_gracefully)
         signal.signal(signal.SIGTERM, self.exit_gracefully)

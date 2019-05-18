@@ -1,8 +1,15 @@
 from __future__ import print_function
 import time
 import os
+from collections import namedtuple
+from multiprocessing import Event
+# from enum import IntFlag
 # import time
 from math import pi
+# import numpy as np
+
+from pygecko.pycore.mbeacon import BeaconCoreServer
+from pygecko.pycore.transport import Ascii
 
 from pygecko.multiprocessing import geckopy
 from pygecko.transport import Pub, Sub
@@ -15,14 +22,16 @@ from pygecko import FileJson, FileYaml
 
 from pygecko.transport.protocols import MsgPack
 from pygecko.messages import vec_t, quaternion_t, wrench_t, twist_t, pose_t
-from pygecko.messages import imu_st, lidar_st, joystick_st
+from pygecko.messages import imu_st, lidar_st, joystick_st, image_st
 
 # Fake cv2 things for testing
-# import pygecko.fake.fake_camera as pcv2
+import pygecko.fake.fake_camera as pcv2
 
 
 def test_messages():
     buffer = MsgPack()
+
+    im = pcv2.cvImage(20, 20)  # fake image
 
     tests = [
         22,
@@ -37,31 +46,39 @@ def test_messages():
         twist_t(vec_t(1, 2, 3), vec_t(4, 5, 6)),
         imu_st(vec_t(1, 2, 3), vec_t(4, 5, 6), vec_t(7, 8, 9)),
         lidar_st(((1, 2), (3, 4), (5, 6), (7, 8))),
-        joystick_st((1, 2, 3), (0, 0, 0, 1), "ps4")
+        joystick_st((1, 2, 3), (0, 0, 0, 1), "ps4"),
+        image_st(im.shape, im.tobytes(), False)
     ]
 
     for t in tests:
         m = buffer.pack(t)
         m = buffer.unpack(m)
-        assert t == m, "{} == {}".format(t, m)
+        assert t == m, "{} => {}".format(t, m)
 
 
-# def test_images():
-#     img = pcv2.cvImage(6, 4)
-#     msg = image2msg(img)
-#     print(msg)
-#     ret = msg2image(msg)
-#     print(ret)
-#     assert img.all() == ret.all()
+def test_new_messages():
+    """
+    Add new messages to pygecko
+    """
+    class msg_t(namedtuple('msg_t', 'x y z')):
+        __slots__ = ()
 
+        def __new__(cls, x, y, z):
+            cls.id = 111
+            return cls.__bases__[0].__new__(cls, x, y, z)
 
-# def test_compressed_images():
-#     img = pcv2.cvImage(6, 4)
-#     msg = image2msg(img, compressed=True)
-#     print(msg)
-#     ret = msg2image(msg)
-#     print(ret)
-#     assert img.all() == ret.all()
+    def unpack(id, data):
+        # unpack new message with id 111
+        if id == 111:
+            return msg_t(*data)
+        return None
+
+    # buffer = MsgPack(list(IntFlag('new', {'msg_t': 111})), unpack)
+    buffer = MsgPack([111], unpack)
+    m = msg_t(1, 2, 3)
+    b = buffer.pack(m)
+    b = buffer.unpack(b)
+    assert m == b, "{} => {}".format(m, b)
 
 
 def file_func(Obj, fname):
@@ -96,6 +113,9 @@ def msg_zmq(args):
     # start message hub
     # core = GeckoCore()
     # core.start()
+    bs = BeaconCoreServer(key='test', handler=Ascii)
+    bs.start()
+    bs.run()
 
     msg1 = imu_st(
         vec_t(1, 2, 3),
@@ -148,21 +168,141 @@ def msg_zmq(args):
     time.sleep(1)  # if I run these too fast, I get errors on bind()
 
 
-def test_msg_zmq_tcp():
+# def test_msg_zmq_tcp():
+#     args = {
+#         'path': zmqTCP('localhost', 9999),
+#         'topics': 'bob'
+#     }
+#     msg_zmq(args)
+#
+#
+# def test_msg_zmq_uds():
+#     args = {
+#         'path': zmqUDS('/tmp/udstest'),
+#         'topics': 'bob'
+#     }
+#     msg_zmq(args)
+
+# bs = BeaconCoreServer(key='test', handler=Ascii)
+# core = GeckoSimpleProcess()
+# core.start(func=bs.run, name='geckocore')
+
+
+def zmq_pub_sub(args):
+    geckopy.init_node()
+    # stop pub
+    exit = Event()
+    exit.clear()
+
+    msg = imu_st(
+        vec_t(1, 2, 3),
+        vec_t(11, 12, 13),
+        vec_t(21, 22, 23))
+
+    def publisher(**kwargs):
+        geckopy.init_node()
+        exit = kwargs['exit']
+
+        pt = kwargs["pub"]
+        key = kwargs["key"]
+        topic = kwargs["topic"]
+        if pt == "bindtcp":
+            p = geckopy.pubBinderTCP(key, topic)
+        elif pt == "connecttcp":
+            p = geckopy.pubConnectTCP(key, topic)
+        elif pt == "binduds":
+            p = geckopy.pubBinderUDS(key, topic, "/tmp/pygecko_test")
+        elif pt == "connectuds":
+            p = geckopy.pubConnectUDS(key, topic)
+
+        if p is None:
+            assert False, "<<< Couldn't get Pub from geckocore >>>"
+
+        for _ in range(100):
+            if exit.is_set():
+                # print("exit")
+                break
+            p.publish(msg)
+            time.sleep(0.1)
+
+    p = GeckoSimpleProcess()
+    args['exit'] = exit
+    p.start(func=publisher, name='publisher', kwargs=args)
+
+    st = args["sub"]
+    key = args["key"]
+    topic = args["topic"]
+
+    if st == "connecttcp":
+        s = geckopy.subConnectTCP(key, topic)
+    elif st == "bindtcp":
+        s = geckopy.subBinderTCP(key, topic)
+    elif st == "connectuds":
+        s = geckopy.subConnectUDS(key, topic)
+    elif st == "binduds":
+        s = geckopy.subBinderUDS(key, topic, "/tmp/pygecko_test_2")
+
+    for _ in range(5):
+        m = s.recv_nb()
+
+        if m:
+            exit.set()
+            break
+        else:
+            print(".", end=" ", flush=True)
+            time.sleep(0.1)
+    assert msg == m, "{} => {}".format(msg, m)
+
+
+def test_pub_sub():
+
+    bs = BeaconCoreServer(key='test', handler=Ascii)
+    core = GeckoSimpleProcess()
+    core.start(func=bs.run, name='geckocore')
+
     args = {
-        'path': zmqTCP('localhost', 9999),
-        'topics': 'bob'
+        'key': 'test',
+        'topic': "test-tcp",
+        'pub': 'bindtcp',
+        'sub': 'connecttcp'
     }
-    msg_zmq(args)
+    zmq_pub_sub(args)
 
-
-def test_msg_zmq_uds():
     args = {
-        'path': zmqUDS('/tmp/udstest'),
-        'topics': 'bob'
+        'key': 'test',
+        'topic': "test-tcp-2",
+        'pub': 'connecttcp',
+        'sub': 'bindtcp'
     }
-    msg_zmq(args)
+    zmq_pub_sub(args)
 
+    args = {
+        'key': 'test',
+        'topic': "test-uds",
+        'pub': 'binduds',
+        'sub': 'connectuds'
+    }
+    zmq_pub_sub(args)
+
+    # args = {
+    #     'key': 'test',
+    #     'topic': "test-uds-2",
+    #     'pub': 'connectuds',
+    #     'sub': 'binduds'
+    # }
+    # zmq_pub_sub(args)
+
+    bs.stop()
+    core.join(0.1)
+
+
+# def test_ps_uds():
+#     args = {
+#         'key': 'test',
+#         'pub': 'binduds',
+#         'sub': 'connectuds'
+#     }
+#     zmq_pub_sub(args)
 
 # def py_zmq():
 #     # start message hub

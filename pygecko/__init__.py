@@ -20,7 +20,7 @@ from pygecko.file_storage import FileYaml
 from pygecko.gecko_enums import Status
 from pygecko.gecko_enums import ZmqType
 
-from pygecko.version  import __version__
+# from pygecko.version  import __version__
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"

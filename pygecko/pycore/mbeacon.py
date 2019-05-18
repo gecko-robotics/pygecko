@@ -12,7 +12,7 @@ import threading
 import time
 # import ipaddress  # kjw
 from pygecko.pycore.ip import GetIP  # dup?
-from pygecko.pycore.transport import Ascii, Json, Pickle  # dup?
+from pygecko.pycore.transport import Ascii  # , Json, Pickle  # dup?
 # import os
 import psutil
 import multiprocessing as mp
@@ -205,7 +205,7 @@ class BeaconCoreServer(BeaconBase):
     def run(self):
         # self.sock.setblocking(0)
 
-        while True:
+        while not self.exit:
             try:
                 data, address = self.sock.recvfrom(1024)
                 data = self.handler.loads(data)
@@ -224,7 +224,6 @@ class BeaconCoreServer(BeaconBase):
             except Exception as e:
                 print("***", e, "***")
                 continue
-
 
 
 ######################################################

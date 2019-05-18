@@ -5,9 +5,32 @@
 ##############################################
 # import pickle
 # from pygecko.transport.protocols import Pickle
-# from pygecko.messages import Image
+from pygecko.messages import image_st
 # from pygecko.messages import Joystick
 # import numpy as np
+
+try:
+    import cv2
+
+    def Image_st(img, compression=None):
+        """
+        Helper function to create a message from an image and optionally use
+        compression. Compression methods are dependant on what libraries were
+        compiled at build time for OpenCV.
+        """
+        if compression:
+            compressed = True
+            data = cv2.imencode(compression, img)[1]
+        else:
+            compressed = False
+            data = img.tobytes()
+
+        return image_st(img.shape, data, compressed)
+
+except ImportError:
+
+    def Image_st(img, compression=None):
+        raise Exception("Image_st: cv2 not installed")
 
 
 # def image2msg(img, compressed=False, handler=Pickle):

@@ -9,8 +9,9 @@
 import pickle
 # from collections import OrderedDict
 from pygecko.messages import vec_t, quaternion_t, wrench_t, pose_t, twist_t
-from pygecko.messages import joystick_st, imu_st, lidar_st
+from pygecko.messages import joystick_st, imu_st, lidar_st, image_st
 from pygecko.messages import GeckoMsgs, GeckoMsgFlags as gmf
+import numpy as np
 
 
 class Pickle(object):
@@ -59,11 +60,19 @@ try:
     import msgpack
 
     class MsgPack(object):
+        new_unpacker = None
+        msgs = GeckoMsgs
+
+        def __init__(self, new_msgs=None, new_unpacker=None):
+            if new_msgs:
+                self.msgs = self.msgs + new_msgs
+            self.new_unpacker = new_unpacker
+            # print(self.msgs)
 
         def ext_unpack2(self, code, data):
             # print(">> code:", code)
             # print("> data:", data)
-            if code in GeckoMsgs:
+            if code in self.msgs:
                 d = msgpack.unpackb(data, ext_hook=self.ext_unpack2, use_list=False, raw=False)
                 # print("> d[{}]: {}".format(code, d))
 
@@ -83,18 +92,27 @@ try:
                     return lidar_st(d[0], d[1])
                 elif code == gmf.joystick:
                     return joystick_st(d[0], d[1], d[2], d[3])
+                elif code == gmf.image:
+                    return image_st(d[0], np.array(d[1]), d[2], d[3])
+                elif self.new_unpacker:
+                    return self.new_unpacker(code, d)
                 else:
                     raise Exception("MsgPack::ext_unpack: UNKNOW MSG {}  {}".format(code, d))
             return msgpack.ExtType(code, data)
 
         def pack(self, data):
             try:
-                if data.id in [gmf.vector, gmf.quaternion]:
-                    # vector, quaternion
-                    m = data[:]
-                elif data.id in [gmf.wrench, gmf.pose, gmf.twist, gmf.lidar, gmf.imu, gmf.joystick]:
-                    # this should get everything else
-                    m = tuple(data)
+                # if data.id in [gmf.vector, gmf.quaternion]:
+                #     # vector, quaternion
+                #     # m = data[:]
+                #     # m = tuple(data)
+                #     m = data
+                # elif data.id in [gmf.image, gmf.wrench, gmf.pose, gmf.twist, gmf.lidar, gmf.imu, gmf.joystick]:
+                #     # this should get everything else
+                #     # m = tuple(data)
+                #     m = data
+                if data.id in self.msgs:
+                    m = data
                 else:
                     raise Exception("MsgPack::pack: unknown ExtType {}".format(data))
 

@@ -89,19 +89,19 @@ class GeckoPy(SignalCatch):
         self.logpub = None
 
         # hard code for now
-        if 'host' in kwargs.keys():
-            host = kwargs.pop('host')
-            if host == 'localhost':
-                host = GetIP().get()
-        else:
-            host = GetIP().get()  # FIXME: kwargs should provide this
-        self.req_addr = zmqTCP(host, 11311)  # set/get topic addrs
+        # if 'host' in kwargs.keys():
+        #     host = kwargs.pop('host')
+        #     if host == 'localhost':
+        #         host = GetIP().get()
+        # else:
+        host = GetIP().get()  # FIXME: kwargs should provide this
+        # self.req_addr = zmqTCP(host, 11311)  # set/get topic addrs
         self.proc_ip = host  # this ip address
 
-    def __del__(self):
-        if len(self.hooks) > 0:
-            for h in self.hooks:
-                h()
+    # def __del__(self):
+    #     if len(self.hooks) > 0:
+    #         for h in self.hooks:
+    #             h()
 
     def __format_print(self, topic, msg):
         # print(msg.level)
@@ -203,8 +203,9 @@ def Binder(key, topic, Conn, Proto, fname=None, queue_size=5):
     pid = mp.current_process().pid
 
     if fname:
-        p.bind(zmqUDS(fname), queue_size=queue_size)
-        msg = (key, topic, str(pid), zmqUDS(fname))
+        addr = zmqUDS(fname)
+        p.bind(addr, queue_size=queue_size)
+        msg = (key, topic, str(pid), addr)
 
         # print(p)
         # print(msg)
@@ -246,7 +247,7 @@ def subBinderUDS(key, topic, queue_size=5):
     return Binder(key, topic, Sub, zmqUDS, queue_size=queue_size)
 
 
-def subConnectTCP(key, topic, queue_size=5):
+def Connector(key, topic, Proto, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
 
@@ -273,15 +274,63 @@ def subConnectTCP(key, topic, queue_size=5):
             continue
 
         if (len(data) == 3) and (data[0] == key) and (data[1] == topic):
-            s = Sub()
-            s.connect(data[2])
-            return s
+            p = Proto()
+            p.connect(data[2])
+            return p
 
     return None
 
 
+def pubConnectTCP(key, topic, queue_size=5):
+    return Connector(key, topic, Pub, queue_size)
+
+
+def pubConnectUDS(key, topic, queue_size=5):
+    return Connector(key, topic, Pub, queue_size)
+
+
+def subConnectTCP(key, topic, queue_size=5):
+    return Connector(key, topic, Sub, queue_size)
+
+
 def subConnectUDS(key, topic, queue_size=5):
-    return subConnectTCP(key, topic, queue_size)
+    return Connector(key, topic, Sub, queue_size)
+
+    # """
+    # Creates a publisher that can either connect or bind to an address.
+    #
+    # addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
+    #       it is set to what geckopy defaults to
+    # queue_size: how many messages to queue up, default is 5
+    # bind: by default this connects to geckocore, but you can also have it bind
+    #       to a different port
+    # """
+    # global g_geckopy
+    #
+    # bf = BeaconFinder(key)
+    # pid = mp.current_process().pid
+    # msg = (key, topic, str(pid))
+    # retry = 5
+    # data = None
+    #
+    # for _ in range(retry):
+    #     data = bf.send(msg)
+    #     print(data)
+    #
+    #     if data is None:
+    #         time.sleep(0.5)
+    #         continue
+    #
+    #     if (len(data) == 3) and (data[0] == key) and (data[1] == topic):
+    #         s = Sub()
+    #         s.connect(data[2])
+    #         return s
+    #
+    # return None
+
+
+def subConnectUDS(key, topic, queue_size=5):
+    return Connector(key, topic, Sub, queue_size)
     # """
     # Creates a publisher that can either connect or bind to an address.
     #

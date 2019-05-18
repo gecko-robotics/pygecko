@@ -20,6 +20,7 @@ COLOR_RGB2BGR = 0
 #     def tobytes(self):
 #         return bytes(self.img)
 
+
 def cvImage(w, h, d=1):
     return np.random.randint(256, size=(d, h, w), dtype=np.uint8)
 
@@ -27,6 +28,7 @@ def cvImage(w, h, d=1):
 class VideoCapture(object):
     width = 1920
     height = 1080
+
     def __init__(self, num):
         pass
 
@@ -41,6 +43,7 @@ class VideoCapture(object):
 
     def release(self):
         pass
+
 
 def cvtColor(a, b):
     return a

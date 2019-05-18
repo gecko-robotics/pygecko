@@ -26,12 +26,6 @@ GeckoMsgFlags = IntFlag(
 GeckoMsgs = list(GeckoMsgFlags)
 Log = namedtuple('Log', 'level name text')
 
-# with timestamp
-# CompressedImage = namedtuple('CompressedImage', 'shape data timestamp')
-# Image = namedtuple('Image', 'shape data timestamp')
-# Lidar = namedtuple('Lidar', 'len data timestamp')
-# Path = namedtuple("Path", 'path')
-
 
 class vec_t(namedtuple('vec_t', 'x y z')):
     __slots__ = ()
@@ -98,35 +92,64 @@ class joystick_st(namedtuple('joystick_st', 'axes buttons type timestamp')):
             return cls.__bases__[0].__new__(cls, a, b, t, time.time())
 
 
-class image_st(namedtuple('image_st', 'shape bytes compressed timestamp')):
-    __slots__ = ()
-
-    def __new__(cls, s, b, c, ts=None):
-        cls.id = GeckoMsgFlags.image
-        if ts:
-            return cls.__bases__[0].__new__(cls, s, b, c, ts)
-        else:
-            return cls.__bases__[0].__new__(cls, s, b, c, time.time())
-
-
-# class image2_st(namedtuple('image_st', 'shape bytes timestamp')):
+# class image_st(namedtuple('image_st', 'shape bytes compressed timestamp')):
 #     __slots__ = ()
 #
-#     def __new__(cls, img, ts=None, compressed=False):
+#     def __new__(cls, s, b, c, ts=None):
 #         cls.id = GeckoMsgFlags.image
-#
-#         if compressed:
-#             jpg = cv2.imencode('.jpg', img)[1]
-#             # m = handler.dumps(img.tobytes())
-#             msg = image_st(img.shape, jpg, True)
-#         else:
-#             msg = image_st(img.shape, img.tobytes(), False)
-#         return msg
-#
 #         if ts:
 #             return cls.__bases__[0].__new__(cls, s, b, c, ts)
 #         else:
-            return cls.__bases__[0].__new__(cls, s, b, c, time.time())
+#             return cls.__bases__[0].__new__(cls, s, b, c, time.time())
+
+try:
+    import cv2
+    import numpy as np
+
+    class image_st(namedtuple('image_st', 'shape bytes compressed timestamp')):
+        """
+        This is the message passed from process to process.
+        shape: (rows, cols, planes)
+        bytes: array of bytes that are or aren't compressed
+        compressed: are the bytes compressed? True/False
+        timestamp: unix timestamp
+        """
+        __slots__ = ()
+
+        def __new__(cls, s, b, c, ts=None):
+            cls.id = GeckoMsgFlags.image
+
+            if ts:
+                return cls.__bases__[0].__new__(cls, s, b, c, ts)
+            else:
+                return cls.__bases__[0].__new__(cls, s, b, c, time.time())
+
+        def uncompress(self):
+            img = np.frombuffer(self.bytes, dtype=np.uint8)
+
+            if self.compressed:
+                if len(self.shape) == 3:
+                    img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+                else:
+                    img = cv2.imdecode(img, cv2.IMREAD_GRAYSCALE)
+
+            img = img.reshape(self.shape)
+            return img
+
+except ImportError:
+
+    class image_st(namedtuple('image_st', 'shape bytes compressed timestamp')):
+        __slots__ = ()
+
+        def __new__(cls, s, b, c, ts=None):
+            cls.id = GeckoMsgFlags.image
+            if ts:
+                return cls.__bases__[0].__new__(cls, s, b, c, ts)
+            else:
+                return cls.__bases__[0].__new__(cls, s, b, c, time.time())
+
+        def uncompress(self):
+            raise Exception("image_st::uncompress: cv2 not installed")
 
 
 class lidar_st(namedtuple('lidar_st', 'data timestamp')):
