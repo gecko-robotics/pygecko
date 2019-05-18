@@ -98,6 +98,14 @@ class GeckoPy(SignalCatch):
         # self.req_addr = zmqTCP(host, 11311)  # set/get topic addrs
         self.proc_ip = host  # this ip address
 
+        print("----------------------------------")
+        print("GeckoPy")
+        print("-----------")
+        print("  Process:", self.name)
+        print("  PID:", self.pid)
+        print("  Host: {}".format(self.proc_ip))
+        print("----------------------------------")
+
     # def __del__(self):
     #     if len(self.hooks) > 0:
     #         for h in self.hooks:
@@ -181,6 +189,7 @@ def Binder(key, topic, Conn, fname=None, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
 
+    key: geckocore key
     topic: pub/sub topic name
     Conn: either Pub or Sub
     fname: file path for UDS
@@ -249,11 +258,10 @@ def Connector(key, topic, Proto, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
 
-    addr: a valid tcp address: 1.1.1.1. If nothing is passed in, then
-          it is set to what geckopy defaults to
+    key: geckocore key
+    topic: pub/sub topic name
+    Proto: either Pub or Sub
     queue_size: how many messages to queue up, default is 5
-    bind: by default this connects to geckocore, but you can also have it bind
-          to a different port
     """
     global g_geckopy
 
@@ -327,8 +335,8 @@ def subConnectUDS(key, topic, queue_size=5):
     # return None
 
 
-def subConnectUDS(key, topic, queue_size=5):
-    return Connector(key, topic, Sub, queue_size)
+# def subConnectUDS(key, topic, queue_size=5):
+#     return Connector(key, topic, Sub, queue_size)
     # """
     # Creates a publisher that can either connect or bind to an address.
     #
