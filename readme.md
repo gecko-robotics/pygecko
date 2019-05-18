@@ -1,9 +1,5 @@
 # :lizard:  pyGecko
 
-
-**WARNIMG:** Broke messages temporarily for compatilibility between c++ and
-python code. Will fix on c++ end first, then python.
-
 ## My robot software.
 
 - Doesn't use [ROS](http://ros.org), ROS is a pain to install and maintain
@@ -13,7 +9,7 @@ on macOS and various linux systems
 - Uses [Zero MQ](http://http://zeromq.org/) as the inter-process communication
 (uses both TCP and UDS) instead of RPC-XML
     - looked at Google's protobuf, but was more complex than I needed
-    - using [`msgpack`](https://msgpack.org/index.html) to serialize data currently, 
+    - using [`msgpack`](https://msgpack.org/index.html) to serialize data currently,
     but could be changed to something different  
     - instead of `roscore` use `geckocore.py` as the message hub
         - produces performance data (see below)
@@ -26,8 +22,10 @@ on macOS and various linux systems
 
 ![](pics/multiprocess-2.png)
 
-- GeckoCore is a main hub and prints node cpu/memory usage
-    - Actually, when gecko processes start up, they tell geckocore their pid numbers so it can track usage using `psutil` library
+- GeckoCore is a hub that tracks what computer publishes what topic and prints
+node cpu/memory usage
+    - Actually, when gecko processes start up, they tell geckocore their pid
+    numbers so it can track usage using `psutil` library
     - Obviously this only works on processes located on the same machine as geckocore
     - GeckoCore really just displays info and keeps track of publisher topics/addresses
 - Any number of pubs can talk to any number of sub ... it is not a one-to-one relationship
@@ -39,10 +37,11 @@ on macOS and various linux systems
 
 ![](pics/multiprocess-3.png)
 
-1. Binder opens a random port and publishes data on a topic
+1. Binder opens a random port for data
+    1. Note: either a publisher or a subscriber can bind to a port
 1. Binder tells GeckoCore the topic and address/port
 1. GeckoCore acknowledges the binder
-1. A connector wants to listen to a topic and asks GeckoCore for the address/port
+1. A connector wants to connect to a topic and asks GeckoCore for the address/port
 1. GeckoCore:
     1. If topic is found, return the address/port and an ok status
     1. If topic is *not* found, returns None
@@ -171,23 +170,19 @@ returned object will dynamically set the sleep interval to achieve the rate. Ex:
 
 # Basic User API
 
-- GeckoCore(port=11311, hertz=5)
 - geckopy.*
     - init_node(kwargs)
-        - kwargs = {'host': 'machine.local')
-        - kwargs = {'host': '1.2.3.4')
-        - kwargs = {'host': 'localhost')
     - logX(test, topic='log')
         - X: Error, Debug, Info, Warning
     - is_shutdown()
     - Publisher(topics, addr=None, queue_size=10, bind=True)
     - Subscriber(topics, callback=None, addr=None, bind=False)
-    - spin(hertz=100)
 
 # Change Log
 
 Date        |Version| Notes
 ------------|-------|---------------------------------
+2019-May-18 | 1.3.0 | working with c++
 2019-Mar-02 | 1.2.0 | set multicast as the default method to find nodes
 2018-Oct-28 | 1.1.0 | simplified and removed geckocore as the main hub
 2018-Sep-16 | 1.0.3 | implemented a multicast connection process
