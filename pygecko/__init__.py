@@ -24,3 +24,4 @@ from pygecko.version  import __version__
 
 __author__ = 'Kevin Walchko'
 __license__ = "MIT"
+__version__ = "1.3.0"

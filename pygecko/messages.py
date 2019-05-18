@@ -18,6 +18,7 @@ GeckoMsgFlags = IntFlag(
         'twist':      4,
         'imu':       10,
         'joystick':  11,
+        'image':     12,
         'lidar':     20
     }
 )
@@ -86,7 +87,7 @@ class imu_st(namedtuple('imu_st', 'linear_accel angular_vel magnetic_field times
             return cls.__bases__[0].__new__(cls, a, g, m, time.time())
 
 
-class joystick_st(namedtuple('joystick_t', 'axes buttons type timestamp')):
+class joystick_st(namedtuple('joystick_st', 'axes buttons type timestamp')):
     __slots__ = ()
 
     def __new__(cls, a, b, t, ts=None):
@@ -95,6 +96,17 @@ class joystick_st(namedtuple('joystick_t', 'axes buttons type timestamp')):
             return cls.__bases__[0].__new__(cls, a, b, t, ts)
         else:
             return cls.__bases__[0].__new__(cls, a, b, t, time.time())
+
+
+class image_st(namedtuple('image_st', 'shape bytes compressed timestamp')):
+    __slots__ = ()
+
+    def __new__(cls, s, b, c, ts=None):
+        cls.id = GeckoMsgFlags.image
+        if ts:
+            return cls.__bases__[0].__new__(cls, s, b, c, ts)
+        else:
+            return cls.__bases__[0].__new__(cls, s, b, c, time.time())
 
 
 class lidar_st(namedtuple('lidar_st', 'data timestamp')):

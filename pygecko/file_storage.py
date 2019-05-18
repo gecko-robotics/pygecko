@@ -11,16 +11,19 @@ try:
 except ImportError:
     import json
 
+
 class FileStorageError(Exception):
     pass
 
 
 class BaseFile(object):
     db = None
+
     def set(self, db):
         if type(db) is not dict:
             raise Exception("You can only set db as a dict, not {}".type(db))
         self.db = db
+
     def getFileSize(self, fname):
         return os.path.getsize(fname)
 

@@ -25,7 +25,6 @@ def publisher(**kwargs):
     p = geckopy.pubBinderTCP(
         kwargs.get('key'),
         kwargs.get('topic')
-
     )
     if p is None:
         raise Exception("publisher is None")

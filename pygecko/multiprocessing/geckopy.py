@@ -81,9 +81,9 @@ class GeckoPy(SignalCatch):
         """
         # geckopy info
         self.kill_signals()  # have to setup signals in new process
-        self.subs = []   # subscriber nodes
-        self.srvs = []   # services
-        self.hooks = []  # functions to call on shutdown
+        # self.subs = []   # subscriber nodes
+        # self.srvs = []   # services
+        # self.hooks = []  # functions to call on shutdown
         self.name = mp.current_process().name
         self.pid = mp.current_process().pid
         self.logpub = None
@@ -315,21 +315,21 @@ def subConnectUDS(key, topic, queue_size=5):
     # return None
 
 
-def spin(hertz=50):
-    """
-    This will continue to loop at the given hertz until is_shutdown() returns
-    True.
-    """
-    global g_geckopy
-    rate = Rate(hertz)
-    while not g_geckopy.kill:
-        for sub in g_geckopy.subs:
-            sub.recv_nb()
-
-        for srv in g_geckopy.srvs:
-            srv.handle()
-
-        rate.sleep()
+# def spin(hertz=50):
+#     """
+#     This will continue to loop at the given hertz until is_shutdown() returns
+#     True.
+#     """
+#     global g_geckopy
+#     rate = Rate(hertz)
+#     while not g_geckopy.kill:
+#         for sub in g_geckopy.subs:
+#             sub.recv_nb()
+#
+#         for srv in g_geckopy.srvs:
+#             srv.handle()
+#
+#         rate.sleep()
 
 ###########################################################################
 # def Subscriber(topics, cb_func=None, addr=None, bind=False):

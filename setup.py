@@ -3,13 +3,15 @@ from setuptools import setup
 from build_utils import BuildCommand
 from build_utils import PublishCommand
 from build_utils import BinaryDistribution
+from build_utils import SetGitTag
 
-ver = {}
-with open("pygecko/version.py") as fp:
-    exec(fp.read(), ver)
-VERSION = ver['__version__']
 
-# __version__ = "1.0.3"
+# ver = {}
+# with open("pygecko/version.py") as fp:
+#     exec(fp.read(), ver)
+# VERSION = ver['__version__']
+
+VERSION = get_pkg_version('pygecko/__init__.py')
 
 PACKAGE_NAME = 'pygecko'
 BuildCommand.pkg = PACKAGE_NAME
@@ -17,6 +19,7 @@ BuildCommand.py2 = False  # not supporting python2 anymore
 # BuildCommand.test = False  # don't do tests
 PublishCommand.pkg = PACKAGE_NAME
 PublishCommand.version = VERSION
+SetGitTag.version = VERSION
 README = open('readme.md').read()
 
 setup(
@@ -59,22 +62,23 @@ setup(
     packages=[PACKAGE_NAME],
     cmdclass={
         'publish': PublishCommand,
-        'make': BuildCommand
+        'make': BuildCommand,
+        'tag': SetGitTag
     },
     scripts=[
         'bin/geckocore.py',
         'bin/pycore.py',
         'bin/geckolaunch.py',
-    #     # 'bin/mjpeg_server.py',  # why? use opencvutils instead
-    #     # 'bin/bag_play.py',
-    #     # 'bin/bag_record.py',
-    #     # 'bin/camera_calibrate.py',
-    #     # 'bin/image_view.py',
-    #     # 'bin/service.py',  # fix
+        # 'bin/mjpeg_server.py',  # why? use opencvutils instead
+        # 'bin/bag_play.py',
+        # 'bin/bag_record.py',
+        # 'bin/camera_calibrate.py',
+        # 'bin/image_view.py',
+        # 'bin/service.py',  # fix
         'bin/gecko_log_display.py',
         'bin/geckotopic.py',
         'bin/twist_keyboard.py'
-    #     # 'bin/video.py',
-    #     # 'bin/webserver.py'
+        # 'bin/video.py',
+        # 'bin/webserver.py'
     ]
 )

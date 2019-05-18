@@ -10,6 +10,7 @@
 # from pygecko.multiprocessing import geckopy
 import pickle
 
+
 class PickleJar(object):
     def __init__(self, fname, buffer_size=500):
         ext = fname.split('.')[-1]

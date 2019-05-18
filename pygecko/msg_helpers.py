@@ -4,32 +4,31 @@
 # see LICENSE for full details
 ##############################################
 # import pickle
-from pygecko.transport.protocols import Pickle
-from pygecko.messages import Image
+# from pygecko.transport.protocols import Pickle
+# from pygecko.messages import Image
 # from pygecko.messages import Joystick
-import numpy as np
+# import numpy as np
 
 
-def image2msg(img, compressed=False, handler=Pickle):
-    if compressed:
-        # import cv2
-        # import msgpack
-        # jpg = cv2.imencode('.jpg', img)[1]
-        m = handler.dumps(img.tobytes())
-        msg = Image(img.shape, m, True)
-    else:
-        msg = Image(img.shape, img.tobytes(), False)
-    return msg
-
-
-def msg2image(msg, handler=Pickle):
-    raw = msg.bytes
-    if msg.compressed:
-        raw = handler.loads(msg.bytes)
-    img = np.frombuffer(raw, dtype=np.uint8)
-    img = img.reshape(msg.shape)
-    return img
-
+# def image2msg(img, compressed=False, handler=Pickle):
+#     if compressed:
+#         # import cv2
+#         # import msgpack
+#         # jpg = cv2.imencode('.jpg', img)[1]
+#         m = handler.dumps(img.tobytes())
+#         msg = Image(img.shape, m, True)
+#     else:
+#         msg = Image(img.shape, img.tobytes(), False)
+#     return msg
+#
+#
+# def msg2image(msg, handler=Pickle):
+#     raw = msg.bytes
+#     if msg.compressed:
+#         raw = handler.loads(msg.bytes)
+#     img = np.frombuffer(raw, dtype=np.uint8)
+#     img = img.reshape(msg.shape)
+#     return img
 
 
 # def msg2image(msg):
@@ -53,7 +52,6 @@ def msg2image(msg, handler=Pickle):
 #     img = np.frombuffer(raw, dtype=np.uint8)
 #     img = img.reshape(msg.shape)
 #     return img
-
 
 
 # def msg2ps4(msg):
