@@ -1,5 +1,11 @@
 # :lizard:  pyGecko
 
+[![Latest Version](https://img.shields.io/pypi/v/pygecko.svg)](https://pypi.python.org/pypi/pygecko/)
+[![License](https://img.shields.io/pypi/l/pygecko.svg)](https://pypi.python.org/pypi/pygecko/)
+[![image](https://img.shields.io/pypi/pyversions/pygecko.svg)](https://pypi.python.org/pypi/pygecko)
+[![image](https://img.shields.io/pypi/format/pygecko.svg)](https://pypi.python.org/pypi/pygecko)
+[![Build Status](https://travis-ci.org/gecko-robotics/pygecko.svg?branch=master)](https://travis-ci.org/gecko-robotics/pygecko)
+
 ## My robot software.
 
 - Doesn't use [ROS](http://ros.org), ROS is a pain to install and maintain
