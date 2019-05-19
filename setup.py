@@ -4,6 +4,7 @@ from build_utils import BuildCommand
 from build_utils import PublishCommand
 from build_utils import BinaryDistribution
 from build_utils import SetGitTag
+from build_utils import get_pkg_version
 
 
 # ver = {}
