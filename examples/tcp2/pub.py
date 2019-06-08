@@ -28,7 +28,8 @@ def publisher(**kwargs):
 
     )
     if p is None:
-        raise Exception("publisher is None")
+        print("** publisher is None")
+        return
 
     start = time.time()
     cnt = 0

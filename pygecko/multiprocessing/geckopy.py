@@ -175,6 +175,8 @@ def is_shutdown():
 
 def shutdown():
     print("*** geckopy::shutdown: not implemented now ***")
+    # global g_geckopy
+    # g_geckopy.kill = True
 
 
 def ok():
@@ -188,6 +190,9 @@ def ok():
 def Binder(key, topic, Conn, fname=None, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
+
+    bind -> (key, topic, pid, endpt)
+    bind <- (key, topic, pid, ok)
 
     key: geckocore key
     topic: pub/sub topic name
@@ -257,6 +262,10 @@ def subBinderUDS(key, topic, fname, queue_size=5):
 def Connector(key, topic, Proto, queue_size=5):
     """
     Creates a publisher that can either connect or bind to an address.
+
+    conn -> (key, topic, pid)
+    conn <- (key, topic, endpt)
+    conn <- (key, topic, pid, endpt)
 
     key: geckocore key
     topic: pub/sub topic name

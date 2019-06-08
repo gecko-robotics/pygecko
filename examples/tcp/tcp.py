@@ -10,6 +10,8 @@ from pygecko.multiprocessing import geckopy
 from pygecko.multiprocessing import GeckoSimpleProcess
 import time
 
+threads_alive = 0
+
 
 def chew_up_cpu(interval):
     # chew up some cpu
@@ -27,7 +29,10 @@ def publisher(**kwargs):
         kwargs.get('topic')
     )
     if p is None:
-        raise Exception("publisher is None")
+        print("publisher is None")
+        # global threads_alive
+        # threads_alive -= 1
+        return
 
     start = time.time()
     cnt = 0
@@ -51,7 +56,10 @@ def subscriber(**kwargs):
         kwargs.get('topic')
     )
     if s is None:
-        raise Exception("subscriber is None")
+        print("subscriber is None")
+        # global threads_alive
+        # threads_alive -= 1
+        return
 
     while not geckopy.is_shutdown():
         msg = s.recv_nb()
@@ -77,6 +85,8 @@ if __name__ == '__main__':
     procs = []
 
     for topic in ['ryan', 'mike', 'sammie', 'scott']:
+        # threads_alive += 1
+
         # info to pass to processes
         args = {
             "key": "local",
@@ -94,6 +104,17 @@ if __name__ == '__main__':
     while True:
         try:
             time.sleep(1)
+            # print(">> Threads alive:", threads_alive)
+            # if threads_alive == 0:
+            #     break
+            for i in range(len(procs)):
+                if (not procs[i].is_alive()):
+                    procs.pop(i)
+
         except KeyboardInterrupt:
             print('main process got ctrl-c')
+            break
+        except Exception as e:
+            print(e)
+            print("bye ...")
             break
