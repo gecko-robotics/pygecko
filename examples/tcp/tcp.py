@@ -15,6 +15,7 @@ threads_alive = 0
 
 def chew_up_cpu(interval):
     # chew up some cpu
+    # return
     start = time.time()
     while (time.time() - start) < interval: 5*5
 
@@ -99,6 +100,10 @@ if __name__ == '__main__':
 
         s = GeckoSimpleProcess()
         s.start(func=subscriber, name='sub_{}'.format(topic), kwargs=args)
+        procs.append(s)
+
+        s = GeckoSimpleProcess()
+        s.start(func=subscriber, name='sub_{}_2'.format(topic), kwargs=args)
         procs.append(s)
 
     while True:

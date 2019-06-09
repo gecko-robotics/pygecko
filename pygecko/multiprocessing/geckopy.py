@@ -232,7 +232,7 @@ def Binder(key, topic, Conn, fname=None, queue_size=5):
 
     for _ in range(retry):
         data = bf.send(msg)
-        print(data)
+        print(">> bind raw:", data)
 
         if data is None:
             time.sleep(0.5)
@@ -264,8 +264,8 @@ def Connector(key, topic, Proto, queue_size=5):
     Creates a publisher that can either connect or bind to an address.
 
     conn -> (key, topic, pid)
-    conn <- (key, topic, endpt)
-    conn <- (key, topic, pid, endpt)
+    conn <- (key, topic, endpt) py
+    conn <- (key, topic, endpt, ok) cpp
 
     key: geckocore key
     topic: pub/sub topic name
@@ -282,13 +282,20 @@ def Connector(key, topic, Proto, queue_size=5):
 
     for _ in range(retry):
         data = bf.send(msg)
-        print(data)
+        print(">> conn raw: ", data)
 
         if data is None:
             time.sleep(0.5)
             continue
 
+        # current python [FIXME]
         if (len(data) == 3) and (data[0] == key) and (data[1] == topic):
+            p = Proto()
+            p.connect(data[2])
+            return p
+
+        # c++
+        if (len(data) == 4) and (data[0] == key) and (data[1] == topic) and data[3] == "ok":
             p = Proto()
             p.connect(data[2])
             return p
