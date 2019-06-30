@@ -51,14 +51,18 @@ class BeaconCoreServer(BeaconBase):
     exit = False
     pubs = {}
     subs = {}
+    print = True
 
-    def __init__(self, key, handler=Ascii, ttl=1, addr=None):
+    def __init__(self, key, handler=Ascii, ttl=1, addr=None, print=True):
         BeaconBase.__init__(self, key=key, ttl=ttl)
 
         if addr is not None:
             if len(addr) == 2:
                 self.mcast_addr = addr[0]
                 self.mcast_port = addr[1]
+
+        # print performance to commandline
+        self.print = print
 
         # setup service socket
         # allow multiple connections
@@ -80,7 +84,8 @@ class BeaconCoreServer(BeaconBase):
 
     def printLoop(self):
         while not self.exit:
-            self.print()
+            if self.print:
+                self.print()
             time.sleep(3)
 
     def start(self):
